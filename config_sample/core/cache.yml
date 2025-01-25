@@ -1,0 +1,10 @@
+# Cache Engine Configuration
+cache:
+  # Possible values are "null" or "redis"
+  driver: redis
+  # Cache store hostname (valid IPv4 address)
+  host: 10.0.11.3
+  # Port (i.e. 6379)
+  port: 6379
+  # Recommended value 1, don't change unless you know what you're doing
+  timeout: 1

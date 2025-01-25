@@ -1,0 +1,8 @@
+# Charcoal Monolith (L0) Foundation App
+imports:
+  # Core/Foundation Imports:
+  - core/cache.yml
+  - core/databases.yml
+
+# Timezone identifier for entire application
+timezone: "UTC"

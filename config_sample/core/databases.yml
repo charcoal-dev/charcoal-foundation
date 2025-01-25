@@ -5,6 +5,6 @@ databases:
     driver: mysql
     host: 10.0.11.2
     port: 3306
-    name: primary
+    database: primary
     username: root
     password: ~
