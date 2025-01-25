@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Db;
 
-
 /**
  * Class Databases
  * @package App\Shared\Core\Db
