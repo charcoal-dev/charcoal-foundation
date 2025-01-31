@@ -6,6 +6,7 @@ namespace App\Shared\Core;
 use App\Shared\Utility\NetworkValidator;
 use Charcoal\App\Kernel\Config\CacheConfig;
 use Charcoal\App\Kernel\Config\CacheDriver;
+use Charcoal\App\Kernel\Config\CacheServerConfig;
 use Charcoal\App\Kernel\Config\DbConfigs;
 use Charcoal\App\Kernel\DateTime\Timezone;
 use Charcoal\Database\DbCredentials;
@@ -45,42 +46,52 @@ class Config extends \Charcoal\App\Kernel\Config
     }
 
     /**
-     * @param array|null $cacheConfig
+     * @param array|null $configData
      * @return CacheConfig
      */
-    private function getCacheConfig(array|null $cacheConfig): CacheConfig
+    private function getCacheConfig(array|null $configData): CacheConfig
     {
-        if (!is_array($cacheConfig)) {
-            return new CacheConfig(CacheDriver::NULL, "0.0.0.0", 0, 0);
+        $cacheConfig = new CacheConfig();
+        $cachePool = $configData["pool"] ?? null;
+
+        if (is_array($cachePool)) {
+            foreach ($cachePool as $poolId => $cacheServer) {
+                // Database Instance Key
+                if (!is_string($poolId) || !preg_match('/^\w{2,20}$/', $poolId)) {
+                    throw new \InvalidArgumentException('Invalid label for cache server object in YML');
+                }
+
+                // Cache Driver
+                $driver = CacheDriver::tryFrom(strval($cacheServer["driver"]));
+                if (!$driver) {
+                    throw new \OutOfBoundsException("Invalid cache driver in configuration");
+                }
+
+                if ($driver === CacheDriver::NULL) {
+                    $cacheConfig->set($poolId, new CacheServerConfig(CacheDriver::NULL, "0.0.0.0", 0, 0));
+                    continue;
+                }
+
+                // Validations on host, port and timeout
+                if (!NetworkValidator::isValidIpAddress($cacheServer["host"] ?? null, ipv4: true, ipv6: false)) {
+                    throw new \DomainException(sprintf('Invalid IPv4 host address for "%s" cache server', $poolId));
+                }
+
+                $port = $cacheServer["port"] ?? null;
+                if (!is_int($port) || $port < 1000 || $port > 65535) {
+                    throw new \InvalidArgumentException(sprintf('Invalid configured port for "%s" cache server', $poolId));
+                }
+
+                $timeout = $cacheServer["timeout"] ?? null;
+                if (!is_int($timeout) || $timeout < 1 || $timeout > 6) {
+                    throw new \OutOfRangeException(sprintf('Invalid configured timeout value for "%s" cache server', $poolId));
+                }
+
+                $cacheConfig->set($poolId, new CacheServerConfig($driver, $cacheServer["host"], $port, $timeout));
+            }
         }
 
-        // Cache Driver
-        $driver = CacheDriver::tryFrom(strval($cacheConfig["driver"]));
-        if (!$driver) {
-            throw new \OutOfBoundsException("Invalid cache driver in configuration");
-        }
-
-        if ($driver === CacheDriver::NULL) {
-            return new CacheConfig(CacheDriver::NULL, "0.0.0.0", 0, 0);
-        }
-
-        // Validations on host, port and timeout
-        if (!NetworkValidator::isValidIpAddress($cacheConfig["host"] ?? null, ipv4: true, ipv6: false)) {
-            throw new \DomainException("Configured cache host is not valid IPv4 address");
-        }
-
-        $port = $cacheConfig["port"] ?? null;
-        if (!is_int($port) || $port < 1000 || $port > 65535) {
-            throw new \InvalidArgumentException("Invalid configured cache port value");
-        }
-
-        $timeout = $cacheConfig["timeout"] ?? null;
-        if (!is_int($timeout) || $timeout < 1 || $timeout > 6) {
-            throw new \OutOfRangeException("Invalid configured cache timeout value");
-        }
-
-        // Return new CacheConfig
-        return new CacheConfig($driver, $cacheConfig["host"], $port, $timeout);
+        return $cacheConfig;
     }
 
     /**
