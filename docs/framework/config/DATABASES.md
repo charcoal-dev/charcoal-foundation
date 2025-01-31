@@ -32,7 +32,7 @@ $app->databases->getDb("second");
 
 ## Optional: Enhancing Type Safety
 
-For stricter typing, you can modify the [`App\Shared\Core\Db\Database`](../../../src/shared/Core/Db/Database.php) enum
+For stricter typing, you can modify the [`App\Shared\Core\Db\AppDatabase`](../../../src/shared/Core/Db/AppDatabase.php) enum
 and
 the [`App\Shared\Core\Db\Databases`](../../../src/shared/Core/Db/Databases.php) class to include the newly configured
 databases.
