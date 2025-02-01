@@ -12,7 +12,7 @@ use Charcoal\Buffers\Buffer;
 abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
 {
     private readonly string $templateDirectory;
-    protected bool $exceptionReturnTrace = false;
+    protected bool $exceptionReturnTrace = true;
 
     abstract protected function entrypoint(): void;
 
