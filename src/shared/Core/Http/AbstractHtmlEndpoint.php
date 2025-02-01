@@ -61,27 +61,24 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
             $this->response->setHttpCode(500);
         }
 
-        try {
-            $this->send($this->renderTemplateFile("crash", ["exception" => $t]));
-            return;
-        } catch (\Exception $e) {
-            $this->response->headers->set("Content-Type", "application/json");
+        $exception = [
+            "class" => $t::class,
+            "message" => $t->getMessage(),
+            "code" => $t->getCode(),
+            "trace" => $this->exceptionReturnTrace ? explode("\n", $t->getTraceAsString()) : [],
+        ];
 
-            $errorData = [
-                "class" => $e::class,
-                "message" => $e->getMessage(),
-                "code" => $e->getCode(),
-                "trace" => $this->exceptionReturnTrace ? explode("\n", $t->getTraceAsString()) : [],
-                "previous" => [
-                    "class" => $t::class,
-                    "message" => $t->getMessage(),
-                    "code" => $t->getCode(),
-                    "trace" => $this->exceptionReturnTrace ? explode("\n", $t->getTraceAsString()) : []
-                ]
+        if ($t->getPrevious()) {
+            $prev = $t->getPrevious();
+            $exception["previous"] = [
+                "class" => $prev::class,
+                "message" => $prev->getMessage(),
+                "code" => $prev->getCode(),
+                "trace" => $this->exceptionReturnTrace ? explode("\n", $prev->getTraceAsString()) : []
             ];
-
-            $this->send(new Buffer(json_encode($errorData, JSON_PRETTY_PRINT)));
         }
+
+        $this->send($this->renderTemplateFile("crash", ["exception" => $exception]));
     }
 
     /**
