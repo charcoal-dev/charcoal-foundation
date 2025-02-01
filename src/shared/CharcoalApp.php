@@ -6,7 +6,7 @@ namespace App\Shared;
 use App\Shared\Core\Db\Databases;
 use App\Shared\Core\Directories;
 use App\Shared\Core\Events;
-use Charcoal\App\Kernel\AppKernel;
+use Charcoal\App\Kernel\AppBuild;
 use Charcoal\App\Kernel\Config;
 use Charcoal\App\Kernel\Errors\FileErrorLogger;
 use Charcoal\Filesystem\Directory;
@@ -16,24 +16,28 @@ use Charcoal\Filesystem\Directory;
  * @package App\Shared
  * @property Databases $databases
  * @property Directories $directories
+ * @property Events $events
  */
-class CharcoalApp extends AppKernel
+abstract class CharcoalApp extends AppBuild
 {
-    protected const string ERROR_LOG_FILE = "log/error.log";
-
     /**
+     * @param BuildContext $context
      * @param Directory $rootDirectory
      * @param string $configClass
+     * @param string $errorLogFilepath
      * @throws \Charcoal\Filesystem\Exception\FilesystemException
      */
     public function __construct(
+        BuildContext     $context,
         Directory        $rootDirectory,
-        protected string $configClass = \App\Shared\Core\Config::class
+        string           $errorLogFilepath = "./log/error.log",
+        protected string $configClass = \App\Shared\Core\Config::class,
     )
     {
         parent::__construct(
+            $context,
             $rootDirectory,
-            new FileErrorLogger($rootDirectory->getFile(static::ERROR_LOG_FILE, true), useAnsiEscapeSeq: true),
+            new FileErrorLogger($rootDirectory->getFile($errorLogFilepath, true), useAnsiEscapeSeq: true),
             Directories::class,
             Events::class,
             Databases::class,

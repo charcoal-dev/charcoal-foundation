@@ -2,6 +2,7 @@
   "require": {
     "php": "^8.3",
     "charcoal-dev/app-kernel": "dev-main",
+    "charcoal-dev/db-orm": "^0.1.6",
     "charcoal-dev/yaml": "^0.1.0",
     "ext-pdo": "*",
     "ext-curl": "*"
@@ -10,7 +11,7 @@
   "autoload": {
     "psr-4": {
       "App\\Shared\\": "shared",
-      "App\\Domain\\": "app",
+      "App\\Domain\\": "domain",
       "App\\Services\\Engine\\": "services/engine",
       "App\\Services\\Web\\": "services/web"
     }

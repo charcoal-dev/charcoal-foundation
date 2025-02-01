@@ -1,0 +1,10 @@
+# HTTP Client Configuration
+http:
+    # Default value for "User-Agent" header
+    userAgent: "Charcoal/1.0 (PHP; Linux x86_64)"
+    # Path to the CA certificates file for SSL verification (relative to "storage" directory)
+    sslCertificateFilePath: "./ssl/mozilla-ca-certs.pem"
+    # Total request timeout (in seconds; recommended range 10-15 for typical use cases)
+    timeout: 15
+    # Connection timeout (in seconds; recommended range 3-10 depending on server conditions)
+    connectTimeout: 5
