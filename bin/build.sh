@@ -22,6 +22,7 @@ if [[ ! -d "$APP_TMP_DIR" ]]; then
   chmod -R 777 tmp
 fi
 
+DOCKER_ENV_FILE=".env";
 if [[ ! -f "$DOCKER_ENV_FILE" ]]; then
   echo -e "\e[31mERROR:\e[0m Environment configuration file \"\e[36m${DOCKER_ENV_FILE}\e[0m\" does not exist";
   exit
