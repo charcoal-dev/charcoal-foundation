@@ -23,6 +23,8 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
      */
     final protected function resolveEntrypoint(): callable
     {
+        $this->response->headers->set("Content-Type", "text/html");
+
         // Sets template directory
         $this->templateDirectory = $this->resolveTemplateDirectory();
 
