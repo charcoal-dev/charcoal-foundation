@@ -12,8 +12,8 @@
     "psr-4": {
       "App\\Shared\\": "shared",
       "App\\Domain\\": "domain",
-      "App\\Services\\Engine\\": "services/engine",
-      "App\\Services\\Web\\": "services/web"
+      "App\\Interfaces\\Engine\\": "interfaces/engine",
+      "App\\Interfaces\\Web\\": "interfaces/web/logic"
     }
   }
 }

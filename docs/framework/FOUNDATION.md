@@ -10,8 +10,8 @@ Below are the primary namespaces included in this framework:
 |-------------------------|--------------------------------------------------|---------------------------------------------------------------------------|
 | `App\Shared\*`          | [src/shared](../../src/shared)                   | Core modules and classes that the application inherits from the framework |
 | `App\Domain\*`          | [src/app](../../src/domain)                         | Additional modules and classes used by the application                    |
-| `App\Services\Engine\*` | [src/services/engine](../../src/services/engine) | Classes specifically designed for CLI scripts and processes               |
-| `App\Services\Web\*`    | [src/services/web](../../src/services/web)       | Controllers and other classes needed for HTTP-facing operations           |
+| `App\Services\Engine\*` | [src/services/engine](../../src/interfaces/engine) | Classes specifically designed for CLI scripts and processes               |
+| `App\Services\Web\*`    | [src/services/web](../../src/interfaces/web)       | Controllers and other classes needed for HTTP-facing operations           |
 
 ## Services and Access
 

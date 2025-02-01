@@ -18,7 +18,7 @@ use Charcoal\Filesystem\Directory;
  * @property Directories $directories
  * @property Events $events
  */
-abstract class CharcoalApp extends AppBuild
+class CharcoalApp extends AppBuild
 {
     /**
      * @param BuildContext $context
@@ -50,5 +50,18 @@ abstract class CharcoalApp extends AppBuild
     protected function renderConfig(): Config
     {
         return new ($this->configClass)($this->directories->config);
+    }
+
+    /**
+     * @return string
+     */
+    public static function getAppClassname(): string
+    {
+        $appClassname = "\\App\\Shared\\" . getenv("APP_CLASSNAME");
+        if (!class_exists($appClassname)) {
+            throw new \LogicException(sprintf('No such Charcoal app with name "%s" defined', getenv("APP_CLASSNAME")));
+        }
+
+        return $appClassname;
     }
 }
