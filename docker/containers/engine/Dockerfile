@@ -34,10 +34,10 @@ RUN curl -sS https://getcomposer.org/installer -o composer-setup.php \
 COPY ./docker/containers/engine/supervisord.conf   /etc/supervisord.conf
 COPY ./docker/containers/engine/entrypoint.sh      /root/entrypoint.sh
 
-
 USER charcoal
 WORKDIR /home/charcoal/
 COPY ./config/ config/
+COPY ./src/composer.json composer.json
 COPY ./src/shared/ shared/
 COPY ./src/domain/ domain/
 COPY ./src/interfaces/engine/ interfaces/engine/
