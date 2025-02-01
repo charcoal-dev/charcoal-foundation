@@ -15,6 +15,7 @@ use Charcoal\Filesystem\Directory;
 /**
  * Class CharcoalApp
  * @package App\Shared
+ * @property CachePool $cache
  * @property Databases $databases
  * @property Directories $directories
  * @property Events $events

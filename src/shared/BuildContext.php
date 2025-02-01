@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Shared;
 
+use App\Shared\Core\Cache\CacheStore;
+use App\Shared\Framework\CoreData\CoreDataModule;
 use Charcoal\App\Kernel\Build\AppBuildEnum;
 use Charcoal\App\Kernel\Build\AppBuildPartial;
 use Charcoal\App\Kernel\Build\BuildPlan;
@@ -32,7 +34,7 @@ enum BuildContext: string implements AppBuildEnum
     {
         return match ($this) {
             default => new BuildPlan(function (BuildPlan $plan) use ($app) {
-                //$plan->include("coreData", );
+                $plan->include("coreData", new CoreDataModule($app, CacheStore::PRIMARY));
             })
         };
     }
