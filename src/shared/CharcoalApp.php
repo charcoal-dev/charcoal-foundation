@@ -7,6 +7,7 @@ use App\Shared\Core\Cache\CachePool;
 use App\Shared\Core\Db\Databases;
 use App\Shared\Core\Directories;
 use App\Shared\Core\Events;
+use App\Shared\Framework\CoreData\CoreDataModule;
 use Charcoal\App\Kernel\AppBuild;
 use Charcoal\App\Kernel\Config;
 use Charcoal\App\Kernel\Errors\FileErrorLogger;
@@ -22,6 +23,8 @@ use Charcoal\Filesystem\Directory;
  */
 class CharcoalApp extends AppBuild
 {
+    public CoreDataModule $coreData;
+
     /**
      * @param BuildContext $context
      * @param Directory $rootDirectory
