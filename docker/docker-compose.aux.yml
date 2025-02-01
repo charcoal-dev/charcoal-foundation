@@ -1,0 +1,13 @@
+services:
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    env_file:
+      - .env
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+    ports:
+      - "${PMA_LISTEN:-127.0.0.1:36001}:80"
+    networks:
+      charcoal-foundation-vlan:
+        ipv4_address: "${SERVICE_PMA_IP}"

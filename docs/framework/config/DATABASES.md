@@ -21,6 +21,13 @@ databases:
     password: ~ # Use the configured MySQL root password
 ```
 
+All databases are initialized from [init.sql](../../../docker/containers/db/init/init.sql) file therefore append it as
+necessary:
+
+```php
+CREATE DATABASE `second`;
+```
+
 ## Using Additional Databases in Code
 
 Once configured, you can access the additional database in your code like this:
@@ -32,7 +39,8 @@ $app->databases->getDb("second");
 
 ## Optional: Enhancing Type Safety
 
-For stricter typing, you can modify the [`App\Shared\Core\Db\AppDatabase`](../../../src/shared/Core/Db/AppDatabase.php) enum
+For stricter typing, you can modify the [`App\Shared\Core\Db\AppDatabase`](../../../src/shared/Core/Db/AppDatabase.php)
+enum
 and
 the [`App\Shared\Core\Db\Databases`](../../../src/shared/Core/Db/Databases.php) class to include the newly configured
 databases.

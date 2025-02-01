@@ -14,8 +14,8 @@ phpunit.phar
 /coverage.xml
 /coverage.clover.xml
 
-docker/services/engine/vendor/
-docker/services/web/vendor/
+docker/containers/engine/vendor/
+docker/containers/web/vendor/
 
 proxy/charcoal.nginx
 proxy/charcoal-dev.crt
