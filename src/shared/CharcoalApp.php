@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared;
 
+use App\Shared\Core\Cache\CachePool;
 use App\Shared\Core\Db\Databases;
 use App\Shared\Core\Directories;
 use App\Shared\Core\Events;
@@ -38,6 +39,7 @@ class CharcoalApp extends AppBuild
             $context,
             $rootDirectory,
             new FileErrorLogger($rootDirectory->getFile($errorLogFilepath, true), useAnsiEscapeSeq: true),
+            CachePool::class,
             Directories::class,
             Events::class,
             Databases::class,
