@@ -4,6 +4,15 @@ source "$SCRIPT_PATH/include/check_root.sh"
 
 cd $SCRIPT_PATH/../
 
+if [ -f .env ]; then
+  set -a
+  source .env
+  set +a
+else
+  echo -e "\e[31mERROR:\e[0m Environment configuration .env file not found."
+  exit 1
+fi
+
 if [ -z "$1" ];
   then
   echo -e "\e[33mWhich docker configuration to build?\e[0m (\e[36mfull\e[0m|\e[36mlite\e[0m)"
@@ -20,12 +29,6 @@ APP_TMP_DIR="tmp/"
 if [[ ! -d "$APP_TMP_DIR" ]]; then
   mkdir "tmp"
   chmod -R 777 tmp
-fi
-
-DOCKER_ENV_FILE=".env";
-if [[ ! -f "$DOCKER_ENV_FILE" ]]; then
-  echo -e "\e[31mERROR:\e[0m Environment configuration file \"\e[36m${DOCKER_ENV_FILE}\e[0m\" does not exist";
-  exit
 fi
 
 if [[ -z "$DOCKER_COMPOSE" ]]; then
