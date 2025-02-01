@@ -31,6 +31,8 @@ services:
       - ../docker/containers/web/vendor:/home/charcoal/vendor
     env_file:
       - .env
+    ports:
+      - "${SERVICE_WEB_PORT}:6000"
     networks:
       charcoal-foundation-vlan:
         ipv4_address: "${SERVICE_WEB_IP}"
