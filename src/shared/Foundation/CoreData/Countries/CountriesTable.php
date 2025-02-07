@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\CoreData\Countries;
 
+use App\Shared\AppDbTables;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;
-use Charcoal\App\Kernel\Orm\Db\DbAwareTableEnum;
 use Charcoal\Database\ORM\Schema\Charset;
 use Charcoal\Database\ORM\Schema\Columns;
 use Charcoal\Database\ORM\Schema\Constraints;
@@ -20,11 +20,10 @@ class CountriesTable extends AbstractOrmTable
 {
     /**
      * @param CoreDataModule $module
-     * @param DbAwareTableEnum $dbTableEnum
      */
-    public function __construct(CoreDataModule $module, DbAwareTableEnum $dbTableEnum)
+    public function __construct(CoreDataModule $module)
     {
-        parent::__construct($module, $dbTableEnum, CountryEntity::class);
+        parent::__construct($module, AppDbTables::COUNTRIES, CountryEntity::class);
     }
 
     /**

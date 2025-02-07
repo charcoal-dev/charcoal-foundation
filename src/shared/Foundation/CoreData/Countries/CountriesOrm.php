@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\CoreData\Countries;
 
+use App\Shared\AppDbTables;
+use App\Shared\Foundation\CoreData\CoreDataModule;
 use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
 use Charcoal\App\Kernel\Orm\Repository\EntityUpsertTrait;
 use Charcoal\OOP\Vectors\StringVector;
@@ -10,10 +12,16 @@ use Charcoal\OOP\Vectors\StringVector;
 /**
  * Class CountriesOrm
  * @package App\Shared\Foundation\CoreData\Countries
+ * @property CoreDataModule $module
  */
 class CountriesOrm extends AbstractOrmRepository
 {
     use EntityUpsertTrait;
+
+    public function __construct(CoreDataModule $module)
+    {
+        parent::__construct($module, AppDbTables::COUNTRIES);
+    }
 
     /**
      * @param string $code3
@@ -24,6 +32,7 @@ class CountriesOrm extends AbstractOrmRepository
      */
     public function get(string $code3, bool $useCache): CountryEntity
     {
+        /** @var CountryEntity */
         return $this->getEntity(strtoupper($code3), $useCache, "`code3`=?", [$code3], $useCache);
     }
 

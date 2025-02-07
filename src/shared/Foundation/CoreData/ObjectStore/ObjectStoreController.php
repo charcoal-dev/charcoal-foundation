@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\CoreData\ObjectStore;
 
+use App\Shared\AppDbTables;
+use App\Shared\Foundation\CoreData\CoreDataModule;
 use Charcoal\App\Kernel\Entity\EntitySource;
 use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
 use Charcoal\Buffers\Buffer;
@@ -14,9 +16,18 @@ use Charcoal\OOP\Vectors\StringVector;
 /**
  * Class ObjectStoreController
  * @package App\Shared\Foundation\CoreData\ObjectStore
+ * @property CoreDataModule $module
  */
 class ObjectStoreController extends AbstractOrmRepository
 {
+    /**
+     * @param CoreDataModule $module
+     */
+    public function __construct(CoreDataModule $module)
+    {
+        parent::__construct($module, AppDbTables::OBJECT_STORE);
+    }
+
     /**
      * @param StoredObjectInterface $object
      * @param string|null $matchExp

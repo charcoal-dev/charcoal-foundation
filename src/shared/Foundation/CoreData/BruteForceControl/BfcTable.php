@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\CoreData\BruteForceControl;
 
+use App\Shared\AppDbTables;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;
-use Charcoal\App\Kernel\Orm\Db\DbAwareTableEnum;
 use Charcoal\Database\ORM\Schema\Columns;
 use Charcoal\Database\ORM\Schema\Constraints;
 use Charcoal\Database\ORM\Schema\TableMigrations;
@@ -16,9 +16,9 @@ use Charcoal\Database\ORM\Schema\TableMigrations;
  */
 class BfcTable extends AbstractOrmTable
 {
-    public function __construct(CoreDataModule $module, DbAwareTableEnum $dbTableEnum)
+    public function __construct(CoreDataModule $module)
     {
-        parent::__construct($module, $dbTableEnum, entityClass: null);
+        parent::__construct($module, AppDbTables::BFC, entityClass: null);
     }
 
     protected function structure(Columns $cols, Constraints $constraints): void

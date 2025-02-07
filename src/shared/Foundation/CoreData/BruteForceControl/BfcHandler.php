@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\CoreData\BruteForceControl;
 
+use App\Shared\AppDbTables;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
 
@@ -13,6 +14,14 @@ use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
  */
 class BfcHandler extends AbstractOrmRepository
 {
+    /**
+     * @param CoreDataModule $module
+     */
+    public function __construct(CoreDataModule $module)
+    {
+        parent::__construct($module, AppDbTables::BFC);
+    }
+
     /**
      * @param BruteForceAction $action
      * @param string $caller
