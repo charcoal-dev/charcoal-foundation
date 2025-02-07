@@ -7,7 +7,8 @@ use App\Shared\Core\Cache\CachePool;
 use App\Shared\Core\Db\Databases;
 use App\Shared\Core\Directories;
 use App\Shared\Core\Events;
-use App\Shared\Framework\CoreData\CoreDataModule;
+use App\Shared\Foundation\CoreData\CoreDataModule;
+use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertEntity;
 use Charcoal\App\Kernel\AppBuild;
 use Charcoal\App\Kernel\Config;
 use Charcoal\App\Kernel\Errors\FileErrorLogger;
@@ -69,5 +70,13 @@ class CharcoalApp extends AppBuild
         }
 
         return $appClassname;
+    }
+
+    /**
+     * @param SystemAlertEntity $alert
+     * @return void
+     */
+    public function onSystemAlert(SystemAlertEntity $alert): void
+    {
     }
 }

@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\CoreData;
 
-use App\Shared\AppDbTables;
 use App\Shared\Core\Cache\CacheStore;
 use App\Shared\Core\Orm\AppOrmModule;
 use App\Shared\Core\Orm\ModuleComponentEnum;
@@ -13,6 +12,8 @@ use App\Shared\Foundation\CoreData\Countries\CountriesOrm;
 use App\Shared\Foundation\CoreData\Countries\CountriesTable;
 use App\Shared\Foundation\CoreData\ObjectStore\ObjectStoreController;
 use App\Shared\Foundation\CoreData\ObjectStore\ObjectStoreTable;
+use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertsController;
+use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertsTable;
 use Charcoal\App\Kernel\Build\AppBuildPartial;
 use Charcoal\App\Kernel\Module\AbstractModuleComponent;
 use Charcoal\App\Kernel\Orm\Db\DatabaseTableRegistry;
@@ -27,6 +28,7 @@ class CoreDataModule extends AppOrmModule
     public ObjectStoreController $objectStore;
     public CountriesOrm $countries;
     public BfcHandler $bfc;
+    public SystemAlertsController $alerts;
 
     /**
      * @param AppBuildPartial $app
@@ -46,19 +48,20 @@ class CoreDataModule extends AppOrmModule
     protected function includeComponent(CoreData|ModuleComponentEnum $component, AppBuildPartial $app): void
     {
         match ($component) {
-            CoreData::OBJECT_STORE => $this->objectStore = new ObjectStoreController($this, AppDbTables::OBJECT_STORE),
-            CoreData::COUNTRIES => $this->countries = new CountriesOrm($this, AppDbTables::COUNTRIES),
-            CoreData::BFC => $this->bfc = new BfcHandler($this, AppDbTables::BFC),
-            default => throw new \LogicException("Cannot resolve component " . $component->name),
+            CoreData::OBJECT_STORE => $this->objectStore = new ObjectStoreController($this),
+            CoreData::COUNTRIES => $this->countries = new CountriesOrm($this),
+            CoreData::BFC => $this->bfc = new BfcHandler($this),
+            CoreData::SYSTEM_ALERTS => $this->alerts = new SystemAlertsController($this),
         };
     }
 
     protected function createDbTables(CoreData|ModuleComponentEnum $component, DatabaseTableRegistry $tables): void
     {
         match ($component) {
-            CoreData::OBJECT_STORE => $tables->register(new ObjectStoreTable($this, AppDbTables::OBJECT_STORE)),
-            CoreData::COUNTRIES => $tables->register(new CountriesTable($this, AppDbTables::COUNTRIES)),
-            CoreData::BFC => $tables->register(new BfcTable($this, AppDbTables::BFC)),
+            CoreData::OBJECT_STORE => $tables->register(new ObjectStoreTable($this)),
+            CoreData::COUNTRIES => $tables->register(new CountriesTable($this)),
+            CoreData::BFC => $tables->register(new BfcTable($this)),
+            CoreData::SYSTEM_ALERTS => $tables->register(new SystemAlertsTable($this)),
         };
     }
 }

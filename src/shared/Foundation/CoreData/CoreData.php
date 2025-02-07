@@ -11,9 +11,9 @@ use App\Shared\Core\Orm\ModuleComponentEnum;
  */
 enum CoreData implements ModuleComponentEnum
 {
-    case OBJECT_STORE;
+    case BFC;
     case COUNTRIES;
     case DB_BACKUPS;
+    case OBJECT_STORE;
     case SYSTEM_ALERTS;
-    case BFC;
 }
