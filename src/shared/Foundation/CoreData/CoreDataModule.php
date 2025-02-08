@@ -10,6 +10,8 @@ use App\Shared\Foundation\CoreData\BruteForceControl\BfcHandler;
 use App\Shared\Foundation\CoreData\BruteForceControl\BfcTable;
 use App\Shared\Foundation\CoreData\Countries\CountriesOrm;
 use App\Shared\Foundation\CoreData\Countries\CountriesTable;
+use App\Shared\Foundation\CoreData\DbBackups\DbBackupsHandler;
+use App\Shared\Foundation\CoreData\DbBackups\DbBackupsTable;
 use App\Shared\Foundation\CoreData\ObjectStore\ObjectStoreController;
 use App\Shared\Foundation\CoreData\ObjectStore\ObjectStoreTable;
 use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertsController;
@@ -29,6 +31,7 @@ class CoreDataModule extends AppOrmModule
     public CountriesOrm $countries;
     public BfcHandler $bfc;
     public SystemAlertsController $alerts;
+    public DbBackupsHandler $dbBackups;
 
     /**
      * @param AppBuildPartial $app
@@ -45,6 +48,11 @@ class CoreDataModule extends AppOrmModule
         return null;
     }
 
+    /**
+     * @param CoreData|ModuleComponentEnum $component
+     * @param AppBuildPartial $app
+     * @return void
+     */
     protected function includeComponent(CoreData|ModuleComponentEnum $component, AppBuildPartial $app): void
     {
         match ($component) {
@@ -52,9 +60,15 @@ class CoreDataModule extends AppOrmModule
             CoreData::COUNTRIES => $this->countries = new CountriesOrm($this),
             CoreData::BFC => $this->bfc = new BfcHandler($this),
             CoreData::SYSTEM_ALERTS => $this->alerts = new SystemAlertsController($this),
+            CoreData::DB_BACKUPS => $this->dbBackups = new DbBackupsHandler($this),
         };
     }
 
+    /**
+     * @param CoreData|ModuleComponentEnum $component
+     * @param DatabaseTableRegistry $tables
+     * @return void
+     */
     protected function createDbTables(CoreData|ModuleComponentEnum $component, DatabaseTableRegistry $tables): void
     {
         match ($component) {
@@ -62,6 +76,7 @@ class CoreDataModule extends AppOrmModule
             CoreData::COUNTRIES => $tables->register(new CountriesTable($this)),
             CoreData::BFC => $tables->register(new BfcTable($this)),
             CoreData::SYSTEM_ALERTS => $tables->register(new SystemAlertsTable($this)),
+            CoreData::DB_BACKUPS => $tables->register(new DbBackupsTable($this)),
         };
     }
 }
