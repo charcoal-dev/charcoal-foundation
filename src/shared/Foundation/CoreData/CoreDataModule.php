@@ -51,32 +51,56 @@ class CoreDataModule extends AppOrmModule
     /**
      * @param CoreData|ModuleComponentEnum $component
      * @param AppBuildPartial $app
-     * @return void
+     * @return bool
      */
-    protected function includeComponent(CoreData|ModuleComponentEnum $component, AppBuildPartial $app): void
+    protected function includeComponent(CoreData|ModuleComponentEnum $component, AppBuildPartial $app): bool
     {
-        match ($component) {
-            CoreData::OBJECT_STORE => $this->objectStore = new ObjectStoreController($this),
-            CoreData::COUNTRIES => $this->countries = new CountriesOrm($this),
-            CoreData::BFC => $this->bfc = new BfcHandler($this),
-            CoreData::SYSTEM_ALERTS => $this->alerts = new SystemAlertsController($this),
-            CoreData::DB_BACKUPS => $this->dbBackups = new DbBackupsHandler($this),
-        };
+        switch ($component) {
+            case CoreData::OBJECT_STORE:
+                $this->objectStore = new ObjectStoreController($this);
+                return true;
+            case CoreData::COUNTRIES:
+                $this->countries = new CountriesOrm($this);
+                return true;
+            case CoreData::BFC:
+                $this->bfc = new BfcHandler($this);
+                return true;
+            case CoreData::SYSTEM_ALERTS:
+                $this->alerts = new SystemAlertsController($this);
+                return true;
+            case CoreData::DB_BACKUPS:
+                $this->dbBackups = new DbBackupsHandler($this);
+                return true;
+            default:
+                return false;
+        }
     }
 
     /**
      * @param CoreData|ModuleComponentEnum $component
      * @param DatabaseTableRegistry $tables
-     * @return void
+     * @return bool
      */
-    protected function createDbTables(CoreData|ModuleComponentEnum $component, DatabaseTableRegistry $tables): void
+    protected function createDbTables(CoreData|ModuleComponentEnum $component, DatabaseTableRegistry $tables): bool
     {
-        match ($component) {
-            CoreData::OBJECT_STORE => $tables->register(new ObjectStoreTable($this)),
-            CoreData::COUNTRIES => $tables->register(new CountriesTable($this)),
-            CoreData::BFC => $tables->register(new BfcTable($this)),
-            CoreData::SYSTEM_ALERTS => $tables->register(new SystemAlertsTable($this)),
-            CoreData::DB_BACKUPS => $tables->register(new DbBackupsTable($this)),
-        };
+        switch ($component) {
+            case CoreData::OBJECT_STORE:
+                $tables->register(new ObjectStoreTable($this));
+                return true;
+            case CoreData::COUNTRIES:
+                $tables->register(new CountriesTable($this));
+                return true;
+            case CoreData::BFC:
+                $tables->register(new BfcTable($this));
+                return true;
+            case CoreData::SYSTEM_ALERTS:
+                $tables->register(new SystemAlertsTable($this));
+                return true;
+            case CoreData::DB_BACKUPS:
+                $tables->register(new DbBackupsTable($this));
+                return true;
+            default:
+                return false;
+        }
     }
 }

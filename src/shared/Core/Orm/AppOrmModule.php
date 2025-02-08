@@ -8,6 +8,7 @@ use App\Shared\Core\Cache\CacheStore;
 use Charcoal\App\Kernel\Build\AppBuildPartial;
 use Charcoal\App\Kernel\Orm\AbstractOrmModule;
 use Charcoal\App\Kernel\Orm\Db\DatabaseTableRegistry;
+use Charcoal\OOP\OOP;
 
 /**
  * Class AppOrmModule
@@ -33,7 +34,14 @@ abstract class AppOrmModule extends AbstractOrmModule
     {
         /** @var ModuleComponentEnum $component */
         foreach ($this->components as $component) {
-            $this->includeComponent($component, $app);
+            if (!$this->includeComponent($component, $app)) {
+                throw new \LogicException(
+                    sprintf('Unknown component "%s" for module "%s"',
+                        $component->name,
+                        OOP::baseClassName(static::class)
+                    )
+                );
+            }
         }
     }
 
@@ -41,17 +49,34 @@ abstract class AppOrmModule extends AbstractOrmModule
     {
         /** @var ModuleComponentEnum $component */
         foreach ($this->components as $component) {
-            $this->createDbTables($component, $tables);
+            if (!$this->createDbTables($component, $tables)) {
+                throw new \LogicException(
+                    sprintf('Unknown component "%s" DB tables for module "%s"',
+                        $component->name,
+                        OOP::baseClassName(static::class)
+                    )
+                );
+            }
         }
     }
 
+    /**
+     * @param ModuleComponentEnum $component
+     * @param AppBuildPartial $app
+     * @return bool
+     */
     abstract protected function includeComponent(
         ModuleComponentEnum $component,
         AppBuildPartial     $app
-    ): void;
+    ): bool;
 
+    /**
+     * @param ModuleComponentEnum $component
+     * @param DatabaseTableRegistry $tables
+     * @return bool
+     */
     abstract protected function createDbTables(
         ModuleComponentEnum   $component,
         DatabaseTableRegistry $tables
-    ): void;
+    ): bool;
 }
