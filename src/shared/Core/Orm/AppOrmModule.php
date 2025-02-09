@@ -30,7 +30,11 @@ abstract class AppOrmModule extends AbstractOrmModule
         parent::__construct($app, $cacheStore);
     }
 
-    final protected function declareChildren(AppBuildPartial $app): void
+    /**
+     * @param AppBuildPartial $app
+     * @return void
+     */
+    protected function declareChildren(AppBuildPartial $app): void
     {
         /** @var ModuleComponentEnum $component */
         foreach ($this->components as $component) {
@@ -45,7 +49,11 @@ abstract class AppOrmModule extends AbstractOrmModule
         }
     }
 
-    final protected function declareDatabaseTables(DatabaseTableRegistry $tables): void
+    /**
+     * @param DatabaseTableRegistry $tables
+     * @return void
+     */
+    protected function declareDatabaseTables(DatabaseTableRegistry $tables): void
     {
         /** @var ModuleComponentEnum $component */
         foreach ($this->components as $component) {
