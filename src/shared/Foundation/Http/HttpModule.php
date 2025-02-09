@@ -21,7 +21,7 @@ use Charcoal\Cipher\Cipher;
 class HttpModule extends AppOrmModule
 {
     public CallLogHandler $callLog;
-    public InterfaceLogHandler $requestLog;
+    public InterfaceLogHandler $interfaceLog;
     public ProxyServersOrm $proxyServers;
     public HttpClient $client;
 
@@ -32,6 +32,12 @@ class HttpModule extends AppOrmModule
     public function __construct(AppBuildPartial $app, array $components)
     {
         parent::__construct($app, CacheStore::PRIMARY, $components);
+    }
+
+    protected function declareChildren(AppBuildPartial $app): void
+    {
+        parent::declareChildren($app);
+        $this->client = new HttpClient($this);
     }
 
     public function getCipher(AbstractModuleComponent $resolveFor): ?Cipher
