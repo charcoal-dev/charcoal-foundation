@@ -41,7 +41,8 @@ class ProxyServersOrm extends AbstractOrmRepository
     /**
      * @param HttpProxy $proxyServer
      * @return void
-     * @throws \Charcoal\HTTP\Client\Exception\HttpClientException
+     * @throws \Charcoal\HTTP\Client\Exception\RequestException
+     * @throws \Throwable
      */
     public function testConnection(HttpProxy $proxyServer): void
     {
