@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace App\Shared;
 
 use App\Shared\Core\Cache\CachePool;
+use App\Shared\Core\Config;
 use App\Shared\Core\Db\Databases;
 use App\Shared\Core\Directories;
 use App\Shared\Core\Events;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertEntity;
 use Charcoal\App\Kernel\AppBuild;
-use Charcoal\App\Kernel\Config;
 use Charcoal\App\Kernel\Errors\FileErrorLogger;
 use Charcoal\Filesystem\Directory;
 
@@ -21,6 +21,7 @@ use Charcoal\Filesystem\Directory;
  * @property Databases $databases
  * @property Directories $directories
  * @property Events $events
+ * @property Config $config
  */
 class CharcoalApp extends AppBuild
 {
@@ -56,7 +57,7 @@ class CharcoalApp extends AppBuild
      */
     protected function renderConfig(): Config
     {
-        return new ($this->configClass)($this->directories->config);
+        return new ($this->configClass)($this->directories);
     }
 
     /**
