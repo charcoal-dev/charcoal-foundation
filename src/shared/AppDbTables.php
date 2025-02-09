@@ -12,18 +12,32 @@ use Charcoal\App\Kernel\Orm\Db\DbAwareTableEnum;
  */
 enum AppDbTables: string implements DbAwareTableEnum
 {
-    // CoreData Module:
+    # CoreData Module
     case BFC = "bfc_table";
     case COUNTRIES = "countries";
     case DB_BACKUPS = "db_backups";
     case OBJECT_STORE = "object_store";
     case SYSTEM_ALERTS = "sys_alerts";
 
+    # Mailer Module
+    case MAILER_BACKLOG = "mails_queue";
+
+    # HTTP Module
+    case HTTP_INTERFACE_LOG = "http_if_log";
+    case HTTP_CALL_LOG = "http_call_log";
+    case HTTP_PROXIES = "http_pxs";
+
+    /**
+     * @return string
+     */
     public function getTableName(): string
     {
         return $this->value;
     }
 
+    /**
+     * @return DatabaseEnum
+     */
     public function getDatabase(): DatabaseEnum
     {
 

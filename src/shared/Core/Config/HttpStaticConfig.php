@@ -5,8 +5,8 @@ namespace App\Shared\Core\Config;
 
 use App\Shared\Core\Directories;
 use App\Shared\Foundation\Http\Config\HttpClientConfig;
-use App\Shared\Foundation\Http\Config\HttpInterface;
 use App\Shared\Foundation\Http\Config\HttpInterfaceConfig;
+use App\Shared\Foundation\Http\HttpInterface;
 use App\Shared\Foundation\Http\HttpLogLevel;
 use Charcoal\Filesystem\Directory;
 use Charcoal\Filesystem\Exception\FilesystemException;

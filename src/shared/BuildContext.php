@@ -5,6 +5,7 @@ namespace App\Shared;
 
 use App\Shared\Foundation\CoreData\CoreData;
 use App\Shared\Foundation\CoreData\CoreDataModule;
+use App\Shared\Foundation\Mailer\MailerModule;
 use Charcoal\App\Kernel\Build\AppBuildEnum;
 use Charcoal\App\Kernel\Build\AppBuildPartial;
 use Charcoal\App\Kernel\Build\BuildPlan;
@@ -34,6 +35,7 @@ enum BuildContext: string implements AppBuildEnum
     {
         return match ($this) {
             default => new BuildPlan(function (BuildPlan $plan) use ($app) {
+                # CoreData Module
                 $plan->include("coreData", new CoreDataModule($app, [
                     CoreData::BFC,
                     CoreData::COUNTRIES,
@@ -41,6 +43,9 @@ enum BuildContext: string implements AppBuildEnum
                     CoreData::OBJECT_STORE,
                     CoreData::SYSTEM_ALERTS
                 ]));
+
+                # Mailer Module
+                $plan->include("mailer", new MailerModule($app, withBacklog: true));
             })
         };
     }
