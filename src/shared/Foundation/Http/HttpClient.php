@@ -11,7 +11,6 @@ use App\Shared\Foundation\Http\Config\HttpClientConfig;
 use App\Shared\Foundation\Http\ProxyServers\HttpProxy;
 use Charcoal\App\Kernel\Errors;
 use Charcoal\App\Kernel\Module\AbstractModuleComponent;
-use Charcoal\App\Kernel\Orm\Exception\NoChangesException;
 use Charcoal\HTTP\Client\Request;
 use Charcoal\HTTP\Client\Response;
 use Charcoal\OOP\Vectors\DsvString;
@@ -147,16 +146,13 @@ class HttpClient extends AbstractModuleComponent
         }
 
         if ($callLog && $callLogSnapshot) {
-            try {
-                $this->module->callLog->finaliseCallLog(
-                    $callLog,
-                    $callLogSnapshot,
-                    $response ?? null,
-                    microtime(true),
-                    $logLevel
-                );
-            } catch (NoChangesException) {
-            }
+            $this->module->callLog->finaliseCallLog(
+                $callLog,
+                $callLogSnapshot,
+                $response ?? null,
+                microtime(true),
+                $logLevel
+            );
         }
 
         if (isset($httpClientError)) {
