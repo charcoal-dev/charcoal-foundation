@@ -58,7 +58,7 @@ class HttpClient extends AbstractModuleComponent
      */
     public function send(
         Request      $request,
-        HttpLogLevel $logLevel = HttpLogLevel::BASIC,
+        HttpLogLevel $logLevel = HttpLogLevel::NONE,
         ?DsvString   $flags = null,
         ?HttpProxy   $proxyServer = null,
         bool         $useTimeouts = true,
@@ -126,24 +126,27 @@ class HttpClient extends AbstractModuleComponent
     ): Response
     {
         $callLog = null;
-        $callLogSnapshot = new CallLogSnapshot($request, $logLevel);
+        $callLogSnapshot = null;
         if ($logLevel !== HttpLogLevel::NONE) {
             if (!isset($this->module->callLog)) {
                 throw new \LogicException("HttpModule does not have CallLog component built");
             }
 
             $callLog = $this->module->callLog->createLog($request, $proxyServer, $flags);
-            $callLogSnapshot->callId = $callLog->id;
+            $callLogSnapshot = new CallLogSnapshot($callLog, $request, $logLevel);
         }
 
         try {
             $response = $request->send();
         } catch (\Throwable $t) {
-            $callLogSnapshot->exception = Errors::Exception2Array($t);
+            if ($callLogSnapshot) {
+                $callLogSnapshot->exception = Errors::Exception2Array($t);
+            }
+
             $httpClientError = $t;
         }
 
-        if ($callLog) {
+        if ($callLog && $callLogSnapshot) {
             try {
                 $this->module->callLog->finaliseCallLog(
                     $callLog,

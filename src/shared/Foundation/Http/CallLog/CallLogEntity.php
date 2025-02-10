@@ -40,9 +40,9 @@ class CallLogEntity extends AbstractOrmEntity
     }
 
     /**
-     * @return Bytes20|null
+     * @return Bytes20
      */
-    public function getChecksum(): ?Bytes20
+    public function getChecksum(): Bytes20
     {
         return $this->checksum;
     }

@@ -12,9 +12,9 @@ use Charcoal\HTTP\Client\Request;
  */
 class CallLogSnapshot
 {
-    public int $callId;
-    public array $requestUrl;
-    public array $requestHeaders;
+    public readonly int $callId;
+    public readonly array $requestUrl;
+    public readonly array $requestHeaders;
     public ?array $requestPayload = null;
     public ?string $requestBody = null;
     public ?array $exception = null;
@@ -23,11 +23,13 @@ class CallLogSnapshot
     public ?string $responseBody = null;
 
     /**
+     * @param CallLogEntity $log
      * @param Request $request
      * @param HttpLogLevel $logLevel
      */
-    public function __construct(Request $request, HttpLogLevel $logLevel)
+    public function __construct(CallLogEntity $log, Request $request, HttpLogLevel $logLevel)
     {
+        $this->callId = $log->id;
         $this->requestUrl = [
             "queryStr" => $request->url->query,
             "fragment" => $request->url->fragment
