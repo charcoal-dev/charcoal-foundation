@@ -18,11 +18,4 @@ abstract class AbstractWebEndpoint extends AbstractHtmlEndpoint
     {
         return __DIR__ . "/../templates/";
     }
-
-    /**
-     * @return void
-     */
-    protected function beforeEntrypointCallback(): void
-    {
-    }
 }
