@@ -8,11 +8,10 @@ use App\Shared\Foundation\Http\HttpLogLevel;
 use App\Shared\Foundation\Http\HttpModule;
 use App\Shared\Foundation\Http\ProxyServers\HttpProxy;
 use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
-use Charcoal\App\Kernel\Orm\Repository\ChecksumAwareRepositoryTrait;
+use Charcoal\App\Kernel\Orm\Exception\NoChangesException;
 use Charcoal\App\Kernel\Orm\Repository\EntityInsertableTrait;
 use Charcoal\App\Kernel\Orm\Repository\EntityUpdatableTrait;
 use Charcoal\Buffers\Buffer;
-use Charcoal\Buffers\Frames\Bytes20P;
 use Charcoal\HTTP\Client\Request;
 use Charcoal\HTTP\Client\Response;
 use Charcoal\OOP\Vectors\DsvString;
@@ -24,7 +23,6 @@ use Charcoal\OOP\Vectors\StringVector;
  */
 class CallLogHandler extends AbstractOrmRepository
 {
-    use ChecksumAwareRepositoryTrait;
     use EntityInsertableTrait;
     use EntityUpdatableTrait;
 
@@ -50,7 +48,6 @@ class CallLogHandler extends AbstractOrmRepository
     ): CallLogEntity
     {
         $callLog = new CallLogEntity();
-        $callLog->checksum = new Bytes20P("tba");
         $callLog->proxyId = $proxyServer?->uniqId;
         $callLog->flags = $flags;
         $callLog->method = $request->method;
@@ -77,9 +74,7 @@ class CallLogHandler extends AbstractOrmRepository
      * @param float $timestamp
      * @param HttpLogLevel $logLevel
      * @return void
-     * @throws \Charcoal\App\Kernel\Entity\Exception\ChecksumComputeException
      * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
-     * @throws \Charcoal\App\Kernel\Orm\Exception\NoChangesException
      */
     public function finaliseCallLog(
         CallLogEntity   $callLog,
@@ -107,12 +102,14 @@ class CallLogHandler extends AbstractOrmRepository
             $callLog->snapshot = new Buffer(serialize($snapshot));
         }
 
-        $this->dbUpdateChecksumAwareEntity(
-            $callLog,
-            new StringVector("checksum", "endOn", "responseCode", "responseLength", "snapshot"),
-            $callLog->id,
-            "id",
-            "checksum",
-        );
+        try {
+            $this->dbUpdateEntity(
+                $callLog,
+                new StringVector("endOn", "responseCode", "responseLength", "snapshot"),
+                $callLog->id,
+                "id"
+            );
+        } catch (NoChangesException) {
+        }
     }
 }

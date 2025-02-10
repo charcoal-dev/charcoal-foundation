@@ -29,7 +29,6 @@ class CallLogTable extends AbstractOrmTable
         $cols->setDefaultCharset(Charset::ASCII);
 
         $cols->int("id")->bytes(8)->unSigned()->autoIncrement();
-        $cols->binaryFrame("checksum")->fixed(20);
         $cols->string("proxy_id")->length(12)->nullable();
         $cols->dsvString("flags", ",")->limit(6)->length(255)->nullable();
         $cols->enumObject("method", HttpMethod::class)->options("GET", "POST", "PUT", "DELETE", "OPTIONS");
