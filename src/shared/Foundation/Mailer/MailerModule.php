@@ -24,11 +24,11 @@ class MailerModule extends AppOrmModule
 
     /**
      * @param AppBuildPartial $app
-     * @param bool $withBacklog
+     * @param Mailer[] $components
      */
-    public function __construct(AppBuildPartial $app, bool $withBacklog)
+    public function __construct(AppBuildPartial $app, array $components)
     {
-        parent::__construct($app, CacheStore::PRIMARY, $withBacklog ? [Mailer::BACKLOG] : []);
+        parent::__construct($app, CacheStore::PRIMARY, $components);
     }
 
     protected function declareChildren(AppBuildPartial $app): void

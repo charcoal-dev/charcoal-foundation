@@ -10,7 +10,9 @@ use App\Shared\Core\Directories;
 use App\Shared\Core\Events;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertEntity;
+use App\Shared\Foundation\Engine\EngineModule;
 use App\Shared\Foundation\Http\HttpModule;
+use App\Shared\Foundation\Mailer\MailerModule;
 use Charcoal\App\Kernel\AppBuild;
 use Charcoal\App\Kernel\Errors\FileErrorLogger;
 use Charcoal\Filesystem\Directory;
@@ -28,6 +30,8 @@ class CharcoalApp extends AppBuild
 {
     public CoreDataModule $coreData;
     public HttpModule $http;
+    public MailerModule $mailer;
+    public EngineModule $engine;
 
     /**
      * @param BuildContext $context

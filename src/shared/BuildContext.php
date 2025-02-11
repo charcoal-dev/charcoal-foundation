@@ -5,6 +5,9 @@ namespace App\Shared;
 
 use App\Shared\Foundation\CoreData\CoreData;
 use App\Shared\Foundation\CoreData\CoreDataModule;
+use App\Shared\Foundation\Http\Http;
+use App\Shared\Foundation\Http\HttpModule;
+use App\Shared\Foundation\Mailer\Mailer;
 use App\Shared\Foundation\Mailer\MailerModule;
 use Charcoal\App\Kernel\Build\AppBuildEnum;
 use Charcoal\App\Kernel\Build\AppBuildPartial;
@@ -44,8 +47,17 @@ enum BuildContext: string implements AppBuildEnum
                     CoreData::SYSTEM_ALERTS
                 ]));
 
+                # HTTP Module
+                $plan->include("http", new HttpModule($app, [
+                    Http::INTERFACE_LOG,
+                    Http::PROXY_SERVERS,
+                    Http::CALL_LOG
+                ]));
+
                 # Mailer Module
-                $plan->include("mailer", new MailerModule($app, withBacklog: true));
+                $plan->include("mailer", new MailerModule($app, [
+                    Mailer::BACKLOG
+                ]));
             })
         };
     }

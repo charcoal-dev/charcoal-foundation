@@ -27,6 +27,11 @@ enum AppDbTables: string implements DbAwareTableEnum
     case HTTP_CALL_LOG = "http_call_log";
     case HTTP_PROXIES = "http_pxs";
 
+    # Engine Module
+    case ENGINE_EXEC_LOG = "cli_exec_log";
+    case ENGINE_EXEC_STATS = "cli_exec_stats";
+    case ENGINE_CMD_QUEUE = "cli_cmd_queue";
+
     /**
      * @return string
      */
