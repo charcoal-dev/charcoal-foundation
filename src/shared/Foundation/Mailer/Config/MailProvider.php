@@ -7,8 +7,8 @@ namespace App\Shared\Foundation\Mailer\Config;
  * Class MailProvider
  * @package App\Shared\Foundation\Mailer\Config
  */
-enum MailProvider
+enum MailProvider: string
 {
-    case DISABLED;
-    case SMTP;
+    case DISABLED = "disabled";
+    case SMTP = "smtp";
 }

@@ -7,9 +7,9 @@ namespace App\Shared\Foundation\Mailer\Config;
  * Class MailDispatchMode
  * @package App\Shared\Foundation\Mailer\Config
  */
-enum MailDispatchMode
+enum MailDispatchMode: string
 {
-    case QUEUE_ONLY;
-    case SEND_AND_QUEUE;
-    case SEND_ONLY;
+    case QUEUE_ONLY = "queue_only";
+    case SEND_AND_QUEUE = "send_and_queue";
+    case SEND_ONLY = "send_only";
 }

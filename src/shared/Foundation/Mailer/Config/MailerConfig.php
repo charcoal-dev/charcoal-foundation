@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Foundation\Mailer\Config;
 
 use App\Shared\Core\Config\AbstractComponentConfig;
+use Charcoal\OOP\Traits\NoDumpTrait;
 
 /**
  * Class MailerConfig
@@ -36,4 +37,6 @@ class MailerConfig extends AbstractComponentConfig
     public ?string $apiServerRegion = null;
     public int $apiTimeout = 1;
     public int $apiConnectTimeout = 1;
+
+    use NoDumpTrait;
 }

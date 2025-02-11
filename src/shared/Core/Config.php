@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Core;
 
 use App\Shared\Core\Config\HttpStaticConfig;
+use App\Shared\Core\Config\StaticMailerConfigTrait;
 use App\Shared\Foundation\Mailer\Config\MailerConfig;
 use App\Shared\Utility\NetworkValidator;
 use Charcoal\App\Kernel\Config\CacheConfig;
@@ -24,6 +25,8 @@ class Config extends \Charcoal\App\Kernel\Config
     public readonly ?MailerConfig $mailer;
     public readonly ?HttpStaticConfig $http;
 
+    use StaticMailerConfigTrait;
+
     /**
      * @param Directories $dir
      * @throws \Charcoal\Yaml\Exception\YamlParseException
@@ -41,6 +44,10 @@ class Config extends \Charcoal\App\Kernel\Config
         );
 
         $this->http = new HttpStaticConfig($dir, $configData["http"] ?? null);
+        if (property_exists($this, "mailer")) {
+            $this->mailer = method_exists($this, "getMailerConfig") ?
+                $this->getMailerConfig($configData["mailer"] ?? null) : null;
+        }
     }
 
     /**
