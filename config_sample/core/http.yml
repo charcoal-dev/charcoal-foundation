@@ -16,9 +16,12 @@ http:
         web:
             # Determines whether this interface is enabled (true) or disabled (false)
             status: true
-            # Specifies the extent of request/response data to log
+            # Specifies the extent of request/response data to log,
             # Valid options: "none", "basic", "headers", "complete"
             logData: "headers"
+            # If enabled above or explicitly in endpoint,
+            # Should interface calls via HTTP method OPTIONS be logged?
+            logHttpMethodOptions: false
             # Specifies the response header name containing a unique tracking ID for the interface request.
             # If set to null or left empty, the header is not included in response.
             traceHeader: "X-Charcoal-Query-Ray"

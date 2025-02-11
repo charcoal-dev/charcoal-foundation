@@ -72,14 +72,6 @@ abstract class AppAwareEndpoint extends AbstractEndpoint
     }
 
     /**
-     * @return HttpMethod[]|null
-     */
-    protected function declareLogHttpMethods(): ?array
-    {
-        return null;
-    }
-
-    /**
      * @return void
      * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
      */
@@ -95,6 +87,13 @@ abstract class AppAwareEndpoint extends AbstractEndpoint
         // InterfaceLog
         $routeLogLevel = $this->declareLogLevel();
         $configLogLevel = $this->interface ? $this->interface->config->logData : HttpLogLevel::NONE;
+        if ($this->request->method === HttpMethod::OPTIONS) {
+            if (!$this->interface?->config?->logHttpMethodOptions) {
+                $configLogLevel = HttpLogLevel::NONE;
+                $routeLogLevel = HttpLogLevel::NONE;
+            }
+        }
+
         $this->requestLogLevel = HttpLogLevel::from(max($routeLogLevel->value, $configLogLevel->value));
         if ($this->requestLogLevel->value === 0) {
             $this->requestLog = null;
