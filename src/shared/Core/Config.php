@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Shared\Core;
 
 use App\Shared\Core\Config\HttpStaticConfig;
-use App\Shared\Foundation\Http\Config\HttpClientConfig;
 use App\Shared\Foundation\Mailer\Config\MailerConfig;
 use App\Shared\Utility\NetworkValidator;
 use Charcoal\App\Kernel\Config\CacheConfig;

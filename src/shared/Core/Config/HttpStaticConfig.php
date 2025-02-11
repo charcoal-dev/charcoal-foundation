@@ -57,6 +57,11 @@ readonly class HttpStaticConfig
 
                 $logData = HttpLogLevel::fromString(trim($logData));
 
+                $logHttpMethodOptions = $ifData["logHttpMethodOptions"] ?? null;
+                if (!is_bool($logHttpMethodOptions)) {
+                    throw new \UnexpectedValueException('Invalid HTTP interface "logHttpMethodOptions" config for: ' . $ifId->name);
+                }
+
                 $traceHeader = $ifData["traceHeader"] ?? null;
                 if ($traceHeader === "") {
                     $traceHeader = null;
@@ -77,6 +82,7 @@ readonly class HttpStaticConfig
                 $ifConfig = new HttpInterfaceConfig();
                 $ifConfig->status = $status;
                 $ifConfig->logData = $logData;
+                $ifConfig->logHttpMethodOptions = $logHttpMethodOptions;
                 $ifConfig->traceHeader = $traceHeader;
                 $interfaces[$ifId->value] = $ifConfig;
             }

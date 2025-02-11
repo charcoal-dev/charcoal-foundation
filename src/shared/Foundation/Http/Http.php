@@ -11,7 +11,7 @@ use App\Shared\Core\Orm\ModuleComponentEnum;
  */
 enum Http implements ModuleComponentEnum
 {
-    case REQUEST_LOG;
+    case INTERFACE_LOG;
     case CALL_LOG;
     case PROXY_SERVERS;
 }

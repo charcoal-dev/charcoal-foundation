@@ -10,6 +10,7 @@ use App\Shared\Core\Directories;
 use App\Shared\Core\Events;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertEntity;
+use App\Shared\Foundation\Http\HttpModule;
 use Charcoal\App\Kernel\AppBuild;
 use Charcoal\App\Kernel\Errors\FileErrorLogger;
 use Charcoal\Filesystem\Directory;
@@ -26,6 +27,7 @@ use Charcoal\Filesystem\Directory;
 class CharcoalApp extends AppBuild
 {
     public CoreDataModule $coreData;
+    public HttpModule $http;
 
     /**
      * @param BuildContext $context

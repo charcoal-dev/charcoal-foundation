@@ -14,5 +14,6 @@ class HttpInterfaceConfig extends AbstractComponentConfig
 {
     public bool $status;
     public HttpLogLevel $logData;
+    public bool $logHttpMethodOptions;
     public ?string $traceHeader;
 }
