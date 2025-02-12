@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Foundation\Mailer;
 
 use App\Shared\Core\Cache\CacheStore;
+use App\Shared\Core\CipherKey;
 use App\Shared\Core\Orm\AppOrmModule;
 use App\Shared\Core\Orm\ModuleComponentEnum;
 use App\Shared\Foundation\Mailer\Backlog\BacklogHandler;
@@ -31,15 +32,23 @@ class MailerModule extends AppOrmModule
         parent::__construct($app, CacheStore::PRIMARY, $components);
     }
 
+    /**
+     * @param AppBuildPartial $app
+     * @return void
+     */
     protected function declareChildren(AppBuildPartial $app): void
     {
         parent::declareChildren($app);
         $this->service = new MailerService($this);
     }
 
-    public function getCipher(AbstractModuleComponent $resolveFor): ?Cipher
+    /**
+     * @param AbstractModuleComponent $resolveFor
+     * @return Cipher
+     */
+    public function getCipher(AbstractModuleComponent $resolveFor): Cipher
     {
-        return null;
+        return $this->app->cipher->get(CipherKey::PRIMARY);
     }
 
     /**

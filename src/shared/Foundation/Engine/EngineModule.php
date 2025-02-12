@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Foundation\Engine;
 
 use App\Shared\Core\Cache\CacheStore;
+use App\Shared\Core\CipherKey;
 use App\Shared\Core\Orm\AppOrmModule;
 use App\Shared\Core\Orm\ModuleComponentEnum;
 use App\Shared\Foundation\Engine\ExecutionLog\ExecutionLogOrm;
@@ -31,9 +32,13 @@ class EngineModule extends AppOrmModule
         parent::__construct($app, CacheStore::PRIMARY, $components);
     }
 
-    public function getCipher(AbstractModuleComponent $resolveFor): ?Cipher
+    /**
+     * @param AbstractModuleComponent $resolveFor
+     * @return Cipher
+     */
+    public function getCipher(AbstractModuleComponent $resolveFor): Cipher
     {
-        // TODO: Implement getCipher() method.
+        return $this->app->cipher->get(CipherKey::PRIMARY);
     }
 
     protected function includeComponent(ModuleComponentEnum $component, AppBuildPartial $app): bool

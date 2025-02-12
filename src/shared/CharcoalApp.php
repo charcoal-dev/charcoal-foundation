@@ -15,7 +15,9 @@ use App\Shared\Foundation\Http\HttpModule;
 use App\Shared\Foundation\Mailer\MailerModule;
 use Charcoal\App\Kernel\AppBuild;
 use Charcoal\App\Kernel\Errors\FileErrorLogger;
+use Charcoal\Cipher\Cipher;
 use Charcoal\Filesystem\Directory;
+use Charcoal\Semaphore\FilesystemSemaphore;
 
 /**
  * Class CharcoalApp
@@ -28,6 +30,8 @@ use Charcoal\Filesystem\Directory;
  */
 class CharcoalApp extends AppBuild
 {
+    public readonly FilesystemSemaphore $semaphore;
+
     public CoreDataModule $coreData;
     public HttpModule $http;
     public MailerModule $mailer;
@@ -36,9 +40,10 @@ class CharcoalApp extends AppBuild
     /**
      * @param BuildContext $context
      * @param Directory $rootDirectory
-     * @param string $configClass
      * @param string $errorLogFilepath
+     * @param string $configClass
      * @throws \Charcoal\Filesystem\Exception\FilesystemException
+     * @throws \Charcoal\Semaphore\Exception\SemaphoreException
      */
     public function __construct(
         BuildContext     $context,
@@ -47,6 +52,8 @@ class CharcoalApp extends AppBuild
         protected string $configClass = \App\Shared\Core\Config::class,
     )
     {
+        $this->semaphore = new FilesystemSemaphore($this->directories->semaphore);
+
         parent::__construct(
             $context,
             $rootDirectory,
@@ -63,7 +70,15 @@ class CharcoalApp extends AppBuild
      */
     protected function renderConfig(): Config
     {
-        return new ($this->configClass)($this->directories);
+        /** @var Config $config */
+        $config = new ($this->configClass)($this->directories);
+
+        // Create Ciphers from Configuration
+        foreach ($config->ciphers->keychain as $cipherId => $cipherObj) {
+            $this->cipher->set($cipherId, new Cipher($cipherObj["entropy"], $cipherObj["mode"]));
+        }
+
+        return $config;
     }
 
     /**
@@ -77,6 +92,26 @@ class CharcoalApp extends AppBuild
         }
 
         return $appClassname;
+    }
+
+    /**
+     * @return array
+     */
+    public function __serialize(): array
+    {
+        $data = parent::__serialize();
+        $data["semaphore"] = $this->semaphore;
+        return $data;
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        parent::__unserialize($data);
+        $this->semaphore = $data["semaphore"];
     }
 
     /**

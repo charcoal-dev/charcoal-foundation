@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Foundation\CoreData;
 
 use App\Shared\Core\Cache\CacheStore;
+use App\Shared\Core\CipherKey;
 use App\Shared\Core\Orm\AppOrmModule;
 use App\Shared\Core\Orm\ModuleComponentEnum;
 use App\Shared\Foundation\CoreData\BruteForceControl\BfcHandler;
@@ -17,6 +18,7 @@ use App\Shared\Foundation\CoreData\ObjectStore\ObjectStoreTable;
 use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertsController;
 use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertsTable;
 use Charcoal\App\Kernel\Build\AppBuildPartial;
+use Charcoal\App\Kernel\Cipher\CipherEnum;
 use Charcoal\App\Kernel\Module\AbstractModuleComponent;
 use Charcoal\App\Kernel\Orm\Db\DatabaseTableRegistry;
 use Charcoal\Cipher\Cipher;
@@ -42,10 +44,13 @@ class CoreDataModule extends AppOrmModule
         parent::__construct($app, CacheStore::PRIMARY, $components);
     }
 
-
-    public function getCipher(AbstractModuleComponent $resolveFor): ?Cipher
+    /**
+     * @param AbstractModuleComponent $resolveFor
+     * @return Cipher
+     */
+    public function getCipher(AbstractModuleComponent $resolveFor): Cipher
     {
-        return null;
+        return $this->app->cipher->get(CipherKey::PRIMARY);
     }
 
     /**

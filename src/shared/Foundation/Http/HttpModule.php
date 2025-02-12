@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Foundation\Http;
 
 use App\Shared\Core\Cache\CacheStore;
+use App\Shared\Core\CipherKey;
 use App\Shared\Core\Orm\AppOrmModule;
 use App\Shared\Core\Orm\ModuleComponentEnum;
 use App\Shared\Foundation\Http\CallLog\CallLogHandler;
@@ -83,8 +84,13 @@ class HttpModule extends AppOrmModule
         );
     }
 
-    public function getCipher(AbstractModuleComponent $resolveFor): ?Cipher
+    /**
+     * @param AbstractModuleComponent $resolveFor
+     * @return Cipher
+     */
+    public function getCipher(AbstractModuleComponent $resolveFor): Cipher
     {
+        return $this->app->cipher->get(CipherKey::PRIMARY);
     }
 
     /**
