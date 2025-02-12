@@ -9,6 +9,7 @@ use Charcoal\App\Kernel\Build\AppBuildPartial;
 use Charcoal\App\Kernel\Orm\AbstractOrmModule;
 use Charcoal\App\Kernel\Orm\Db\DatabaseTableRegistry;
 use Charcoal\OOP\OOP;
+use Charcoal\Semaphore\FilesystemSemaphore;
 
 /**
  * Class AppOrmModule
@@ -28,6 +29,14 @@ abstract class AppOrmModule extends AbstractOrmModule
     {
         $this->components = array_unique($components);
         parent::__construct($app, $cacheStore);
+    }
+
+    /**
+     * @return FilesystemSemaphore
+     */
+    public function getSemaphore(): FilesystemSemaphore
+    {
+        return $this->app->semaphore;
     }
 
     /**

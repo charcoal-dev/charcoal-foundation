@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Cli;
+namespace App\Shared\Core\Cli\Process;
 
 /**
  * Class RecoverableProcessBinding
- * @package App\Shared\Core\Cli
+ * @package App\Shared\Core\Cli\Process
  */
 readonly class RecoverableProcessBinding
 {

@@ -8,6 +8,8 @@ use App\Shared\Foundation\CoreData\SystemAlerts\AlertTraceProviderInterface;
 use App\Shared\Utility\TypeCaster;
 use Charcoal\App\Kernel\Interfaces\Cli\AbstractCliScript;
 use Charcoal\App\Kernel\Interfaces\Cli\AppCliHandler;
+use Charcoal\Semaphore\Exception\SemaphoreLockException;
+use Charcoal\Semaphore\Filesystem\FileLock;
 
 /**
  * Class AppAwareCliScript
@@ -222,5 +224,48 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
 
         $logger->saveStateContext()->captureCpuStats(upsertState: true);
         $logger->close();
+    }
+
+    /**
+     * @param string $resourceId
+     * @param bool $setAutoRelease
+     * @return FileLock
+     * @throws SemaphoreLockException
+     */
+    protected function obtainSemaphoreLock(string $resourceId, bool $setAutoRelease): FileLock
+    {
+        $this->inline(sprintf("Obtaining semaphore lock for {yellow}{invert} %s {/} ... ", $resourceId));
+
+        try {
+            $lock = $this->getAppBuild()->semaphore->obtainLock($resourceId, null);
+            $this->inline("{green}Success{/} {grey}[AutoRelease={/}");
+            if ($setAutoRelease) {
+                $lock->setAutoRelease();
+                $this->print("{green}1{grey}]{/}");
+            } else {
+                $this->print("{red}0{grey}]{/}");
+            }
+
+            return $lock;
+        } catch (SemaphoreLockException $e) {
+            $this->print("{red}{invert} " . $e->error->name . " {/}");
+            throw $e;
+        }
+    }
+
+    /**
+     * A safe sleep method that can catch PCNTL signals while sleeping
+     * @param int $seconds
+     * @return void
+     */
+    protected function safeSleep(int $seconds = 1): void
+    {
+        for ($i = 0; $i < $seconds; $i++) {
+            if (($i % 3) === 0) {
+                $this->cli->catchPcntlSignal();
+            }
+
+            sleep(1);
+        }
     }
 }

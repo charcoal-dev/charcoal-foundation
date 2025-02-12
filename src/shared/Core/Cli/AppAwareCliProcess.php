@@ -3,38 +3,60 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Cli;
 
+use App\Shared\Core\Cli\Process\CrashRecoverableProcessInterface;
+use App\Shared\Core\Cli\Process\CrashSystemAlertInterface;
 use App\Shared\Exception\CliForceTerminateException;
 use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertContext;
-use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertLevel;
 use Charcoal\App\Kernel\Interfaces\Cli\AppCliHandler;
+use Charcoal\App\Kernel\Module\CacheAwareModule;
+use Charcoal\OOP\OOP;
 use Charcoal\Semaphore\Filesystem\FileLock;
 
 /**
  * Class AppAwareCliProcess
  * @package App\Shared\Core\Cli
- * @mixin RecoverableCliProcessTrait
  */
 abstract class AppAwareCliProcess extends AppAwareCliScript
 {
     final protected const int TIME_LIMIT = 0;
 
-    protected ?FileLock $semaphoreLock = null;
+    protected readonly ?FileLock $semaphoreLock;
 
+    /**
+     * @param AppCliHandler $cli
+     * @param CliScriptState $initialState
+     * @param string|null $semaphoreLockId
+     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
+     * @throws \Charcoal\Filesystem\Exception\FilesystemException
+     */
     public function __construct(
-        AppCliHandler               $cli,
-        protected readonly ?string  $semaphoreLockId,
-        protected ?SystemAlertLevel $crashAlertLevel = null,
+        AppCliHandler              $cli,
+        CliScriptState             $initialState = CliScriptState::STARTED,
+        protected readonly ?string $semaphoreLockId
     )
     {
-
+        parent::__construct($cli, $initialState);
     }
 
+    /**
+     * @return void
+     * @throws \Charcoal\Semaphore\Exception\SemaphoreLockException
+     */
     protected function onConstructHook(): void
     {
-        // IPC Handling?
+        $this->semaphoreLock = $this->semaphoreLockId ?
+            $this->obtainSemaphoreLock($this->semaphoreLockId, true) : null;
+
+        if ($this instanceof CrashRecoverableProcessInterface) {
+            $this->recoveryOnConstructHook();
+        }
     }
 
-    abstract protected function onEachTick(): void;
+    /**
+     * Execution logic for every tick, return number of seconds to sleep until next interval
+     * @return int
+     */
+    abstract protected function onEachTick(): int;
 
     /**
      * @return void
@@ -45,8 +67,9 @@ abstract class AppAwareCliProcess extends AppAwareCliScript
     {
         while (true) {
             try {
-                $this->onEachTick();
+                $interval = $this->onEachTick();
                 $this->cli->onEveryLoop();
+                $this->safeSleep(max($interval, 1));
             } catch (\Throwable $t) {
                 $this->handleProcessCrash($t);
             }
@@ -65,10 +88,12 @@ abstract class AppAwareCliProcess extends AppAwareCliScript
             ->print(sprintf("{red}[{yellow}%s{/}{red}]: %s{/}", get_class($t), $t->getMessage()));
 
         $this->logger?->context->log("Process crashed with exception: " . get_class($t));
-        if ($this->crashAlertLevel) {
+
+        // CrashSystemAlertInterface
+        if ($this instanceof CrashSystemAlertInterface) {
             if (isset($this->getAppBuild()->coreData->alerts)) {
                 $systemAlert = $this->getAppBuild()->coreData->alerts->raise(
-                    $this->crashAlertLevel,
+                    $this->alertLevelOnCrash(),
                     sprintf('App process "%s" crashed with "%s"', $this->semaphoreLockId, get_class($t)),
                     new SystemAlertContext($t),
                     $this,
@@ -81,35 +106,73 @@ abstract class AppAwareCliProcess extends AppAwareCliScript
             }
         }
 
-        // Recovery?
-        if (!$this->checkIsRecoverable($t)) {
+        // Check for recovery options after crash...
+        if ($t instanceof CliForceTerminateException) {
+            throw $t;
+        }
+
+        // CrashRecoverableProcessInterface
+        $recoverable = false;
+        if ($this instanceof CrashRecoverableProcessInterface) {
+            if ($this->isRecoverable()) {
+                $recoverable = true;
+            }
+        }
+
+        if (!$recoverable) {
             throw $t;
         }
 
         $this->logger?->context->logException($t);
-        $this->handleProcessRecovery();
+        $this->handleRecoveryAfterCrash();
     }
 
     /**
-     * @param \Throwable $t
-     * @return bool
+     * @param bool $dbQueries
+     * @param bool $errorLog
+     * @param bool $runtimeObjects
+     * @param bool $verbose
+     * @return void
      */
-    private function checkIsRecoverable(\Throwable $t): bool
+    protected function memoryCleanup(bool $dbQueries, bool $errorLog, bool $runtimeObjects, bool $verbose = true): void
     {
-        if ($t instanceof CliForceTerminateException) {
-            return false;
+        call_user_func([$this, $verbose ? "print" : "inline"], "{cyan}Runtime memory clean-up initiated: ");
+        $app = $this->getAppBuild();
+
+        // Lifecycle Logs
+        $app->lifecycle->purgeAll();
+
+        // Database queries
+        if ($dbQueries) {
+            if ($verbose) $this->inline("\t[{green}*{/}] Database queries: ");
+            $app->databases->flushAllQueries();
+            if ($verbose) $this->print("{green}Done");
         }
 
-        if (in_array(RecoverableCliProcessTrait::class, class_uses($this), true)) {
-            if ($this->recovery) {
-                if ($this->recovery->recoverable &&
-                    $this->recovery->ticks > 0 &&
-                    $this->recovery->ticksInterval > 0) {
-                    return true;
+        // Error log
+        if ($errorLog) {
+            if ($verbose) $this->inline("\t[{green}*{/}] Error handler log: ");
+            $app->errors->flush();
+            if ($verbose) $this->print("{green}Done");
+        }
+
+        // Run-time objects memory
+        if ($runtimeObjects) {
+            if ($verbose) $this->print("\t[{green}@{/}] App ORM Modules: ");
+            foreach ($app->build->modulesProperties as $moduleProperty) {
+                if (isset($app->$moduleProperty)) {
+                    $moduleInstance = $app->$moduleProperty;
+                    if ($moduleInstance instanceof CacheAwareModule) {
+                        if ($verbose) $this->inline("\t\t[{green}*{/}] {yellow}" . OOP::baseClassName($moduleInstance::class) . "{/}: ");
+                        $moduleInstance->memoryCache->purgeRuntimeMemory();
+                        if ($verbose) $this->print("{green}Done");
+                    }
                 }
             }
         }
 
-        return false;
+        if (!$verbose) {
+            $this->print("{green}Done");
+        }
     }
 }

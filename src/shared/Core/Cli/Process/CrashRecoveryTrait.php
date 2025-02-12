@@ -1,14 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Cli;
+namespace App\Shared\Core\Cli\Process;
+
+use App\Shared\Core\Cli\AppAwareCliProcess;
+use App\Shared\Core\Cli\CliScriptState;
 
 /**
  * Trait RecoverableCliProcessTrait
  * @package App\Shared\Core\Cli
  * @mixin AppAwareCliProcess
  */
-trait RecoverableCliProcessTrait
+trait CrashRecoveryTrait
 {
     protected readonly ?RecoverableProcessBinding $recovery;
 
@@ -17,21 +20,40 @@ trait RecoverableCliProcessTrait
     /**
      * @return void
      */
-    protected function initRecoverableProcess(): void
+    public function recoveryOnConstructHook(): void
     {
         $this->recovery = $this->declareRecoverableProcess();
     }
 
-    protected function beforeCrashRecovery(): void
+    /**
+     * @return bool
+     */
+    public function isRecoverable(): bool
     {
-        $this->cleanUpMemory(dbQueries: true, errorLog: true, runtimeObjects: true, verbose: false);
+        if (isset($this->recovery)) {
+            if ($this->recovery->recoverable &&
+                $this->recovery->ticks > 0 &&
+                $this->recovery->ticksInterval > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return void
+     */
+    protected function beforeHealingStart(): void
+    {
+        $this->memoryCleanup(dbQueries: true, errorLog: true, runtimeObjects: true, verbose: false);
     }
 
     /**
      * @return void
      * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
      */
-    protected function onCrashRecovery(): void
+    protected function onHealingFinished(): void
     {
         $this->cli->catchPcntlSignal();
 
@@ -50,7 +72,7 @@ trait RecoverableCliProcessTrait
      * @return void
      * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
      */
-    final protected function handleProcessRecovery(): void
+    final protected function handleRecoveryAfterCrash(): void
     {
         $this->print("");
         $this->inline(sprintf("{grey}Recovery in {b}%d{/} ticks ", $this->recovery->ticks));
@@ -61,7 +83,7 @@ trait RecoverableCliProcessTrait
             $this->logger->saveStateContext()->captureCpuStats(upsertState: false);
         }
 
-        $this->beforeCrashRecovery();
+        $this->beforeHealingStart();
 
         for ($i = 0; $i < $this->recovery->ticks; $i++) {
             if (($i % 3) === 0) { // On every 3rd tick
@@ -73,6 +95,6 @@ trait RecoverableCliProcessTrait
         }
 
         $this->print("")->print("");
-        $this->onCrashRecovery();
+        $this->onHealingFinished();
     }
 }
