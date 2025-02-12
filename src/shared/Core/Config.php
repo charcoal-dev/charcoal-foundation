@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core;
 
+use App\Shared\Core\Config\CiphersConfig;
 use App\Shared\Core\Config\HttpStaticConfig;
 use App\Shared\Core\Config\StaticMailerConfigTrait;
 use App\Shared\Foundation\Mailer\Config\MailerConfig;
@@ -24,6 +25,7 @@ class Config extends \Charcoal\App\Kernel\Config
 {
     public readonly ?MailerConfig $mailer;
     public readonly ?HttpStaticConfig $http;
+    public readonly ?CiphersConfig $ciphers;
 
     use StaticMailerConfigTrait;
 
@@ -43,6 +45,7 @@ class Config extends \Charcoal\App\Kernel\Config
             $this->getDatabasesConfig($configData["core"]["databases"] ?? null),
         );
 
+        $this->ciphers = new CiphersConfig($configData["ciphers"] ?? null);
         $this->http = new HttpStaticConfig($dir, $configData["http"] ?? null);
         if (property_exists($this, "mailer")) {
             $this->mailer = method_exists($this, "getMailerConfig") ?
