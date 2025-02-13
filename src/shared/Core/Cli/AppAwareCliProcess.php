@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Cli;
 
+use App\Shared\Core\Cli\Ipc\IpcServerInterface;
 use App\Shared\Core\Cli\Process\CrashRecoverableProcessInterface;
 use App\Shared\Core\Cli\Process\CrashSystemAlertInterface;
 use App\Shared\Exception\CliForceTerminateException;
@@ -10,7 +11,6 @@ use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertContext;
 use Charcoal\App\Kernel\Interfaces\Cli\AppCliHandler;
 use Charcoal\App\Kernel\Module\CacheAwareModule;
 use Charcoal\OOP\OOP;
-use Charcoal\Semaphore\Filesystem\FileLock;
 
 /**
  * Class AppAwareCliProcess
@@ -20,35 +20,34 @@ abstract class AppAwareCliProcess extends AppAwareCliScript
 {
     final protected const int TIME_LIMIT = 0;
 
-    protected readonly ?FileLock $semaphoreLock;
-
     /**
      * @param AppCliHandler $cli
-     * @param CliScriptState $initialState
      * @param string|null $semaphoreLockId
+     * @param CliScriptState $initialState
      * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
      * @throws \Charcoal\Filesystem\Exception\FilesystemException
+     * @throws \Charcoal\Semaphore\Exception\SemaphoreLockException
      */
     public function __construct(
-        AppCliHandler              $cli,
-        CliScriptState             $initialState = CliScriptState::STARTED,
-        protected readonly ?string $semaphoreLockId
+        AppCliHandler  $cli,
+        ?string        $semaphoreLockId,
+        CliScriptState $initialState = CliScriptState::STARTED,
     )
     {
-        parent::__construct($cli, $initialState);
+        parent::__construct($cli, $initialState, $semaphoreLockId);
     }
 
     /**
      * @return void
-     * @throws \Charcoal\Semaphore\Exception\SemaphoreLockException
      */
     protected function onConstructHook(): void
     {
-        $this->semaphoreLock = $this->semaphoreLockId ?
-            $this->obtainSemaphoreLock($this->semaphoreLockId, true) : null;
-
         if ($this instanceof CrashRecoverableProcessInterface) {
             $this->recoveryOnConstructHook();
+        }
+
+        if ($this instanceof IpcServerInterface) {
+            $this->ipcServerOnConstructHook();
         }
     }
 

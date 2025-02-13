@@ -8,7 +8,8 @@
     "charcoal-dev/mailer": "dev-main",
     "charcoal-dev/http-client": "^0.1.0",
     "ext-pdo": "*",
-    "ext-curl": "*"
+    "ext-curl": "*",
+    "ext-sockets": "*"
   },
   "minimum-stability": "dev",
   "autoload": {

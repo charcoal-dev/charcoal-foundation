@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Core\Cli;
 
 use App\Shared\CharcoalApp;
+use App\Shared\Core\Cli\Script\IpcDependentScriptInterface;
 use App\Shared\Foundation\CoreData\SystemAlerts\AlertTraceProviderInterface;
 use App\Shared\Utility\TypeCaster;
 use Charcoal\App\Kernel\Interfaces\Cli\AbstractCliScript;
@@ -20,17 +21,21 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
     public readonly int $startedOn;
     protected readonly ?ScriptExecutionLogBinding $logBinding;
     protected readonly ?ScriptExecutionLogger $logger;
+    protected readonly ?FileLock $semaphoreLock;
     private CliScriptState $state;
 
     /**
      * @param AppCliHandler $cli
      * @param CliScriptState $initialState
+     * @param string|null $semaphoreLockId
+     * @throws SemaphoreLockException
      * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
      * @throws \Charcoal\Filesystem\Exception\FilesystemException
      */
     public function __construct(
-        AppCliHandler  $cli,
-        CliScriptState $initialState = CliScriptState::STARTED
+        AppCliHandler              $cli,
+        CliScriptState             $initialState = CliScriptState::STARTED,
+        protected readonly ?string $semaphoreLockId
     )
     {
         parent::__construct($cli);
@@ -38,6 +43,19 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
         $this->state = $initialState;
 
         $this->onConstructHook();
+
+        $this->semaphoreLock = $this->semaphoreLockId ?
+            $this->obtainSemaphoreLock($this->semaphoreLockId, true) : null;
+
+        // Declared Depends On?
+        if ($this instanceof IpcDependentScriptInterface) {
+            $this->waitForIpcService(
+                $this->ipcDependsOn(),
+                $this->semaphoreLockId ?? $this->scriptClassname,
+                interval: 3,
+                maxAttempts: 100
+            );
+        }
 
         // Log Binding & ScriptExecutionLogger
         $this->logBinding = $this->declareExecutionLogging();
