@@ -4,13 +4,14 @@ declare(strict_types=1);
 namespace App\Shared\Foundation\Engine\ExecutionLog;
 
 use App\Shared\Core\Cli\AppAwareCliScript;
+use Charcoal\App\Kernel\Contracts\LifecycleBoundContextInterface;
 use Charcoal\App\Kernel\Errors;
 
 /**
  * Class ExecutionLogContext
  * @package App\Shared\Foundation\Engine\ExecutionLog
  */
-class ExecutionLogContext
+class ExecutionLogContext implements LifecycleBoundContextInterface
 {
     private array $flags = [];
     private array $arguments = [];
@@ -117,5 +118,25 @@ class ExecutionLogContext
             "logs" => $this->logs,
             "exceptions" => $this->exceptions
         ];
+    }
+
+    /**
+     * @param string $level
+     * @param string $entry
+     * @param bool|int|string|null $value
+     * @return void
+     */
+    public function entryFromLifecycle(string $level, string $entry, bool|int|string|null $value = null): void
+    {
+        $this->dump(sprintf("%s[%s]", $level, $entry), $value);
+    }
+
+    /**
+     * @param \Throwable $t
+     * @return void
+     */
+    public function exceptionFromLifecycle(\Throwable $t): void
+    {
+        $this->logException($t);
     }
 }

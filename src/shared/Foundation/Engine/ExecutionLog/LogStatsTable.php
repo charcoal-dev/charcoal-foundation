@@ -56,13 +56,4 @@ class LogStatsTable extends AbstractOrmTable
     protected function migrations(TableMigrations $migrations): void
     {
     }
-
-    /**
-     * @param ExecutionLogEntity $log
-     * @param bool $upsert
-     * @return void
-     * @throws \Charcoal\Database\Exception\QueryExecuteException
-     * @throws \Charcoal\Database\ORM\Exception\OrmQueryException
-     */
-
 }

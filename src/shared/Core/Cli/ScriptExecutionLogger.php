@@ -23,6 +23,7 @@ class ScriptExecutionLogger
     private readonly ExecutionLogEntity $logEntity;
     private ?FileWriter $outputBuffer = null;
     private ?string $outputBufferId = null;
+    private int $lifecycleBoundContext;
 
     public readonly int $logId;
     public readonly ExecutionLogContext $context;
@@ -65,6 +66,7 @@ class ScriptExecutionLogger
 
         $this->logId = $this->logEntity->id;
         $this->context = $this->logEntity->context();
+        $this->lifecycleBoundContext = $this->app->lifecycle->bindContext($this->context);
 
         if ($outputBuffering) {
             $this->outputBufferId = $this->logEntity->script . ":" . $this->logEntity->id;
@@ -126,6 +128,7 @@ class ScriptExecutionLogger
      */
     public function close(): void
     {
+        $this->app->lifecycle->unbindContext($this->lifecycleBoundContext);
         if ($this->outputBuffer) {
             $this->cli->removeOutputHandler($this->outputBufferId);
             $this->outputBuffer->endBuffer();
