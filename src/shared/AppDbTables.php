@@ -32,6 +32,10 @@ enum AppDbTables: string implements DbAwareTableEnum
     case ENGINE_EXEC_STATS = "cli_exec_stats";
     case ENGINE_CMD_QUEUE = "cli_cmd_queue";
 
+    # Auth Module
+    case AUTH_SESSIONS = "sessions";
+    case AUTH_CHECKPOINTS = "checkpoints";
+
     /**
      * @return string
      */
