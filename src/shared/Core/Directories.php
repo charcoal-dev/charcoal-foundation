@@ -12,6 +12,7 @@ use Charcoal\Filesystem\Directory;
 class Directories extends \Charcoal\App\Kernel\Directories
 {
     public readonly Directory $config;
+    public readonly Directory $emails;
     public readonly Directory $log;
     public readonly Directory $semaphore;
     public readonly Directory $storage;
@@ -21,6 +22,7 @@ class Directories extends \Charcoal\App\Kernel\Directories
     {
         parent::__construct($root);
         $this->config = $this->validateDirectory("/config", true, false);
+        $this->emails = $this->validateDirectory("/emails", true, false);
         $this->log = $this->validateDirectory("/log", true, true);
         $this->tmp = $this->validateDirectory("/tmp", true, true);
         $this->semaphore = $this->validateDirectory("/tmp/semaphore", true, true);
