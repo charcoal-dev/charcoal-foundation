@@ -7,6 +7,7 @@ services:
       dockerfile: docker/containers/engine/Dockerfile
     restart: always
     volumes:
+      - ../emails:/home/charcoal/emails
       - ../storage:/home/charcoal/storage
       - ../tmp:/home/charcoal/tmp
       - ../log/engine:/home/charcoal/log
@@ -25,6 +26,7 @@ services:
         APP_INTERFACE_DIRECTORY: web
     restart: always
     volumes:
+      - ../emails:/home/charcoal/emails
       - ../storage:/home/charcoal/storage
       - ../tmp:/home/charcoal/tmp
       - ../log/web:/home/charcoal/log
