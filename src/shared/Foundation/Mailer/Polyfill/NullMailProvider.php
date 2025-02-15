@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Mailer\Polyfill;
 
-use App\Shared\Exception\EmailDeliveryException;
+use App\Shared\Foundation\Mailer\Exception\EmailDeliveryException;
 use Charcoal\Mailer\Agents\MailerAgentInterface;
 use Charcoal\Mailer\Message;
 use Charcoal\Mailer\Message\CompiledMimeMessage;

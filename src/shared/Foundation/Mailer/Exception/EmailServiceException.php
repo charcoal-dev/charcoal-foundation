@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Exception;
+namespace App\Shared\Foundation\Mailer\Exception;
 
 /**
  * Class EmailServiceException
- * @package App\Shared\Exception
+ * @package App\Shared\Foundation\Mailer\Exception
  */
 class EmailServiceException extends \Exception
 {
