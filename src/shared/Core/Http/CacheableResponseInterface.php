@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http;
 
+use Charcoal\Http\Router\Controllers\CacheControl;
 use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 
 /**
@@ -11,9 +12,25 @@ use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
  */
 interface CacheableResponseInterface
 {
-    function hasCachedResponse(string $cacheableRequestId): bool;
+    /**
+     * @param string $uniqueRequestId
+     * @param CacheControl|null $cacheControl
+     * @return CacheableResponse
+     */
+    public function getCacheableResponse(
+        string        $uniqueRequestId,
+        ?CacheControl $cacheControl
+    ): CacheableResponse;
 
-    function getCachedResponse(string $cacheableRequestId): ?AbstractControllerResponse;
-
-    function storeCachedResponse(string $cacheableRequestId, AbstractControllerResponse $response): void;
+    /**
+     * @param CacheableResponse $cacheableResponse
+     * @param AbstractControllerResponse $response
+     * @param bool $includeAppCachedResponseHeader
+     * @return never
+     */
+    public function sendResponseFromCache(
+        CacheableResponse          $cacheableResponse,
+        AbstractControllerResponse $response,
+        bool                       $includeAppCachedResponseHeader = true
+    ): never;
 }

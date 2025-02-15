@@ -5,6 +5,7 @@ namespace App\Shared\Core\Http;
 
 class AbstractApiEndpoint extends AppAwareEndpoint
 {
+    use CacheableResponseTrait;
 
     protected function resolveEntrypoint(): callable
     {

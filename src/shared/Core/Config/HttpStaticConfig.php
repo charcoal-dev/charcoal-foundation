@@ -8,6 +8,7 @@ use App\Shared\Foundation\Http\Config\HttpClientConfig;
 use App\Shared\Foundation\Http\Config\HttpInterfaceConfig;
 use App\Shared\Foundation\Http\HttpInterface;
 use App\Shared\Foundation\Http\HttpLogLevel;
+use App\Shared\Utility\StringHelper;
 use Charcoal\Filesystem\Directory;
 use Charcoal\Filesystem\Exception\FilesystemException;
 
@@ -62,33 +63,41 @@ readonly class HttpStaticConfig
                     throw new \UnexpectedValueException('Invalid HTTP interface "logHttpMethodOptions" config for: ' . $ifId->name);
                 }
 
-                $traceHeader = $ifData["traceHeader"] ?? null;
-                if ($traceHeader === "") {
-                    $traceHeader = null;
-                }
+                $traceHeader = $this->validateHeaderKey("traceHeader",
+                    $ifData["traceHeader"] ?? null, $ifId->name);
 
-                if (!is_null($traceHeader) && !is_string($traceHeader)) {
-                    throw new \UnexpectedValueException(
-                        'Invalid HTTP interface "traceHeader" config for: ' . $ifId->name
-                    );
-                }
-
-                if (is_string($traceHeader) && !preg_match('/^[\w\-]+$/i', $traceHeader)) {
-                    throw new \UnexpectedValueException(
-                        'Bad value for HTTP interface "traceHeader" config for: ' . $ifId->name
-                    );
-                }
+                $cachedResponseHeader = $this->validateHeaderKey("cachedResponseHeader",
+                    $ifData["cachedResponseHeader"] ?? null, $ifId->name);
 
                 $ifConfig = new HttpInterfaceConfig();
                 $ifConfig->status = $status;
                 $ifConfig->logData = $logData;
                 $ifConfig->logHttpMethodOptions = $logHttpMethodOptions;
                 $ifConfig->traceHeader = $traceHeader;
+                $ifConfig->cachedResponseHeader = $cachedResponseHeader;
                 $interfaces[$ifId->value] = $ifConfig;
             }
         }
 
         $this->interfaces = $interfaces;
+    }
+
+    private function validateHeaderKey(string $key, ?string $value, string $interface): string
+    {
+        $value = StringHelper::getTrimmedOrNull($value);
+        if (!is_null($value) && !is_string($value)) {
+            throw new \UnexpectedValueException(
+                'Invalid HTTP interface "' . $key . '" config for: ' . $interface
+            );
+        }
+
+        if (is_string($value) && !preg_match('/^[\w\-]+$/i', $value)) {
+            throw new \UnexpectedValueException(
+                'Bad value for HTTP interface "' . $key . '" config for: ' . $interface
+            );
+        }
+
+        return $value;
     }
 
     /**

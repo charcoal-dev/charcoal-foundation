@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http;
 
 use Charcoal\Buffers\Buffer;
+use Charcoal\Http\Router\Controllers\Response\BodyResponse;
 
 /**
  * Class AppAwareEndpoint
@@ -19,11 +20,28 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
     abstract protected function resolveTemplateDirectory(): string;
 
     /**
+     * @return BodyResponse
+     */
+    final protected function initEmptyResponse(): BodyResponse
+    {
+        return new BodyResponse();
+    }
+
+    /**
+     * @return BodyResponse
+     */
+    protected function response(): BodyResponse
+    {
+        /** @var BodyResponse */
+        return $this->getResponseObject();
+    }
+
+    /**
      * @return callable
      */
     final protected function resolveEntrypoint(): callable
     {
-        $this->response->headers->set("Content-Type", "text/html");
+        $this->getResponseObject()->headers->set("Content-Type", "text/html");
 
         // Sets template directory
         $this->templateDirectory = $this->resolveTemplateDirectory();
@@ -48,7 +66,7 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
      */
     protected function send(Buffer $body): void
     {
-        $this->response->body->flush()->append($body);
+        $this->response()->body->flush()->append($body);
     }
 
     /**
@@ -57,8 +75,8 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
      */
     final protected function handleException(\Throwable $t): void
     {
-        if ($this->response->getHttpStatusCode() === 200) {
-            $this->response->setHttpCode(500);
+        if ($this->response()->getStatusCode() === 200) {
+            $this->response()->setStatusCode(500);
         }
 
         $exception = [

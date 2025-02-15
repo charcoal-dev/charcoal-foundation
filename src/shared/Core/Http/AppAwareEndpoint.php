@@ -12,6 +12,7 @@ use App\Shared\Utility\NetworkValidator;
 use Charcoal\App\Kernel\Errors;
 use Charcoal\App\Kernel\Interfaces\Http\AbstractRouteController;
 use Charcoal\Http\Commons\HttpMethod;
+use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 
 /**
  * Class AppAwareEndpoint
@@ -51,6 +52,14 @@ abstract class AppAwareEndpoint extends AbstractRouteController
 
         // Proceed to entrypoint
         parent::dispatchEntrypoint();
+    }
+
+    /**
+     * @return AbstractControllerResponse
+     */
+    protected function response(): AbstractControllerResponse
+    {
+        return $this->getResponseObject();
     }
 
     /**

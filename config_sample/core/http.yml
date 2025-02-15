@@ -22,6 +22,9 @@ http:
             # If enabled above or explicitly in endpoint,
             # Should interface calls via HTTP method OPTIONS be logged?
             logHttpMethodOptions: false
-            # Specifies the response header name containing a unique tracking ID for the interface request.
+            # Specifies the response header name containing a unique tracking ID for the interface request
             # If set to null or left empty, the header is not included in response.
             traceHeader: "X-Charcoal-Query-Ray"
+            # Defines the response header name that indicates the age (in seconds) of the cached response.
+            # If set to null or an empty string, the header will not be included in the response.
+            cachedResponseHeader: "X-Charcoal-Cached"
