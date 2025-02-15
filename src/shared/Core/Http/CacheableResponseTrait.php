@@ -22,7 +22,7 @@ trait CacheableResponseTrait
      * @throws \Charcoal\Filesystem\Exception\FilesystemException
      * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
      */
-    public function sendResponseFromCache(
+    protected function sendResponseFromCache(
         CacheableResponse          $cacheableResponse,
         AbstractControllerResponse $response,
         bool                       $includeAppCachedResponseHeader = true
@@ -52,7 +52,7 @@ trait CacheableResponseTrait
      * @param CacheControl|null $cacheControl
      * @return CacheableResponse
      */
-    public function getCacheableResponse(string $uniqueRequestId, ?CacheControl $cacheControl): CacheableResponse
+    protected function getCacheableResponse(string $uniqueRequestId, ?CacheControl $cacheControl): CacheableResponse
     {
         return new CacheableResponse($this, $uniqueRequestId, $cacheControl);
     }
