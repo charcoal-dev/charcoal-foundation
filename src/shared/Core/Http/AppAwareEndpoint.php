@@ -56,7 +56,7 @@ abstract class AppAwareEndpoint extends AbstractEndpoint
     /**
      * @return void
      */
-    abstract public function appAwareCallback(): void;
+    abstract protected function appAwareCallback(): void;
 
     /**
      * @return HttpInterface|null
@@ -157,7 +157,7 @@ abstract class AppAwareEndpoint extends AbstractEndpoint
         $logFileDump = [
             "exception" => Errors::Exception2Array($t),
             "errors" => $this->app->errors->getAll(),
-            "lifecycle" => $this->app->lifecycle->getAll(),
+            "lifecycle" => $this->app->lifecycle->toArray(),
         ];
 
         $this->app->directories->log->getDirectory("queries", true)

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared;
 
+use App\Shared\Core\Db\AppDatabase;
 use Charcoal\App\Kernel\Orm\Db\DatabaseEnum;
 use Charcoal\App\Kernel\Orm\Db\DbAwareTableEnum;
 
@@ -25,16 +26,12 @@ enum AppDbTables: string implements DbAwareTableEnum
     # HTTP Module
     case HTTP_INTERFACE_LOG = "http_if_log";
     case HTTP_CALL_LOG = "http_call_log";
-    case HTTP_PROXIES = "http_pxs";
+    case HTTP_PROXIES = "http_proxies";
 
     # Engine Module
     case ENGINE_EXEC_LOG = "cli_exec_log";
     case ENGINE_EXEC_STATS = "cli_exec_stats";
     case ENGINE_CMD_QUEUE = "cli_cmd_queue";
-
-    # Auth Module
-    case AUTH_SESSIONS = "sessions";
-    case AUTH_CHECKPOINTS = "checkpoints";
 
     /**
      * @return string
@@ -49,6 +46,6 @@ enum AppDbTables: string implements DbAwareTableEnum
      */
     public function getDatabase(): DatabaseEnum
     {
-
+        return AppDatabase::PRIMARY;
     }
 }

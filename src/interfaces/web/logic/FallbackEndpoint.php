@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Interfaces\Web;
 
 
+use App\Shared\Core\Http\HttpInterfaceBinding;
 use Charcoal\OOP\OOP;
 use Composer\InstalledVersions;
 

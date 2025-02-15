@@ -24,7 +24,7 @@ readonly class HttpInterfaceBinding
      * @param HttpInterface $enum
      * @param bool $useStaticConfig
      * @param bool $useObjectStoreConfig
-     * @param string $configClass
+     * @param class-string $configClass
      */
     public function __construct(
         CharcoalApp          $app,

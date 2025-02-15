@@ -77,7 +77,7 @@ class InterfaceLogSnapshot
             }
 
             // Lifecycle Entries
-            $this->lifecycle = $app->lifecycle->getAll();
+            $this->lifecycle = $app->lifecycle->toArray();
 
             // Database Queries
             $appDbQueries = $app->databases->getAllQueries();
