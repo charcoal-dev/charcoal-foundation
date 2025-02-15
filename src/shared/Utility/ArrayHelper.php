@@ -34,6 +34,7 @@ class ArrayHelper
      * @param array|object $input
      * @return array
      * @throws \JsonException
+     * @noinspection PhpMultipleClassDeclarationsInspection
      */
     public static function jsonFilter(array|object $input): array
     {
