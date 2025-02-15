@@ -10,15 +10,15 @@ use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogEntity;
 use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogSnapshot;
 use App\Shared\Utility\NetworkValidator;
 use Charcoal\App\Kernel\Errors;
-use Charcoal\App\Kernel\Interfaces\Http\AbstractEndpoint;
-use Charcoal\HTTP\Commons\HttpMethod;
+use Charcoal\App\Kernel\Interfaces\Http\AbstractRouteController;
+use Charcoal\Http\Commons\HttpMethod;
 
 /**
  * Class AppAwareEndpoint
  * @package App\Shared\Core\Http
  * @property CharcoalApp $app
  */
-abstract class AppAwareEndpoint extends AbstractEndpoint
+abstract class AppAwareEndpoint extends AbstractRouteController
 {
     protected const array LOG_IGNORE_REQUEST_HEADERS = [];
     protected const array LOG_IGNORE_RESPONSE_HEADERS = [];
@@ -122,18 +122,18 @@ abstract class AppAwareEndpoint extends AbstractEndpoint
     }
 
     /**
-     * @return void
+     * @return never
      * @throws \Charcoal\Filesystem\Exception\FilesystemException
-     * @throws \Charcoal\HTTP\Router\Exception\RouterException
+     * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
      */
-    public function sendResponse(): void
+    public function sendResponse(): never
     {
         if ($this->requestLog) {
             try {
                 $this->requestLogSnapshot?->finalise(
                     $this->app,
                     $this->requestLogLevel,
-                    $this->response,
+                    $this->getResponseObject(),
                     static::LOG_IGNORE_RESPONSE_HEADERS,
                     static::LOG_IGNORE_RESPONSE_PARAMS
                 );

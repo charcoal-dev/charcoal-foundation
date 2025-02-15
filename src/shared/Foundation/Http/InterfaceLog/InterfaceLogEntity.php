@@ -6,7 +6,7 @@ namespace App\Shared\Foundation\Http\InterfaceLog;
 use App\Shared\Foundation\Http\HttpInterface;
 use Charcoal\App\Kernel\Orm\Repository\AbstractOrmEntity;
 use Charcoal\Buffers\Buffer;
-use Charcoal\HTTP\Commons\HttpMethod;
+use Charcoal\Http\Commons\HttpMethod;
 
 /**
  * Class InterfaceLogEntity

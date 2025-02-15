@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Foundation\Http\CallLog;
 
 use App\Shared\Foundation\Http\HttpLogLevel;
-use Charcoal\HTTP\Client\Request;
+use Charcoal\Http\Client\Request;
 
 /**
  * Class CallLogSnapshot

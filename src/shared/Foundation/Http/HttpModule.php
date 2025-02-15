@@ -18,8 +18,8 @@ use Charcoal\App\Kernel\Build\AppBuildPartial;
 use Charcoal\App\Kernel\Module\AbstractModuleComponent;
 use Charcoal\App\Kernel\Orm\Db\DatabaseTableRegistry;
 use Charcoal\Cipher\Cipher;
-use Charcoal\HTTP\Client\Request;
-use Charcoal\HTTP\Client\Response;
+use Charcoal\Http\Client\Request;
+use Charcoal\Http\Client\Response;
 use Charcoal\OOP\Vectors\DsvString;
 
 /**

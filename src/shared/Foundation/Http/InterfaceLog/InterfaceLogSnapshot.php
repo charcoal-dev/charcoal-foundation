@@ -9,8 +9,10 @@ use App\Shared\Utility\ArrayHelper;
 use Charcoal\App\Kernel\Errors\ErrorEntry;
 use Charcoal\Database\Queries\DbExecutedQuery;
 use Charcoal\Database\Queries\DbFailedQuery;
-use Charcoal\HTTP\Router\Controllers\Request;
-use Charcoal\HTTP\Router\Controllers\Response;
+use Charcoal\Http\Router\Controllers\Request;
+use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
+use Charcoal\Http\Router\Controllers\Response\FileDownloadResponse;
+use Charcoal\Http\Router\Controllers\Response\PayloadResponse;
 
 /**
  * Class InterfaceLogSnapshot
@@ -23,6 +25,7 @@ class InterfaceLogSnapshot
     public array $requestParams = [];
     public array $responseHeaders = [];
     public array $responseParams = [];
+    public ?string $responseFileDownload = null;
     public array $dbQueries = [];
     public array $errors = [];
     public array $lifecycle = [];
@@ -51,23 +54,29 @@ class InterfaceLogSnapshot
     /**
      * @param CharcoalApp $app
      * @param HttpLogLevel $logLevel
-     * @param Response $response
+     * @param AbstractControllerResponse $response
      * @param array $ignoreHeaders
      * @param array $ignoreParams
      * @return void
-     * @throws \Exception
+     * @throws \JsonException
      */
     public function finalise(
-        CharcoalApp  $app,
-        HttpLogLevel $logLevel,
-        Response     $response,
-        array        $ignoreHeaders = [],
-        array        $ignoreParams = []
+        CharcoalApp                $app,
+        HttpLogLevel               $logLevel,
+        AbstractControllerResponse $response,
+        array                      $ignoreHeaders = [],
+        array                      $ignoreParams = []
     ): void
     {
         $this->responseHeaders = ArrayHelper::excludeKeys($response->headers->toArray(), $ignoreHeaders);
+        if ($response instanceof FileDownloadResponse) {
+            $this->responseFileDownload = $response->filepath;
+        }
+
         if ($logLevel === HttpLogLevel::COMPLETE) {
-            $this->responseParams = ArrayHelper::excludeKeys($response->payload->toArray(), $ignoreParams);
+            if ($response instanceof PayloadResponse) {
+                $this->responseParams = ArrayHelper::excludeKeys($response->payload->toArray(), $ignoreParams);
+            }
 
             // Errors
             $errors = $app->errors->getAll();

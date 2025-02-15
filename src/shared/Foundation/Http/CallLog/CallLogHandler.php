@@ -12,8 +12,8 @@ use Charcoal\App\Kernel\Orm\Exception\NoChangesException;
 use Charcoal\App\Kernel\Orm\Repository\EntityInsertableTrait;
 use Charcoal\App\Kernel\Orm\Repository\EntityUpdatableTrait;
 use Charcoal\Buffers\Buffer;
-use Charcoal\HTTP\Client\Request;
-use Charcoal\HTTP\Client\Response;
+use Charcoal\Http\Client\Request;
+use Charcoal\Http\Client\Response;
 use Charcoal\OOP\Vectors\DsvString;
 use Charcoal\OOP\Vectors\StringVector;
 

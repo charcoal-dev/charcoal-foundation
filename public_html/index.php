@@ -6,7 +6,7 @@ require "../vendor/autoload.php";
 
 try {
     // Instantiate router & define routes
-    $router = new Charcoal\HTTP\Router\Router();
+    $router = new Charcoal\Http\Router\Router();
     $router->route('/*', 'App\Interfaces\Web\Endpoints\*')
         ->fallbackController(\App\Interfaces\Web\FallbackEndpoint::class);
 
@@ -28,7 +28,7 @@ try {
     $router->setControllersArgs([$app, \Charcoal\App\Kernel\Interfaces\Http\RemoteClient::class]);
 
     // Create request from _SERVER globals
-    \Charcoal\HTTP\Router\HttpServer::requestFromServerGlobals($router,
+    \Charcoal\Http\Router\HttpServer::requestFromServerGlobals($router,
         function (\App\Interfaces\Web\AbstractWebEndpoint $endpoint) {
             $endpoint->sendResponse();
         });

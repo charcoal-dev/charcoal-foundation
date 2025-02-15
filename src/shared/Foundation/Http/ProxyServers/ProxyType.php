@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Http\ProxyServers;
 
-use Charcoal\HTTP\Client\Response;
+use Charcoal\Http\Client\Response;
 use Charcoal\OOP\Traits\EnumOptionsTrait;
 
 /**

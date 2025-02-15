@@ -10,7 +10,7 @@ use Charcoal\Database\ORM\Schema\Charset;
 use Charcoal\Database\ORM\Schema\Columns;
 use Charcoal\Database\ORM\Schema\Constraints;
 use Charcoal\Database\ORM\Schema\TableMigrations;
-use Charcoal\HTTP\Commons\HttpMethod;
+use Charcoal\Http\Commons\HttpMethod;
 
 /**
  * Class CallLogTable

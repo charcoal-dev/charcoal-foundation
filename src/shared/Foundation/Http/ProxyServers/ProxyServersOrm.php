@@ -7,8 +7,8 @@ use App\Shared\AppDbTables;
 use App\Shared\Foundation\Http\HttpLogLevel;
 use App\Shared\Foundation\Http\HttpModule;
 use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
-use Charcoal\HTTP\Client\Request;
-use Charcoal\HTTP\Commons\HttpMethod;
+use Charcoal\Http\Client\Request;
+use Charcoal\Http\Commons\HttpMethod;
 
 /**
  * Class ProxyServersOrm
@@ -41,7 +41,7 @@ class ProxyServersOrm extends AbstractOrmRepository
     /**
      * @param HttpProxy $proxyServer
      * @return void
-     * @throws \Charcoal\HTTP\Client\Exception\RequestException
+     * @throws \Charcoal\Http\Client\Exception\RequestException
      * @throws \Throwable
      */
     public function testConnection(HttpProxy $proxyServer): void

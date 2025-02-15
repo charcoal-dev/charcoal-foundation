@@ -11,8 +11,8 @@ use App\Shared\Foundation\Http\Config\HttpClientConfig;
 use App\Shared\Foundation\Http\ProxyServers\HttpProxy;
 use Charcoal\App\Kernel\Errors;
 use Charcoal\App\Kernel\Module\AbstractModuleComponent;
-use Charcoal\HTTP\Client\Request;
-use Charcoal\HTTP\Client\Response;
+use Charcoal\Http\Client\Request;
+use Charcoal\Http\Client\Response;
 use Charcoal\OOP\Vectors\DsvString;
 
 /**
