@@ -10,7 +10,6 @@ use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 /**
  * Trait CacheableResponseTrait
  * @package App\Shared\Core\Http
- * @mixin AppAwareEndpoint
  */
 trait CacheableResponseTrait
 {

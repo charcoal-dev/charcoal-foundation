@@ -3,10 +3,11 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http;
 
-class AbstractApiEndpoint extends AppAwareEndpoint
-{
-    use CacheableResponseTrait;
+use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
+use Charcoal\Http\Router\Controllers\Response\PayloadResponse;
 
+abstract class AbstractApiEndpoint extends AppAwareEndpoint
+{
     protected function resolveEntrypoint(): callable
     {
         $httpMethod = strtolower($this->request->method->name);
@@ -38,5 +39,31 @@ class AbstractApiEndpoint extends AppAwareEndpoint
         }
 
         return $options;
+    }
+
+    /**
+     * @return PayloadResponse
+     */
+    protected function initEmptyResponse(): PayloadResponse
+    {
+        return new PayloadResponse();
+    }
+
+    /**
+     * @return PayloadResponse
+     */
+    protected function response(): PayloadResponse
+    {
+        /** @var PayloadResponse */
+        return $this->getResponseObject();
+    }
+
+    protected function appAwareCallback(): void
+    {
+    }
+
+    protected function declareHttpInterface(): ?HttpInterfaceBinding
+    {
+        // TODO: Implement declareHttpInterface() method.
     }
 }

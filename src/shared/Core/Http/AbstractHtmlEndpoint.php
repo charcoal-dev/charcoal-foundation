@@ -37,6 +37,14 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
     }
 
     /**
+     * @param array $args
+     * @return void
+     */
+    protected function onConstructHook(array $args): void
+    {
+    }
+
+    /**
      * @return callable
      */
     final protected function resolveEntrypoint(): callable
@@ -57,14 +65,14 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
      */
     protected function sendTemplate(string $template, array $data = []): void
     {
-        $this->send($this->renderTemplateFile($template, $data));
+        $this->setBody($this->renderTemplateFile($template, $data));
     }
 
     /**
      * @param Buffer $body
      * @return void
      */
-    protected function send(Buffer $body): void
+    protected function setBody(Buffer $body): void
     {
         $this->response()->body->flush()->append($body);
     }
@@ -96,7 +104,7 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
             ];
         }
 
-        $this->send($this->renderTemplateFile("crash", ["exception" => $exception]));
+        $this->setBody($this->renderTemplateFile("crash", ["exception" => $exception]));
     }
 
     /**
