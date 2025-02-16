@@ -41,13 +41,14 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
      */
     protected function handleException(\Throwable $t): void
     {
+        var_dump($t);
         // Handleable Individual Exception?
         list($statusCode,
             $errorMessage,
             $errorCode) = $this->individualExceptionHandler($t);
 
         if ($errorMessage || $errorCode) {
-            $this->responseErrorObject($statusCode, ["message" => $errorMessage, "code" => $errorCode]);
+            $this->responseFromErrorObject($statusCode, ["message" => $errorMessage, "code" => $errorCode]);
             return;
         }
 
@@ -60,7 +61,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
             $this->app->lifecycle->exception($t);
         }
 
-        $this->responseErrorObject($statusCode, $this->exceptionToArray($t));
+        $this->responseFromErrorObject($statusCode, $this->exceptionToArray($t));
     }
 
     /**
@@ -68,7 +69,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
      * @param array $errorObject
      * @return void
      */
-    private function responseErrorObject(null|int $statusCode, array $errorObject): void
+    private function responseFromErrorObject(null|int $statusCode, array $errorObject): void
     {
         if (!$statusCode) {
             $statusCode = 400;
