@@ -5,7 +5,7 @@ namespace App\Shared\Foundation\Http;
 
 use App\Shared\Core\Cache\CacheStore;
 use App\Shared\Core\CipherKey;
-use App\Shared\Core\Orm\AppOrmModule;
+use App\Shared\Core\Orm\ComponentsAwareModule;
 use App\Shared\Core\Orm\ModuleComponentEnum;
 use App\Shared\Foundation\Http\CallLog\CallLogHandler;
 use App\Shared\Foundation\Http\CallLog\CallLogTable;
@@ -26,7 +26,7 @@ use Charcoal\OOP\Vectors\DsvString;
  * Class HttpModule
  * @package App\Shared\Foundation\Http
  */
-class HttpModule extends AppOrmModule
+class HttpModule extends ComponentsAwareModule
 {
     public CallLogHandler $callLog;
     public InterfaceLogHandler $interfaceLog;

@@ -5,6 +5,7 @@ namespace App\Shared;
 
 use App\Shared\Foundation\CoreData\CoreData;
 use App\Shared\Foundation\CoreData\CoreDataModule;
+use App\Shared\Foundation\Engine\EngineModule;
 use App\Shared\Foundation\Http\Http;
 use App\Shared\Foundation\Http\HttpModule;
 use App\Shared\Foundation\Mailer\Mailer;
@@ -56,6 +57,11 @@ enum BuildContext: string implements AppBuildEnum
 
                 # Mailer Module
                 $plan->include("mailer", new MailerModule($app, [
+                    Mailer::BACKLOG
+                ]));
+
+                # Engine Module
+                $plan->include("engine", new EngineModule($app, [
                     Mailer::BACKLOG
                 ]));
             })

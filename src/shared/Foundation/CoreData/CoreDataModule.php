@@ -6,6 +6,7 @@ namespace App\Shared\Foundation\CoreData;
 use App\Shared\Core\Cache\CacheStore;
 use App\Shared\Core\CipherKey;
 use App\Shared\Core\Orm\AppOrmModule;
+use App\Shared\Core\Orm\ComponentsAwareModule;
 use App\Shared\Core\Orm\ModuleComponentEnum;
 use App\Shared\Foundation\CoreData\BruteForceControl\BfcHandler;
 use App\Shared\Foundation\CoreData\BruteForceControl\BfcTable;
@@ -27,7 +28,7 @@ use Charcoal\Cipher\Cipher;
  * Class CoreDataModule
  * @package App\Shared\Foundation\CoreData
  */
-class CoreDataModule extends AppOrmModule
+class CoreDataModule extends ComponentsAwareModule
 {
     public ObjectStoreController $objectStore;
     public CountriesOrm $countries;

@@ -27,11 +27,10 @@ class EngineModule extends AppOrmModule
 
     /**
      * @param AppBuildPartial $app
-     * @param array $components
      */
-    public function __construct(AppBuildPartial $app, array $components)
+    public function __construct(AppBuildPartial $app)
     {
-        parent::__construct($app, CacheStore::PRIMARY, $components);
+        parent::__construct($app, CacheStore::PRIMARY);
     }
 
     /**
@@ -61,25 +60,5 @@ class EngineModule extends AppOrmModule
     {
         $tables->register(new ExecutionLogTable($this));
         $tables->register(new LogStatsTable($this));
-    }
-
-    /**
-     * @param ModuleComponentEnum $component
-     * @param AppBuildPartial $app
-     * @return bool
-     */
-    protected function includeComponent(ModuleComponentEnum $component, AppBuildPartial $app): bool
-    {
-        return false;
-    }
-
-    /**
-     * @param ModuleComponentEnum $component
-     * @param DatabaseTableRegistry $tables
-     * @return bool
-     */
-    protected function createDbTables(ModuleComponentEnum $component, DatabaseTableRegistry $tables): bool
-    {
-        return false;
     }
 }

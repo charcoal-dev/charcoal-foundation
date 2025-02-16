@@ -32,7 +32,14 @@ try {
 
 } catch (Throwable $t) {
     $stdout->write("", true);
-    $stdout->write(sprintf("{red}{invert} %s {/}: {grey}#%s{/} {red}%s{/}", get_class($t), $t->getCode(), $t->getMessage()), true);
+    $stdout->write(sprintf(
+        "{red}{invert} %s {/}: {grey}#%s{/} {red}%s{/} {grey}near{/} {cyan}%s{/}{grey}:{/}{yellow}%d{/}",
+        get_class($t),
+        $t->getCode(),
+        $t->getMessage(),
+        $t->getFile(),
+        $t->getLine(),
+    ), true);
 }
 
 if (isset($app)) {

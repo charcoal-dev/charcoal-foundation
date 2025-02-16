@@ -5,7 +5,7 @@ namespace App\Shared\Foundation\Mailer;
 
 use App\Shared\Core\Cache\CacheStore;
 use App\Shared\Core\CipherKey;
-use App\Shared\Core\Orm\AppOrmModule;
+use App\Shared\Core\Orm\ComponentsAwareModule;
 use App\Shared\Core\Orm\ModuleComponentEnum;
 use App\Shared\Foundation\Mailer\Backlog\BacklogHandler;
 use App\Shared\Foundation\Mailer\Backlog\BacklogTable;
@@ -18,7 +18,7 @@ use Charcoal\Cipher\Cipher;
  * Class MailerModule
  * @package App\Shared\Foundation\Mailer
  */
-class MailerModule extends AppOrmModule
+class MailerModule extends ComponentsAwareModule
 {
     public BacklogHandler $backlog;
     public readonly MailerService $service;
