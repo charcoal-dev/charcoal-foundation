@@ -6,7 +6,8 @@ ARG HOST_GID=1000
 ARG APP_INTERFACE_DIRECTORY
 
 RUN if id ubuntu >/dev/null 2>&1; then \
-        userdel -r ubuntu && groupdel ubuntu; \
+        userdel -rf ubuntu || true; \
+        getent group ubuntu && groupdel ubuntu || true; \
     fi
 
 RUN groupadd -g ${HOST_GID} charcoal \

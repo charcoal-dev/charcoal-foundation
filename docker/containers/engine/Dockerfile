@@ -5,8 +5,10 @@ ARG HOST_UID=1000
 ARG HOST_GID=1000
 ARG APP_INTERFACE_DIRECTORY
 
-RUN groupadd -g ${HOST_GID} charcoal \
- && useradd -m -u ${HOST_UID} -g ${HOST_GID} --shell /bin/bash charcoal
+RUN if id ubuntu >/dev/null 2>&1; then \
+        userdel -rf ubuntu || true; \
+        getent group ubuntu && groupdel ubuntu || true; \
+    fi
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
