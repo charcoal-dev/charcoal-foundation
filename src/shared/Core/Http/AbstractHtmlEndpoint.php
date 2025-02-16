@@ -44,6 +44,9 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
      */
     protected function onConstructHook(array $args): void
     {
+        $this->exceptionReturnTrace = true;
+        $this->exceptionFullClassname = true;
+        $this->exceptionIncludePrevious = true;
     }
 
     /**
