@@ -16,6 +16,7 @@ abstract class AbstractWebEndpoint extends AbstractHtmlEndpoint
 {
     final protected function resolveTemplateDirectory(): string
     {
+        var_dump($this->app->directories->root->pathToChild("./templates", false));
         return $this->app->directories->root->pathToChild("./templates", false);
     }
 
