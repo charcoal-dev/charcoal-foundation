@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Html;
+namespace App\Shared\Core\Http\Html;
 
 use Charcoal\Buffers\Buffer;
 
 /**
  * Trait RenderHtmlTemplateTrait
- * @package App\Shared\Core\Html
+ * @package App\Shared\Core\Http\Html
  */
 trait RenderHtmlTemplateTrait
 {

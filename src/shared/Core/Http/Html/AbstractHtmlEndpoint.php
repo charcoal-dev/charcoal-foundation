@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http;
+namespace App\Shared\Core\Http\Html;
 
-use App\Shared\Core\Html\RenderHtmlTemplateTrait;
+use App\Shared\Core\Http\AppAwareEndpoint;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Http\Router\Controllers\Response\BodyResponse;
 
 /**
- * Class AppAwareEndpoint
- * @package App\Shared\Core\Http
+ * Class AbstractHtmlEndpoint
+ * @package App\Shared\Core\Http\Html
  */
 abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
 {
@@ -36,17 +36,6 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
     {
         /** @var BodyResponse */
         return $this->getResponseObject();
-    }
-
-    /**
-     * @param array $args
-     * @return void
-     */
-    protected function onConstructHook(array $args): void
-    {
-        $this->exceptionReturnTrace = true;
-        $this->exceptionFullClassname = true;
-        $this->exceptionIncludePrevious = true;
     }
 
     /**

@@ -3,7 +3,10 @@ declare(strict_types=1);
 
 namespace App\Shared\Core;
 
-use App\Shared\Core\Html\RenderHtmlTemplateTrait;
+use App\Shared\CharcoalApp;
+use App\Shared\Core\Http\Html\RenderHtmlTemplateTrait;
+use Charcoal\App\Kernel\Build\AppBuildEnum;
+use Charcoal\App\Kernel\Errors\ErrorLoggerInterface;
 
 /**
  * Class ErrorHandler
@@ -12,6 +15,19 @@ use App\Shared\Core\Html\RenderHtmlTemplateTrait;
 class ErrorHandler extends \Charcoal\App\Kernel\Errors\ErrorHandler
 {
     use RenderHtmlTemplateTrait;
+
+    private readonly string $crashHtmlFile;
+
+    /**
+     * @param CharcoalApp $app
+     * @param AppBuildEnum $build
+     * @param ErrorLoggerInterface $logger
+     */
+    public function __construct(CharcoalApp $app, AppBuildEnum $build, ErrorLoggerInterface $logger)
+    {
+        parent::__construct($app, $build, $logger);
+        $this->crashHtmlFile = $app->directories->storage->pathToChild("./crash.phtml");
+    }
 
     /**
      * @param \Throwable $t
@@ -32,7 +48,7 @@ class ErrorHandler extends \Charcoal\App\Kernel\Errors\ErrorHandler
         }
 
         header("Content-Type: text/html", response_code: 500);
-        print($this->renderTemplateFile(__DIR__ . "/Html/crash.phtml", ["exception" => $exception])->raw());
+        print($this->renderTemplateFile($this->crashHtmlFile, ["exception" => $exception])->raw());
         exit();
     }
 }

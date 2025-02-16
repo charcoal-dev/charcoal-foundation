@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Interfaces\Web;
 
-use App\Shared\Core\Http\AbstractHtmlEndpoint;
+use App\Shared\Core\Http\Html\AbstractHtmlEndpoint;
 use App\Shared\Core\Http\HttpInterfaceBinding;
 use App\Shared\Foundation\Http\Config\HttpInterfaceConfig;
 use App\Shared\Foundation\Http\HttpInterface;
