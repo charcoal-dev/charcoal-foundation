@@ -14,14 +14,10 @@ use App\Shared\Foundation\Http\HttpInterface;
  */
 abstract class AbstractWebEndpoint extends AbstractHtmlEndpoint
 {
-    /**
-     * @return string
-     */
     final protected function resolveTemplateDirectory(): string
     {
-        return __DIR__ . "/../templates/";
+        return $this->app->directories->root->pathToChild("./templates", false);
     }
-
 
     protected function appAwareCallback(): void
     {
