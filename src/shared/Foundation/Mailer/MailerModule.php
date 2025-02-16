@@ -21,7 +21,7 @@ use Charcoal\Cipher\Cipher;
 class MailerModule extends ComponentsAwareModule
 {
     public BacklogHandler $backlog;
-    public readonly MailerService $service;
+    public MailerService $service;
 
     /**
      * @param AppBuildPartial $app

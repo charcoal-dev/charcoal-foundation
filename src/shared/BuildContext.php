@@ -61,9 +61,7 @@ enum BuildContext: string implements AppBuildEnum
                 ]));
 
                 # Engine Module
-                $plan->include("engine", new EngineModule($app, [
-                    Mailer::BACKLOG
-                ]));
+                $plan->include("engine", new EngineModule($app));
             })
         };
     }
