@@ -54,8 +54,6 @@ class CharcoalApp extends AppBuild
         protected string $configClass = \App\Shared\Core\Config::class,
     )
     {
-        $this->semaphore = new FilesystemSemaphore($this->directories->semaphore);
-
         parent::__construct(
             $context,
             $rootDirectory,
@@ -66,6 +64,8 @@ class CharcoalApp extends AppBuild
             Databases::class,
             errorHandlerClass: ErrorHandler::class
         );
+
+        $this->semaphore = new FilesystemSemaphore($this->directories->semaphore);
     }
 
     /**
