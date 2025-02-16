@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Interfaces\Web;
 
 use App\Shared\Core\Http\Response\CacheControlHelper;
-use App\Shared\Exception\ApiValidationException;
 use Charcoal\OOP\OOP;
 use Composer\InstalledVersions;
 
@@ -21,9 +20,6 @@ class FallbackEndpoint extends AbstractWebEndpoint
     {
         // Browser/CDN side caching:
         $this->useCacheControl(CacheControlHelper::publicCdnCache(3600, 21600));
-
-        throw new ApiValidationException("dfsdf");
-        trigger_error("Fallback endpoint called", E_USER_WARNING);
 
         $this->sendTemplate("fallback", [
             "appClassname" => OOP::baseClassName($this->app::class),

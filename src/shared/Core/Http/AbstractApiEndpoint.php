@@ -41,7 +41,6 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
      */
     protected function handleException(\Throwable $t): void
     {
-        var_dump($t);
         // Handleable Individual Exception?
         list($statusCode,
             $errorMessage,
