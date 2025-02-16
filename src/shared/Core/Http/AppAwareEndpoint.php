@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http;
 
 use App\Shared\CharcoalApp;
+use App\Shared\Core\Cache\CacheStore;
 use App\Shared\Core\Http\Response\CacheableResponse;
+use App\Shared\Core\Http\Response\CacheSource;
 use App\Shared\Exception\ApiValidationException;
 use App\Shared\Foundation\Http\HttpInterface;
 use App\Shared\Foundation\Http\HttpLogLevel;
@@ -197,16 +199,6 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         }
 
         $this->sendResponse();
-    }
-
-    /**
-     * @param string $uniqueRequestId
-     * @param CacheControl|null $cacheControl
-     * @return CacheableResponse
-     */
-    protected function getCacheableResponse(string $uniqueRequestId, ?CacheControl $cacheControl): CacheableResponse
-    {
-        return new CacheableResponse($this, $uniqueRequestId, $cacheControl);
     }
 
     /**
