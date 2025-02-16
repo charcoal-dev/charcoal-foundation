@@ -47,13 +47,14 @@
         <p class="mb-0"><strong>Error Code:</strong> <?= htmlspecialchars($exception['code']) ?></p>
     </div>
 
+    <?php if (!empty($exception['trace'])): ?>
     <h4>Stack Trace:</h4>
-    <div class="stack-trace px-4 py-3"><?= htmlspecialchars(implode("\n", $exception['trace'])) ?></div>
+    <div class="stack-trace px-4 py-3"><?= htmlspecialchars(implode("\n", $exception['trace'])) ?></div><?php endif; ?>
     <?php if (!empty($exception['previous'])): ?>
         <h4 class="mt-4">Previous Exception:</h4>
         <div class="stack-trace px-4 py-3 mb-4"><strong><?= htmlspecialchars($exception['previous']['class']) ?>
 :</strong> <?= htmlspecialchars($exception['previous']['message']) ?>
-<br><strong>Code:</strong> <?= htmlspecialchars($exception['previous']['code']) ?><br><strong>Stack Trace:</strong><br><?= htmlspecialchars(implode("\n", $exception['previous']['trace'])) ?>
+<br><strong>Code:</strong> <?= htmlspecialchars($exception['previous']['code']) ?><br><?php if (!empty($exception['previous']['trace'])): ?><strong>Stack Trace:</strong><br><?= htmlspecialchars(implode("\n", $exception['previous']['trace'])) ?><?php endif; ?>
         </div>
     <?php endif; ?>
 </div>
