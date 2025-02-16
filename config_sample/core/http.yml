@@ -18,7 +18,7 @@ http:
             status: true
             # Specifies the extent of request/response data to log,
             # Valid options: "none", "basic", "headers", "complete"
-            logData: "headers"
+            logData: "none"
             # If enabled above or explicitly in endpoint,
             # Should interface calls via HTTP method OPTIONS be logged?
             logHttpMethodOptions: false
