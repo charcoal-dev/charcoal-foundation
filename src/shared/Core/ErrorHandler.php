@@ -28,7 +28,7 @@ class ErrorHandler extends \Charcoal\App\Kernel\Errors\ErrorHandler
         ];
 
         if ($this->exceptionHandlerShowTrace) {
-            $exception["trace"] = $t->getTrace();
+            $exception["trace"] = explode("\n", $t->getTraceAsString());
         }
 
         header("Content-Type: text/html", response_code: 500);
