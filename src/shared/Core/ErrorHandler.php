@@ -30,6 +30,26 @@ class ErrorHandler extends \Charcoal\App\Kernel\Errors\ErrorHandler
     }
 
     /**
+     * @return array
+     */
+    public function __serialize(): array
+    {
+        $data = parent::__serialize();
+        $data["crashHtmlFile"] = $this->crashHtmlFile;
+        return $data;
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        parent::__unserialize($data);
+        $this->crashHtmlFile = $data["crashHtmlFile"];
+    }
+
+    /**
      * @param \Throwable $t
      * @return never
      */
@@ -47,8 +67,13 @@ class ErrorHandler extends \Charcoal\App\Kernel\Errors\ErrorHandler
             $exception["trace"] = explode("\n", $t->getTraceAsString());
         }
 
-        header("Content-Type: text/html", response_code: 500);
-        print($this->renderTemplateFile($this->crashHtmlFile, ["exception" => $exception])->raw());
-        exit();
+        if (isset($this->crashHtmlFile)) {
+            header("Content-Type: text/html", response_code: 500);
+            print($this->renderTemplateFile($this->crashHtmlFile, ["exception" => $exception])->raw());
+            exit();
+        } else {
+            header("Content-Type: application/json", response_code: 500);
+            exit(json_encode(["FatalError" => $exception]));
+        }
     }
 }
