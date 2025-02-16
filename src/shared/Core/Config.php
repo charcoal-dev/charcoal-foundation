@@ -45,11 +45,11 @@ class Config extends \Charcoal\App\Kernel\Config
             $this->getDatabasesConfig($configData["core"]["databases"] ?? null),
         );
 
-        $this->ciphers = new CiphersConfig($configData["ciphers"] ?? null);
-        $this->http = new HttpStaticConfig($dir, $configData["http"] ?? null);
+        $this->ciphers = new CiphersConfig($configData["core"]["ciphers"] ?? null);
+        $this->http = new HttpStaticConfig($dir, $configData["core"]["http"] ?? null);
         if (property_exists($this, "mailer")) {
             $this->mailer = method_exists($this, "getMailerConfig") ?
-                $this->getMailerConfig($configData["mailer"] ?? null) : null;
+                $this->getMailerConfig($configData["core"]["mailer"] ?? null) : null;
         }
     }
 
