@@ -56,23 +56,27 @@ class ErrorHandler extends \Charcoal\App\Kernel\Errors\ErrorHandler
      */
     public function handleThrowable(\Throwable $t): never
     {
-        if($t instanceof ResponseDispatchedException) {
+        if ($t instanceof ResponseDispatchedException) {
             exit(); // Terminate Execution
         }
 
+        $isCli = php_sapi_name() === "cli";
         $exception = $this->createErrorArray($t);
         if ($t->getPrevious()) {
             $exception["previous"] = $this->createErrorArray($t->getPrevious());
         }
 
-        if (isset($this->crashHtmlFile) && file_exists($this->crashHtmlFile)) {
+        if (!$isCli && isset($this->crashHtmlFile) && file_exists($this->crashHtmlFile)) {
             header("Content-Type: text/html", response_code: 500);
             header("Cache-Control: no-store, no-cache, must-revalidate");
             print($this->renderTemplateFile($this->crashHtmlFile, ["exception" => $exception])->raw());
             exit();
         } else {
-            header("Content-Type: application/json", response_code: 500);
-            header("Cache-Control: no-store, no-cache, must-revalidate");
+            if (!$isCli) {
+                header("Content-Type: application/json", response_code: 500);
+                header("Cache-Control: no-store, no-cache, must-revalidate");
+            }
+
             exit(json_encode(["FatalError" => $exception]));
         }
     }
