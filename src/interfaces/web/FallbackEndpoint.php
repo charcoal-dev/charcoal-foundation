@@ -21,6 +21,8 @@ class FallbackEndpoint extends AbstractWebEndpoint
         // Browser/CDN side caching:
         $this->useCacheControl(CacheControlHelper::publicCdnCache(3600, 21600));
 
+        strlen();
+
         $this->sendTemplate("fallback", [
             "appClassname" => OOP::baseClassName($this->app::class),
             "appKernelBuild" => InstalledVersions::getVersion("charcoal-dev/app-kernel"),
