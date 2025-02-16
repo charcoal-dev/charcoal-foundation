@@ -41,7 +41,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
 
     protected bool $exceptionReturnTrace = false;
     protected bool $exceptionFullClassname = false;
-    protected bool $execptionIncludePrevious = false;
+    protected bool $exceptionIncludePrevious = false;
 
     /**
      * @return void
@@ -147,7 +147,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
      */
     public function sendResponse(): never
     {
-        if ($this->requestLog) {
+        if (isset($this->requestLog)) {
             try {
                 $this->requestLogSnapshot?->finalise(
                     $this->app,
@@ -255,7 +255,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
             $errorObject["trace"] = explode("\n", $t->getTraceAsString());
         }
 
-        if ($this->execptionIncludePrevious) {
+        if ($this->exceptionIncludePrevious) {
             $errorObject["previous"] = $this->exceptionToArray($t->getPrevious(), $classnameKey);
         }
 
