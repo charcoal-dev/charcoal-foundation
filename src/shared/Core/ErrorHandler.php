@@ -6,6 +6,7 @@ namespace App\Shared\Core;
 use App\Shared\CharcoalApp;
 use App\Shared\Core\Http\Html\RenderHtmlTemplateTrait;
 use Charcoal\App\Kernel\Build\AppBuildEnum;
+use Charcoal\App\Kernel\Errors\ErrorEntry;
 use Charcoal\App\Kernel\Errors\ErrorLoggerInterface;
 use Charcoal\Http\Router\Exception\ResponseDispatchedException;
 
@@ -48,6 +49,24 @@ class ErrorHandler extends \Charcoal\App\Kernel\Errors\ErrorHandler
     {
         parent::__unserialize($data);
         $this->crashHtmlFile = $data["crashHtmlFile"];
+    }
+
+    /**
+     * @param int $level
+     * @param string $message
+     * @param string $file
+     * @param int $line
+     * @return bool
+     * @throws \ErrorException
+     */
+    public function handleError(int $level, string $message, string $file, int $line): bool
+    {
+        if (error_reporting() === 0) return false;
+
+        $err = new ErrorEntry($this, $level, $message, $file, $line);
+        $this->append($err);
+
+        throw new \ErrorException($message, 0, $err->level, $file, $line);
     }
 
     /**

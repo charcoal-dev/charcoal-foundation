@@ -4,9 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Core\Cache\CacheStore;
 use App\Shared\Core\Http\Response\CacheableResponse;
-use App\Shared\Core\Http\Response\CacheSource;
 use App\Shared\Exception\ApiValidationException;
 use App\Shared\Foundation\Http\HttpInterface;
 use App\Shared\Foundation\Http\HttpLogLevel;
@@ -17,7 +15,6 @@ use App\Shared\Utility\StringHelper;
 use Charcoal\App\Kernel\Errors;
 use Charcoal\App\Kernel\Interfaces\Http\AbstractRouteController;
 use Charcoal\Http\Commons\HttpMethod;
-use Charcoal\Http\Router\Controllers\CacheControl;
 use Charcoal\Http\Router\Controllers\CacheStoreDirective;
 use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 use Charcoal\OOP\OOP;

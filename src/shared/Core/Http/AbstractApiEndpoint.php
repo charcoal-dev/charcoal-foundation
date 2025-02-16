@@ -89,6 +89,14 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
             return [405, "Method not allowed", null];
         }
 
+        if ($t instanceof \ErrorException) {
+            if ($this->app->errors->isFatalError($t->getSeverity())) {
+                return [500, "Internal server error", null];
+            }
+
+            return [400, "An error has occurred", null];
+        }
+
         return [400, null, null];
     }
 
