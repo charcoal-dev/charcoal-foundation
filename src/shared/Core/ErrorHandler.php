@@ -55,6 +55,27 @@ class ErrorHandler extends \Charcoal\App\Kernel\Errors\ErrorHandler
      */
     public function handleThrowable(\Throwable $t): never
     {
+        $exception = $this->createErrorArray($t);
+        if ($t->getPrevious()) {
+            $exception["previous"] = $this->createErrorArray($t->getPrevious());
+        }
+
+        if (isset($this->crashHtmlFile)) {
+            header("Content-Type: text/html", response_code: 500);
+            print($this->renderTemplateFile($this->crashHtmlFile, ["exception" => $exception])->raw());
+            exit();
+        } else {
+            header("Content-Type: application/json", response_code: 500);
+            exit(json_encode(["FatalError" => $exception]));
+        }
+    }
+
+    /**
+     * @param \Throwable $t
+     * @return array
+     */
+    private function createErrorArray(\Throwable $t): array
+    {
         $exception = [
             "class" => get_class($t),
             "message" => $t->getMessage(),
@@ -67,13 +88,6 @@ class ErrorHandler extends \Charcoal\App\Kernel\Errors\ErrorHandler
             $exception["trace"] = explode("\n", $t->getTraceAsString());
         }
 
-        if (isset($this->crashHtmlFile)) {
-            header("Content-Type: text/html", response_code: 500);
-            print($this->renderTemplateFile($this->crashHtmlFile, ["exception" => $exception])->raw());
-            exit();
-        } else {
-            header("Content-Type: application/json", response_code: 500);
-            exit(json_encode(["FatalError" => $exception]));
-        }
+        return $exception;
     }
 }

@@ -60,7 +60,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
             $this->app->lifecycle->exception($t);
         }
 
-        $this->responseErrorObject($statusCode, $this->exceptionToArray($t, "exception"));
+        $this->responseErrorObject($statusCode, $this->exceptionToArray($t));
     }
 
     /**

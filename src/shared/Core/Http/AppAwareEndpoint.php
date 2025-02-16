@@ -228,10 +228,9 @@ abstract class AppAwareEndpoint extends AbstractRouteController
 
     /**
      * @param \Throwable $t
-     * @param string $classnameKey
      * @return array
      */
-    protected function exceptionToArray(\Throwable $t, string $classnameKey): array
+    protected function exceptionToArray(\Throwable $t): array
     {
         $errorObject = [
             "message" => StringHelper::getTrimmedOrNull($t->getMessage()),
@@ -240,7 +239,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         ];
 
         if (!$t instanceof ApiValidationException) {
-            $errorObject[$classnameKey] = $this->exceptionFullClassname ?
+            $errorObject["exception"] = $this->exceptionFullClassname ?
                 $t::class : OOP::baseClassName($t::class);
         }
 
@@ -256,7 +255,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         }
 
         if ($this->exceptionIncludePrevious) {
-            $errorObject["previous"] = $this->exceptionToArray($t->getPrevious(), $classnameKey);
+            $errorObject["previous"] = $this->exceptionToArray($t->getPrevious());
         }
 
         return $errorObject;
