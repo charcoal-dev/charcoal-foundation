@@ -25,7 +25,7 @@ class FallbackEndpoint extends AbstractWebEndpoint
 
 
         // Remove below lines, private caching:
-        $cacheable = $this->getCacheableResponse("fallback", CacheControlHelper::publicCdnCache(86400, 432000));
+        $cacheable = $this->getCacheableResponse("public_fallback", CacheControlHelper::publicCdnCache(86400, 432000));
         $cached = $cacheable->getFromFilesystem();
         if ($cached) {
             $this->sendResponseFromCache($cacheable, $cached, true);

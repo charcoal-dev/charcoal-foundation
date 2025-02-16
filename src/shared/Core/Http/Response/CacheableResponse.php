@@ -94,7 +94,7 @@ class CacheableResponse
         }
 
         $tmpDir->writeToFile(
-            $tmpDir->pathToChild($this->uniqueRequestId, validations: false),
+            $this->uniqueRequestId,
             $this->getSerializedResponse($response),
             append: false,
         );
@@ -109,7 +109,7 @@ class CacheableResponse
         try {
             $tmpDir = $this->getFilesystemDirectory();
             $response = $tmpDir->getFile(
-                $tmpDir->pathToChild($this->uniqueRequestId, validations: false),
+                $this->uniqueRequestId,
                 createIfNotExists: false
             );
 
