@@ -3,7 +3,7 @@ FROM ubuntu:24.04
 ARG DEBIAN_FRONTEND=noninteractive
 ARG HOST_UID=1000
 ARG HOST_GID=1000
-ARG APP_INTERFACE_DIRECTORY
+#ARG APP_INTERFACE_DIRECTORY
 
 RUN if id ubuntu >/dev/null 2>&1; then \
         userdel -rf ubuntu || true; \
@@ -45,7 +45,7 @@ COPY ./config/ config/
 COPY ./src/composer.json composer.json
 COPY ./src/shared/ shared/
 COPY ./src/domain/ domain/
-COPY ./src/interfaces/engine/ interfaces/engine/
+#COPY ./src/interfaces/engine/ interfaces/engine/
 COPY ./docker/containers/engine/charcoal.sh charcoal.sh
 COPY ./docker/containers/engine/charcoal.php charcoal.php
 COPY ./docker/containers/engine/build.php build.php
