@@ -127,7 +127,7 @@ class CacheableResponse
             $this->returnCheckInstance($response);
             return $response;
         } catch (FilesystemException $e) {
-            if ($e->error === FilesystemError::PATH_NOT_EXISTS) {
+            if (in_array($e->error, [FilesystemError::PATH_NOT_EXISTS, FilesystemError::PATH_TYPE_ERR])) {
                 return null;
             }
 
