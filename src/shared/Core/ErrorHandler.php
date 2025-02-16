@@ -60,7 +60,7 @@ class ErrorHandler extends \Charcoal\App\Kernel\Errors\ErrorHandler
             $exception["previous"] = $this->createErrorArray($t->getPrevious());
         }
 
-        if (isset($this->crashHtmlFile)) {
+        if (isset($this->crashHtmlFile) && file_exists($this->crashHtmlFile)) {
             header("Content-Type: text/html", response_code: 500);
             header("Cache-Control: no-store, no-cache, must-revalidate");
             print($this->renderTemplateFile($this->crashHtmlFile, ["exception" => $exception])->raw());
