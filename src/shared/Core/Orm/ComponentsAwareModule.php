@@ -23,8 +23,22 @@ abstract class ComponentsAwareModule extends AppOrmModule
      */
     protected function __construct(AppBuildPartial $app, CacheStore $cacheStore, array $components)
     {
-        $this->components = array_unique($components);
+        $this->components = $this->filterUniqueComponents($components);
         parent::__construct($app, $cacheStore);
+    }
+
+    /**
+     * @param array $components
+     * @return array
+     */
+    private function filterUniqueComponents(array $components): array
+    {
+        return array_values(array_reduce($components, function ($carry, $item) {
+            if (!in_array($item, $carry, true)) {
+                $carry[] = $item;
+            }
+            return $carry;
+        }, []));
     }
 
     /**
