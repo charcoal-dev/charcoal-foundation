@@ -66,6 +66,14 @@ class CharcoalApp extends AppBuild
         );
 
         $this->semaphore = new FilesystemSemaphore($this->directories->semaphore);
+    }
+
+    /**
+     * @return void
+     */
+    public function bootstrap(): void
+    {
+        parent::bootstrap();
         $this->errors->exceptionHandlerShowTrace = true;
     }
 
