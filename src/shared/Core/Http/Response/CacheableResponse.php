@@ -7,6 +7,7 @@ use App\Shared\CharcoalApp;
 use App\Shared\Core\Cache\CacheStore;
 use App\Shared\Core\Http\AppAwareEndpoint;
 use App\Shared\Foundation\Http\HttpInterface;
+use Charcoal\Buffers\Buffer;
 use Charcoal\Filesystem\Directory;
 use Charcoal\Filesystem\Exception\FilesystemError;
 use Charcoal\Filesystem\Exception\FilesystemException;
@@ -117,6 +118,7 @@ class CacheableResponse
                 AbstractControllerResponse::class,
                 PayloadResponse::class,
                 BodyResponse::class,
+                Buffer::class,
                 FileDownloadResponse::class,
                 WritableHeaders::class,
                 WritablePayload::class
