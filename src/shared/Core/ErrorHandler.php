@@ -7,6 +7,7 @@ use App\Shared\CharcoalApp;
 use App\Shared\Core\Http\Html\RenderHtmlTemplateTrait;
 use Charcoal\App\Kernel\Build\AppBuildEnum;
 use Charcoal\App\Kernel\Errors\ErrorLoggerInterface;
+use Charcoal\Http\Router\Exception\ResponseDispatchedException;
 
 /**
  * Class ErrorHandler
@@ -55,6 +56,10 @@ class ErrorHandler extends \Charcoal\App\Kernel\Errors\ErrorHandler
      */
     public function handleThrowable(\Throwable $t): never
     {
+        if($t instanceof ResponseDispatchedException) {
+            exit(); // Terminate Execution
+        }
+
         $exception = $this->createErrorArray($t);
         if ($t->getPrevious()) {
             $exception["previous"] = $this->createErrorArray($t->getPrevious());

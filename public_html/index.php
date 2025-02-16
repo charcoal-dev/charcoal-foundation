@@ -30,11 +30,7 @@ try {
     // Create request from _SERVER globals
     \Charcoal\Http\Router\HttpServer::requestFromServerGlobals($router,
         function (\App\Interfaces\Web\AbstractWebEndpoint $endpoint) {
-            try {
-                $endpoint->sendResponse();
-            } catch (\Charcoal\Http\Router\Exception\ResponseDispatchedException) {
-                // Success!
-            }
+            $endpoint->sendResponse();
         });
 } catch (Throwable $t) {
     /** @noinspection PhpUnhandledExceptionInspection */
