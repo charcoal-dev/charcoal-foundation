@@ -21,7 +21,7 @@ class FallbackEndpoint extends AbstractWebEndpoint
         // Browser/CDN side caching:
         $this->useCacheControl(CacheControlHelper::publicCdnCache(3600, 21600));
 
-        trigger_error("Fallback endpoint called", E_USER_NOTICE);
+        trigger_error("Fallback endpoint called", E_USER_WARNING);
 
         $this->sendTemplate("fallback", [
             "appClassname" => OOP::baseClassName($this->app::class),
