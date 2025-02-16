@@ -11,7 +11,7 @@ RUN if id ubuntu >/dev/null 2>&1; then \
     fi
 
 RUN groupadd -g ${HOST_GID} charcoal \
- && useradd -m -u ${HOST_UID} -g ${HOST_GID} --shell /bin/bash charcoal
+    && useradd -m -u ${HOST_UID} -g ${HOST_GID} --shell /bin/bash charcoal
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
