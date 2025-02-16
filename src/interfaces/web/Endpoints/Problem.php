@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Interfaces\Web\Endpoints;
 
+
 use App\Interfaces\Web\AbstractWebEndpoint;
 
 /**

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http;
+namespace App\Shared\Core\Http\Response;
 
 use Charcoal\Http\Router\Controllers\CacheControl;
 use Charcoal\Http\Router\Controllers\CacheStoreDirective;

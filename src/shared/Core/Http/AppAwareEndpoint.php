@@ -4,15 +4,21 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http;
 
 use App\Shared\CharcoalApp;
+use App\Shared\Core\Http\Response\CacheableResponse;
+use App\Shared\Exception\ApiValidationException;
 use App\Shared\Foundation\Http\HttpInterface;
 use App\Shared\Foundation\Http\HttpLogLevel;
 use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogEntity;
 use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogSnapshot;
 use App\Shared\Utility\NetworkValidator;
+use App\Shared\Utility\StringHelper;
 use Charcoal\App\Kernel\Errors;
 use Charcoal\App\Kernel\Interfaces\Http\AbstractRouteController;
 use Charcoal\Http\Commons\HttpMethod;
+use Charcoal\Http\Router\Controllers\CacheControl;
+use Charcoal\Http\Router\Controllers\CacheStoreDirective;
 use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
+use Charcoal\OOP\OOP;
 
 /**
  * Class AppAwareEndpoint
@@ -32,6 +38,10 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     public readonly HttpLogLevel $requestLogLevel;
     private readonly ?InterfaceLogEntity $requestLog;
     private readonly ?InterfaceLogSnapshot $requestLogSnapshot;
+
+    protected bool $exceptionReturnTrace = false;
+    protected bool $exceptionFullClassname = false;
+    protected bool $execptionIncludePrevious = false;
 
     /**
      * @return void
@@ -157,6 +167,49 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     }
 
     /**
+     * @param CacheableResponse $cacheableResponse
+     * @param AbstractControllerResponse $response
+     * @param bool $includeAppCachedResponseHeader
+     * @return never
+     * @throws \Charcoal\Filesystem\Exception\FilesystemException
+     * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
+     */
+    protected function sendResponseFromCache(
+        CacheableResponse          $cacheableResponse,
+        AbstractControllerResponse $response,
+        bool                       $includeAppCachedResponseHeader = true
+    ): never
+    {
+        $this->swapResponseObject($response);
+        if ($cacheableResponse->cacheControl) {
+            $this->useCacheControl($cacheableResponse->cacheControl);
+            if ($cacheableResponse->cacheControl->store === CacheStoreDirective::PUBLIC ||
+                $cacheableResponse->cacheControl->store === CacheStoreDirective::PRIVATE) {
+                $response->headers->set("Last-Modified", gmdate("D, d M Y H:i:s", $response->createdOn) . " GMT");
+            }
+        }
+
+        if ($includeAppCachedResponseHeader && $this->interface) {
+            if ($this->interface->config->cachedResponseHeader) {
+                $response->headers->set($this->interface->config->cachedResponseHeader,
+                    strval((time() - $response->createdOn)));
+            }
+        }
+
+        $this->sendResponse();
+    }
+
+    /**
+     * @param string $uniqueRequestId
+     * @param CacheControl|null $cacheControl
+     * @return CacheableResponse
+     */
+    protected function getCacheableResponse(string $uniqueRequestId, ?CacheControl $cacheControl): CacheableResponse
+    {
+        return new CacheableResponse($this, $uniqueRequestId, $cacheControl);
+    }
+
+    /**
      * @param \Throwable $t
      * @return void
      * @throws \Charcoal\Filesystem\Exception\FilesystemException
@@ -171,5 +224,41 @@ abstract class AppAwareEndpoint extends AbstractRouteController
 
         $this->app->directories->log->getDirectory("queries", true)
             ->writeToFile(dechex($this->requestLog->id), var_export($logFileDump, true));
+    }
+
+    /**
+     * @param \Throwable $t
+     * @param string $classnameKey
+     * @return array
+     */
+    protected function exceptionToArray(\Throwable $t, string $classnameKey): array
+    {
+        $errorObject = [
+            "message" => StringHelper::getTrimmedOrNull($t->getMessage()),
+            "code" => $t instanceof ApiValidationException && $t->errorCode ?
+                $t->errorCode : $t->getCode()
+        ];
+
+        if (!$t instanceof ApiValidationException) {
+            $errorObject[$classnameKey] = $this->exceptionFullClassname ?
+                $t::class : OOP::baseClassName($t::class);
+        }
+
+        if (!$errorObject["message"]) {
+            $errorObject["message"] = $this->exceptionFullClassname ?
+                $t::class : OOP::baseClassName($t::class);
+        }
+
+        if ($this->exceptionReturnTrace) {
+            $errorObject["file"] = $t->getFile();
+            $errorObject["line"] = $t->getLine();
+            $errorObject["trace"] = explode("\n", $t->getTraceAsString());
+        }
+
+        if ($this->execptionIncludePrevious) {
+            $errorObject["previous"] = $this->exceptionToArray($t->getPrevious(), $classnameKey);
+        }
+
+        return $errorObject;
     }
 }

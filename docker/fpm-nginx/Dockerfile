@@ -54,6 +54,7 @@ COPY ./src/composer.json composer.json
 COPY ./src/shared/ shared/
 COPY ./src/domain/ domain/
 COPY ./src/interfaces/${APP_INTERFACE_DIRECTORY}/ interfaces/${APP_INTERFACE_DIRECTORY}/
+COPY ./templates/ templates/
 COPY ./public_html/ public_html/
 
 USER root

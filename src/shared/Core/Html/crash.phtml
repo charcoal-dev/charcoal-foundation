@@ -37,6 +37,13 @@
         <p class="lead"><?= htmlspecialchars($exception['message']) ?></p>
         <hr>
         <p><strong>Exception Type:</strong> <?= htmlspecialchars($exception['class']) ?></p>
+        <?php if (!empty($exception['file'])): ?>
+            <p><strong>File:</strong> <?= htmlspecialchars($exception['file']) ?>
+                <?php if (!empty($exception['line'])): ?>
+                    :<?= (int) $exception['line'] ?>
+                <?php endif; ?>
+            </p>
+        <?php endif; ?>
         <p class="mb-0"><strong>Error Code:</strong> <?= htmlspecialchars($exception['code']) ?></p>
     </div>
 

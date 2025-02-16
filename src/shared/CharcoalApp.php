@@ -7,6 +7,7 @@ use App\Shared\Core\Cache\CachePool;
 use App\Shared\Core\Config;
 use App\Shared\Core\Db\Databases;
 use App\Shared\Core\Directories;
+use App\Shared\Core\ErrorHandler;
 use App\Shared\Core\Events;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertEntity;
@@ -27,6 +28,7 @@ use Charcoal\Semaphore\FilesystemSemaphore;
  * @property Directories $directories
  * @property Events $events
  * @property Config $config
+ * @property ErrorHandler $errors
  */
 class CharcoalApp extends AppBuild
 {
@@ -62,6 +64,7 @@ class CharcoalApp extends AppBuild
             Directories::class,
             Events::class,
             Databases::class,
+            errorHandlerClass: ErrorHandler::class
         );
     }
 

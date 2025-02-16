@@ -1,10 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http;
+namespace App\Shared\Core\Http\Response;
 
 use App\Shared\CharcoalApp;
 use App\Shared\Core\Cache\CacheStore;
+use App\Shared\Core\Http\AppAwareEndpoint;
 use App\Shared\Foundation\Http\HttpInterface;
 use Charcoal\Filesystem\Directory;
 use Charcoal\Filesystem\Exception\FilesystemError;
@@ -19,7 +20,7 @@ use Charcoal\Http\Router\Controllers\Response\PayloadResponse;
 
 /**
  * Class CacheableResponse
- * @package App\Shared\Core\Http
+ * @package App\Shared\Core\Http\Response
  */
 class CacheableResponse
 {

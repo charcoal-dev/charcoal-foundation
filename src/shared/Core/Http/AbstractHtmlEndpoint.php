@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http;
 
+use App\Shared\Core\Html\RenderHtmlTemplateTrait;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Http\Router\Controllers\Response\BodyResponse;
 
@@ -13,7 +14,8 @@ use Charcoal\Http\Router\Controllers\Response\BodyResponse;
 abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
 {
     private readonly string $templateDirectory;
-    protected bool $exceptionReturnTrace = true;
+
+    use RenderHtmlTemplateTrait;
 
     abstract protected function entrypoint(): void;
 
@@ -65,7 +67,7 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
      */
     protected function sendTemplate(string $template, array $data = []): void
     {
-        $this->setBody($this->renderTemplateFile($template, $data));
+        $this->setBody($this->renderTemplateFile($this->templateDirectory . $template . ".phtml", $data));
     }
 
     /**
@@ -80,57 +82,11 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
     /**
      * @param \Throwable $t
      * @return void
+     * @throws \Throwable
      */
     final protected function handleException(\Throwable $t): void
     {
-        if ($this->response()->getStatusCode() === 200) {
-            $this->response()->setStatusCode(500);
-        }
-
-        $exception = [
-            "class" => $t::class,
-            "message" => $t->getMessage(),
-            "code" => $t->getCode(),
-            "trace" => $this->exceptionReturnTrace ? explode("\n", $t->getTraceAsString()) : [],
-        ];
-
-        if ($t->getPrevious()) {
-            $prev = $t->getPrevious();
-            $exception["previous"] = [
-                "class" => $prev::class,
-                "message" => $prev->getMessage(),
-                "code" => $prev->getCode(),
-                "trace" => $this->exceptionReturnTrace ? explode("\n", $prev->getTraceAsString()) : []
-            ];
-        }
-
-        $this->setBody($this->renderTemplateFile("crash", ["exception" => $exception]));
-    }
-
-    /**
-     * Renders a template file and returns Buffer
-     * @param string $template
-     * @param array $data
-     * @return Buffer
-     */
-    final protected function renderTemplateFile(string $template, array $data = []): Buffer
-    {
-        $templateFile = $this->templateDirectory . $template . ".php";
-        if (!file_exists($templateFile)) {
-            throw new \RuntimeException("Template file not found");
-        }
-
-        extract($data, EXTR_SKIP);
-        if (!ob_start()) {
-            throw new \RuntimeException("Failed to start output buffer for templating");
-        }
-
-        try {
-            include $templateFile;
-            return new Buffer(ob_get_clean());
-        } catch (\Throwable $e) {
-            ob_end_clean();
-            throw new \RuntimeException("Error rendering template $template: " . $e->getMessage(), 0, $e);
-        }
+        // Forward to application ErrorHandler
+        throw $t;
     }
 }

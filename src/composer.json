@@ -18,7 +18,7 @@
       "App\\Shared\\": "shared",
       "App\\Domain\\": "domain",
       "App\\Interfaces\\Engine\\": "interfaces/engine",
-      "App\\Interfaces\\Web\\": "interfaces/web/logic"
+      "App\\Interfaces\\Web\\": "interfaces/web"
     }
   }
 }
