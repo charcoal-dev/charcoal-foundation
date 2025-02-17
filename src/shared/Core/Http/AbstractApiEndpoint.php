@@ -95,7 +95,8 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     {
         if ($t instanceof ApiValidationException) {
             if ($t->errorCode) {
-                return [$t->errorCode->getHttpCode(), $t->errorCode->getErrorMessage($this), $t->getCode()];
+                $errorCodeMessage = $t->errorCode->getErrorMessage($this);
+                return [$t->errorCode->getHttpCode(), $errorCodeMessage ?? $t->errorCode->name, $t->getCode()];
             }
         }
 
