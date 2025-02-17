@@ -5,7 +5,6 @@ namespace App\Interfaces\Engine\Scripts;
 
 use App\Shared\Core\Cli\AppAwareCliScript;
 use App\Shared\Core\Cli\ScriptExecutionLogBinding;
-use App\Shared\Foundation\CoreData\ObjectStore\ObjectStoreController;
 use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;
 use Charcoal\App\Kernel\Orm\Exception\EntityNotFoundException;
 use Charcoal\Database\ORM\Migrations;
@@ -58,7 +57,6 @@ class Install extends AppAwareCliScript
     }
 
     /**
-     * @param ObjectStoreController $objectStore
      * @param string $objectClassname
      * @param \Closure $newInstance
      * @return void
@@ -67,11 +65,11 @@ class Install extends AppAwareCliScript
      * @throws \Charcoal\Database\ORM\Exception\OrmQueryException
      */
     protected function handleRequiredStoredObject(
-        ObjectStoreController $objectStore,
         string                $objectClassname,
         \Closure              $newInstance
     ): void
     {
+        $objectStore = $this->getAppBuild()->coreData->objectStore;
         if (!class_exists($objectClassname)) {
             throw new \LogicException("Bad stored object classname");
         }
