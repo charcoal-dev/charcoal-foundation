@@ -5,9 +5,11 @@ namespace App\Interfaces\Engine\Scripts;
 
 use App\Shared\Core\Cli\AppAwareCliScript;
 use App\Shared\Core\Cli\ScriptExecutionLogBinding;
-use Charcoal\App\Kernel\Orm\AbstractOrmModule;
+use App\Shared\Foundation\CoreData\ObjectStore\ObjectStoreController;
 use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;
+use Charcoal\App\Kernel\Orm\Exception\EntityNotFoundException;
 use Charcoal\Database\ORM\Migrations;
+use Charcoal\OOP\OOP;
 
 /**
  * Class Install
@@ -30,13 +32,71 @@ class Install extends AppAwareCliScript
     {
     }
 
+    /**
+     * @return void
+     * @throws \Charcoal\Database\Exception\QueryExecuteException
+     */
     protected function execScript(): void
     {
         $this->createDbTables();
+        $this->createRequiredStoredObjects();
     }
 
     /**
      * @return void
+     */
+    private function createRequiredStoredObjects(): void
+    {
+        $app = $this->getAppBuild();
+        $this->inline("Checking for required stored objects ... ");
+        if (!isset($app->coreData->objectStore)) {
+            $this->print("{red}ObjectStore not built");
+            return;
+        }
+
+        $this->print("");
+    }
+
+    /**
+     * @param ObjectStoreController $objectStore
+     * @param string $objectClassname
+     * @param \Closure $newInstance
+     * @return void
+     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
+     * @throws \Charcoal\Cipher\Exception\CipherException
+     * @throws \Charcoal\Database\ORM\Exception\OrmQueryException
+     */
+    protected function handleRequiredStoredObject(
+        ObjectStoreController $objectStore,
+        string                $objectClassname,
+        \Closure              $newInstance
+    ): void
+    {
+        if (!class_exists($objectClassname)) {
+            throw new \LogicException("Bad stored object classname");
+        }
+
+        $this->inline("\t{grey}Checking {yellow}" . OOP::baseClassName($objectClassname) . "{/}{grey} ... ");
+
+        try {
+            $objectStore->get($objectClassname, useCache: false);
+            $this->print("{green}Exists");
+            return;
+        } catch (EntityNotFoundException) {
+        }
+
+        $newInstance = $newInstance();
+        if (!$newInstance instanceof $objectClassname) {
+            throw new \LogicException("Expected " . $objectClassname . " instance");
+        }
+
+        $objectStore->store($newInstance);
+        $this->print("{green}Created");
+    }
+
+    /**
+     * @return void
+     * @throws \Charcoal\Database\Exception\QueryExecuteException
      */
     private function createDbTables(): void
     {
@@ -75,7 +135,7 @@ class Install extends AppAwareCliScript
                 $this->print(sprintf("{grey}Progress: {/}%d{grey}/{yellow}%d", $progressIndex, $tablesCount));
                 $this->print(sprintf("{grey}CREATE TABLE `{green}%s{/}{grey}` IF NOT EXISTS", $tableInstance->name));
                 $stmt = Migrations::createTable($dbInstance, $tableInstance, true);
-                //$dbInstance->exec(implode("", $stmt));
+                $dbInstance->exec(implode("", $stmt));
             }
 
             $this->print("{goUp3}{atLineStart}{clearRight}{clearRight}");

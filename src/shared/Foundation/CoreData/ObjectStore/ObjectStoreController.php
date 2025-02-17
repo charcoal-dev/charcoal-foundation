@@ -90,7 +90,7 @@ class ObjectStoreController extends AbstractOrmRepository
                     return $this->invokeStorageHooks($storedObject, EntitySource::CACHE);
                 }
             } catch (CacheException $e) {
-                trigger_error(static::class . ' caught CacheException', E_USER_WARNING);
+                trigger_error(static::class . ' caught CacheException', E_USER_NOTICE);
                 $this->module->app->lifecycle->exception(
                     new \RuntimeException(static::class . ' caught CacheException', previous: $e),
                 );
@@ -134,7 +134,7 @@ class ObjectStoreController extends AbstractOrmRepository
                 $this->module->memoryCache->storeInCache($storageKey, $cacheObject, $cacheTtl > 0 ? $cacheTtl : null);
                 $storedInCache = true;
             } catch (CacheException $e) {
-                trigger_error(static::class . ' caught CacheException', E_USER_WARNING);
+                trigger_error(static::class . ' caught CacheException', E_USER_NOTICE);
                 $this->module->app->lifecycle->exception(
                     new \RuntimeException(static::class . ' caught CacheException', previous: $e),
                 );

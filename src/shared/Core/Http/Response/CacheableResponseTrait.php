@@ -43,7 +43,7 @@ trait CacheableResponseTrait
                     $cacheable->getFromCache($cacheStore) : $cacheable->getFromFilesystem();
             } catch (\Exception $e) {
                 $errorMsg = "Failed to retrieve cached response: " . $e::class;
-                trigger_error($errorMsg, E_USER_WARNING);
+                trigger_error($errorMsg, E_USER_NOTICE);
                 $this->app->lifecycle->exception(new \RuntimeException($errorMsg, previous: $e));
             }
 
@@ -63,7 +63,7 @@ trait CacheableResponseTrait
                 }
             } catch (\Exception $e) {
                 $errorMsg = "Failed to STORE cached response: " . $e::class;
-                trigger_error($errorMsg, E_USER_WARNING);
+                trigger_error($errorMsg, E_USER_NOTICE);
                 $this->app->lifecycle->exception(new \RuntimeException($errorMsg, previous: $e));
             }
         }
