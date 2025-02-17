@@ -11,7 +11,7 @@ use App\Shared\Core\Http\AbstractApiEndpoint;
  */
 interface ApiErrorCodeInterface extends \BackedEnum
 {
-    public function getErrorMessage(AbstractApiEndpoint $context): ?string;
+    public function getErrorMessage(?AbstractApiEndpoint $context): ?string;
 
     public function getHttpCode(): ?int;
 }
