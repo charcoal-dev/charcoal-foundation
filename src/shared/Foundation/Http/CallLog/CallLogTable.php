@@ -41,7 +41,8 @@ class CallLogTable extends AbstractOrmTable
         $cols->blobBuffer("snapshot")->size("medium")->nullable();
         $cols->setPrimaryKey("id");
 
-        $constraints->foreignKey("proxy_id")->table(AppDbTables::HTTP_PROXIES->value, "uniq_id");
+        $constraints->foreignKey("proxy_id")->database(AppDbTables::HTTP_PROXIES->getDatabase()->getDatabaseKey())
+            ->table(AppDbTables::HTTP_PROXIES->value, "uniq_id");
     }
 
     protected function migrations(TableMigrations $migrations): void
