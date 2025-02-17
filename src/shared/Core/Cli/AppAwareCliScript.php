@@ -90,9 +90,9 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
     }
 
     /**
-     * @return ScriptExecutionLogBinding|null
+     * @return ScriptExecutionLogBinding
      */
-    abstract protected function declareExecutionLogging(): ?ScriptExecutionLogBinding;
+    abstract protected function declareExecutionLogging(): ScriptExecutionLogBinding;
 
     /**
      * @return void
