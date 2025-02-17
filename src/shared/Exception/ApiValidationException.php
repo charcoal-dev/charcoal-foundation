@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Exception;
 
-use App\Shared\Utility\StringHelper;
+use App\Shared\Core\Http\Api\ApiErrorCodeInterface;
 
 /**
  * Class ApiValidationException
@@ -11,30 +11,32 @@ use App\Shared\Utility\StringHelper;
  */
 class ApiValidationException extends \Exception
 {
+    public readonly ?ApiErrorCodeInterface $errorCode;
     public readonly ?string $param;
-    public readonly ?array $baggage;
-    public readonly ?string $errorCode;
 
     /**
-     * @param string $message
+     * @param string|ApiErrorCodeInterface $message
      * @param int $code
      * @param string|null $param
-     * @param \StringBackedEnum|string|null $errorCode
      * @param \Throwable|null $previous
      */
     public function __construct(
-        string                        $message = "",
-        int                           $code = 0,
-        ?string                       $param = null,
-        \StringBackedEnum|string|null $errorCode = null,
-        ?\Throwable                   $previous = null
+        string|ApiErrorCodeInterface $message = "",
+        int                          $code = 0,
+        ?string                      $param = null,
+        ?\Throwable                  $previous = null
     )
     {
+        $errorCode = null;
+        if ($message instanceof ApiErrorCodeInterface) {
+            $errorCode = $message;
+            $message = "";
+        }
+
         parent::__construct($message, $code, $previous);
 
         // Param & errorCode (if any)
         $this->param = $param;
-        $this->errorCode = StringHelper::getTrimmedOrNull($errorCode) ?
-            ($errorCode instanceof \StringBackedEnum ? $errorCode->value : $errorCode) : null;
+        $this->errorCode = $errorCode;
     }
 }

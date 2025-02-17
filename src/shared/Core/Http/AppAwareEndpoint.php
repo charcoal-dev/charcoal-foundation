@@ -223,8 +223,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     {
         $errorObject = [
             "message" => StringHelper::getTrimmedOrNull($t->getMessage()),
-            "code" => $t instanceof ApiValidationException && $t->errorCode ?
-                $t->errorCode : $t->getCode()
+            "code" => $t->getCode()
         ];
 
         if (!$t instanceof ApiValidationException) {
@@ -243,7 +242,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
             $errorObject["trace"] = explode("\n", $t->getTraceAsString());
         }
 
-        if ($this->exceptionIncludePrevious) {
+        if (!$t instanceof ApiValidationException && $this->exceptionIncludePrevious) {
             $errorObject["previous"] = $this->exceptionToArray($t->getPrevious());
         }
 
