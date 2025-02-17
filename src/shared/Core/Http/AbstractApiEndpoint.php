@@ -93,8 +93,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
             $statusCode = 400;
         }
 
-        $this->response()->setStatusCode($statusCode)
-            ->setSuccess(false)
+        $this->response()->setSuccess(false, $statusCode)
             ->set("error", $errorObject);
     }
 
