@@ -13,7 +13,7 @@ use App\Shared\Foundation\Http\HttpInterface;
  * Class HttpInterfaceBinding
  * @package App\Shared\Core\Http
  */
-readonly class HttpInterfaceBinding
+class HttpInterfaceBinding
 {
     public HttpInterfaceConfig $config;
 

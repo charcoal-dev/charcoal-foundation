@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http;
 
+use App\Shared\Core\Http\Api\ApiInterfaceBinding;
 use App\Shared\Core\Http\Api\ApiNamespaceInterface;
 use App\Shared\Core\Http\Api\ApiResponse;
 use App\Shared\Exception\ApiEntrypointException;
@@ -15,7 +16,6 @@ use App\Shared\Exception\ApiValidationException;
 abstract class AbstractApiEndpoint extends AppAwareEndpoint
 {
     protected bool $allowOptionsCall = true;
-    public readonly ApiNamespaceInterface $namespace;
 
     /**
      * @return ApiNamespaceInterface
@@ -23,14 +23,25 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     abstract protected function declareApiNamespace(): ApiNamespaceInterface;
 
     /**
+     * @param ApiNamespaceInterface $interface
+     * @return ApiInterfaceBinding
+     */
+    abstract protected function declareApiInterface(ApiNamespaceInterface $interface): ApiInterfaceBinding;
+
+    /**
+     * @return HttpInterfaceBinding|null
+     */
+    final protected function declareHttpInterface(): ?HttpInterfaceBinding
+    {
+        return $this->declareApiInterface($this->declareApiNamespace());
+    }
+
+    /**
      * @return callable
      * @throws ApiEntrypointException
      */
     protected function resolveEntrypoint(): callable
     {
-        $this->response()->setStatusCode(204);
-        $this->namespace = $this->declareApiNamespace();
-
         $httpMethod = strtolower($this->request->method->name);
         if ($httpMethod === "options" && !$this->allowOptionsCall) {
             throw new ApiEntrypointException();
