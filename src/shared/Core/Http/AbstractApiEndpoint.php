@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http;
 
+use App\Shared\Core\Http\Response\ApiResponse;
 use App\Shared\Exception\ApiEntrypointException;
 use App\Shared\Exception\ApiValidationException;
 use Charcoal\Http\Router\Controllers\Response\PayloadResponse;
@@ -101,19 +102,19 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     }
 
     /**
-     * @return PayloadResponse
+     * @return ApiResponse
      */
-    protected function initEmptyResponse(): PayloadResponse
+    protected function initEmptyResponse(): ApiResponse
     {
-        return new PayloadResponse();
+        return new ApiResponse();
     }
 
     /**
-     * @return PayloadResponse
+     * @return ApiResponse
      */
-    protected function response(): PayloadResponse
+    protected function response(): ApiResponse
     {
-        /** @var PayloadResponse */
+        /** @var ApiResponse */
         return $this->getResponseObject();
     }
 
