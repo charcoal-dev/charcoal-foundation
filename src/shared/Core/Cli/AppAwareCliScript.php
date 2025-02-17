@@ -122,7 +122,7 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
                 $this->closeScriptLogger($this->logger, CliScriptState::FINISHED);
             }
         } catch (\Throwable $t) {
-            if (isset($this->logBinding)) {
+            if (isset($this->logBinding, $this->logger)) {
                 $this->logger->context->logException($t);
                 $this->closeScriptLogger($this->logger, CliScriptState::ERROR);
             }
