@@ -19,7 +19,10 @@ class ApiResponse extends PayloadResponse
      */
     public function setSuccess(bool $status): static
     {
-        $this->setStatusCode($status ? 200 : 400);
+        if ($status) {
+            $this->setStatusCode(200);
+        }
+
         $this->isSuccess = $status;
         return $this;
     }
