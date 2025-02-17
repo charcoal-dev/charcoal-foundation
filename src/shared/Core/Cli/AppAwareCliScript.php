@@ -34,8 +34,8 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
      */
     public function __construct(
         AppCliHandler              $cli,
-        CliScriptState             $initialState = CliScriptState::STARTED,
-        protected readonly ?string $semaphoreLockId
+        protected readonly ?string $semaphoreLockId = null,
+        CliScriptState             $initialState = CliScriptState::STARTED
     )
     {
         parent::__construct($cli);

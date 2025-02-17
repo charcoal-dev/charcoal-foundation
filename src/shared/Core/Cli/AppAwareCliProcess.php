@@ -34,7 +34,7 @@ abstract class AppAwareCliProcess extends AppAwareCliScript
         CliScriptState $initialState = CliScriptState::STARTED,
     )
     {
-        parent::__construct($cli, $initialState, $semaphoreLockId);
+        parent::__construct($cli, $semaphoreLockId, $initialState);
     }
 
     /**
