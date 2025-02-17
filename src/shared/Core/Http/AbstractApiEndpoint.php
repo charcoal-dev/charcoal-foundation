@@ -23,17 +23,16 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     abstract protected function declareApiNamespace(): ApiNamespaceInterface;
 
     /**
-     * @param ApiNamespaceInterface|null $interface
      * @return ApiInterfaceBinding
      */
-    abstract protected function declareApiInterface(ApiNamespaceInterface $interface = null): ApiInterfaceBinding;
+    abstract protected function declareApiInterface(): ApiInterfaceBinding;
 
     /**
      * @return HttpInterfaceBinding|null
      */
     final protected function declareHttpInterface(): ?HttpInterfaceBinding
     {
-        return $this->declareApiInterface($this->declareApiNamespace());
+        return $this->declareApiInterface();
     }
 
     /**
