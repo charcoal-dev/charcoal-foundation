@@ -15,12 +15,13 @@ class ApiResponse extends PayloadResponse
 
     /**
      * @param bool $status
+     * @param int $statusCode
      * @return $this
      */
-    public function setSuccess(bool $status): static
+    public function setSuccess(bool $status, int $statusCode = 200): static
     {
-        if ($status) {
-            $this->setStatusCode(200);
+        if ($statusCode) {
+            $this->setStatusCode($statusCode);
         }
 
         $this->isSuccess = $status;
