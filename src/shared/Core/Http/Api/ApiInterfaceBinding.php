@@ -14,16 +14,18 @@ use App\Shared\Foundation\Http\HttpInterface;
  */
 class ApiInterfaceBinding extends HttpInterfaceBinding
 {
-    public readonly ?ApiNamespaceInterface $namespace;
+    public readonly ApiNamespaceInterface $namespace;
 
     public function __construct(
-        CharcoalApp          $app,
-        public HttpInterface $enum,
-        bool                 $useStaticConfig,
-        bool                 $useObjectStoreConfig,
-        string               $configClass = HttpInterfaceConfig::class,
+        CharcoalApp            $app,
+        HttpInterface          $enum,
+        ApiNamespaceInterface $namespace,
+        bool                   $useStaticConfig,
+        bool                   $useObjectStoreConfig,
+        string                 $configClass = HttpInterfaceConfig::class,
     )
     {
         parent::__construct($app, $enum, $useStaticConfig, $useObjectStoreConfig, $configClass);
+        $this->namespace = $namespace;
     }
 }
