@@ -9,7 +9,6 @@ try {
     $appClass = \App\Shared\CharcoalApp::getAppClassname();
     $appClassname = \Charcoal\OOP\OOP::baseClassName($appClass);
     $rootDirectory = new \Charcoal\Filesystem\Directory(__DIR__);
-    $scriptDirectory = $rootDirectory->getDirectory("interfaces/engine/Scripts");
 
     $startOn = microtime(true);
     $arguments = explode(";", substr($argv[1] ?? "", 1, -1));
