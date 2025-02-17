@@ -90,10 +90,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     private function responseFromErrorObject(null|int $statusCode, array $errorObject): void
     {
         if (!$statusCode) {
-            $currentStatusCode = $this->response()->getStatusCode();
-            if ($currentStatusCode < 400 || $currentStatusCode >= 500) {
-                $statusCode = 401;
-            }
+            $statusCode = 400;
         }
 
         $this->response()->setStatusCode($statusCode)
@@ -126,7 +123,13 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
             return [400, "An error has occurred", null];
         }
 
-        return [402, null, null];
+        $statusCode = 400;
+        $currentStatusCode = $this->response()->getStatusCode();
+        if ($currentStatusCode >= 400 && $currentStatusCode <= 599) {
+            $statusCode = $currentStatusCode;
+        }
+
+        return [$statusCode, null, null];
     }
 
     /**
