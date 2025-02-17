@@ -12,6 +12,7 @@ use App\Shared\Exception\ApiValidationException;
 /**
  * Class AbstractApiEndpoint
  * @package App\Shared\Core\Http
+ * @property ApiInterfaceBinding $interface
  */
 abstract class AbstractApiEndpoint extends AppAwareEndpoint
 {
