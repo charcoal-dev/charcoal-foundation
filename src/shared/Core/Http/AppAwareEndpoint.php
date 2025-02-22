@@ -14,6 +14,7 @@ use App\Shared\Utility\NetworkValidator;
 use App\Shared\Utility\StringHelper;
 use Charcoal\App\Kernel\Errors;
 use Charcoal\App\Kernel\Interfaces\Http\AbstractRouteController;
+use Charcoal\Buffers\AbstractFixedLenBuffer;
 use Charcoal\Http\Commons\HttpMethod;
 use Charcoal\Http\Router\Controllers\CacheStoreDirective;
 use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
@@ -33,6 +34,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
 
     public readonly string $userIpAddress;
     public readonly ?HttpInterfaceBinding $interface;
+    protected readonly ?AbstractFixedLenBuffer $deviceFp;
 
     public readonly HttpLogLevel $requestLogLevel;
     private readonly ?InterfaceLogEntity $requestLog;
@@ -58,6 +60,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
 
         // Interface Configuration
         $this->interface = $this->declareHttpInterface();
+        $this->deviceFp = $this instanceof DeviceFingerprintRequiredRoute ? $this->resolveDeviceFp() : null;
 
         // Proceed to entrypoint
         parent::dispatchEntrypoint();
