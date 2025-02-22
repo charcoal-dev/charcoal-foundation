@@ -8,6 +8,7 @@ use App\Shared\Core\Http\Api\ApiNamespaceInterface;
 use App\Shared\Core\Http\Api\ApiResponse;
 use App\Shared\Exception\ApiEntrypointException;
 use App\Shared\Exception\ApiValidationException;
+use App\Shared\Exception\ConcurrentHttpRequestException;
 
 /**
  * Class AbstractApiEndpoint
@@ -103,6 +104,10 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
      */
     protected function individualExceptionHandler(\Throwable $t): array
     {
+        if ($t instanceof ConcurrentHttpRequestException) {
+            return [429, "Too many requests", null];
+        }
+
         if ($t instanceof ApiValidationException) {
             if ($t->errorCode) {
                 $errorCodeMessage = $t->errorCode->getErrorMessage($this);
