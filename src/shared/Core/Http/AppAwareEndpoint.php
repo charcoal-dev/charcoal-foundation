@@ -8,6 +8,7 @@ use App\Shared\Core\Http\Auth\AuthContextResolverInterface;
 use App\Shared\Core\Http\Auth\AuthRouteInterface;
 use App\Shared\Core\Http\Response\CacheableResponse;
 use App\Shared\Exception\ApiValidationException;
+use App\Shared\Exception\ConcurrentHttpRequestException;
 use App\Shared\Foundation\Http\HttpInterface;
 use App\Shared\Foundation\Http\HttpLogLevel;
 use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogEntity;
@@ -21,6 +22,9 @@ use Charcoal\Http\Commons\HttpMethod;
 use Charcoal\Http\Router\Controllers\CacheStoreDirective;
 use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 use Charcoal\OOP\OOP;
+use Charcoal\Semaphore\Exception\SemaphoreException;
+use Charcoal\Semaphore\Filesystem\FileLock;
+use Charcoal\Semaphore\FilesystemSemaphore;
 
 /**
  * Class AppAwareEndpoint
@@ -42,6 +46,8 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     public readonly HttpLogLevel $requestLogLevel;
     private readonly ?InterfaceLogEntity $requestLog;
     private readonly ?InterfaceLogSnapshot $requestLogSnapshot;
+    protected readonly ?ConcurrencyBinding $concurrencyBinding;
+    private ?FileLock $concurrencyLock = null;
 
     protected bool $exceptionReturnTrace = false;
     protected bool $exceptionFullClassname = false;
@@ -65,9 +71,18 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         $this->interface = $this->declareHttpInterface();
         $this->deviceFp = $this instanceof DeviceFingerprintRequiredRoute ? $this->resolveDeviceFp() : null;
         $this->authContext = $this instanceof AuthRouteInterface ? $this->resolveAuthContext() : null;
+        $this->concurrencyBinding = $this->declareConcurrencyBinding();
 
         // Proceed to entrypoint
         parent::dispatchEntrypoint();
+    }
+
+    /**
+     * @return ConcurrencyBinding|null
+     */
+    protected function declareConcurrencyBinding(): ?ConcurrencyBinding
+    {
+        return null;
     }
 
     /**
@@ -98,6 +113,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
 
     /**
      * @return void
+     * @throws ConcurrentHttpRequestException
      * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
      */
     final protected function beforeEntrypointCallback(): void
@@ -108,6 +124,9 @@ abstract class AppAwareEndpoint extends AbstractRouteController
                 sprintf('HTTP Interface "%s" is DISABLED', $this->interface->enum->name)
             );
         }
+
+        // Handle Request Concurrency
+        $this->handleRequestConcurrency();
 
         // InterfaceLog
         $routeLogLevel = $this->declareLogLevel();
@@ -151,12 +170,52 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     }
 
     /**
+     * @return void
+     * @throws ConcurrentHttpRequestException
+     */
+    private function handleRequestConcurrency(): void
+    {
+        $concurrencyLockKey = match ($this->concurrencyBinding->policy) {
+            ConcurrencyPolicy::IP_ADDR => "ip_" . md5($this->userIpAddress),
+            ConcurrencyPolicy::AUTH_CONTEXT => "auth_" . $this->authContext->getPrimaryId(),
+            default => throw new \LogicException("Cannot determine semaphore key for concurrency policy")
+        };
+
+        try {
+            $httpSemaphore = new FilesystemSemaphore(
+                $this->app->directories->semaphore->getDirectory($this->interface?->enum->value ?? "http", true)
+            );
+        } catch (\Exception $e) {
+            throw new \LogicException("Failed to initialize HTTP Semaphore", previous: $e);
+        }
+
+        try {
+            $this->concurrencyLock = $httpSemaphore->obtainLock($concurrencyLockKey,
+                $this->concurrencyBinding->maximumWaitTime > 0 ? $this->concurrencyBinding->tickInterval : null,
+                max($this->concurrencyBinding->maximumWaitTime, 0),
+            );
+
+            $this->concurrencyLock->setAutoRelease();
+        } catch (SemaphoreException) {
+            throw new ConcurrentHttpRequestException($this->concurrencyBinding->policy, $concurrencyLockKey);
+        }
+    }
+
+    /**
      * @return never
      * @throws \Charcoal\Filesystem\Exception\FilesystemException
      * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
      */
     public function sendResponse(): never
     {
+        if (isset($this->concurrencyLock)) {
+            try {
+                $this->concurrencyLock->releaseLock();
+            } catch (\Throwable $t) {
+                $this->app->lifecycle->exception($t);
+            }
+        }
+
         if (isset($this->requestLog)) {
             try {
                 $this->requestLogSnapshot?->finalise(

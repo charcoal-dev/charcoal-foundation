@@ -11,4 +11,9 @@ use App\Shared\Foundation\Http\InterfaceLog\RouteLogTraceProvider;
  */
 interface AuthContextResolverInterface extends RouteLogTraceProvider
 {
+    /**
+     * Primary session or token identifier
+     * @return int
+     */
+    public function getPrimaryId(): int;
 }
