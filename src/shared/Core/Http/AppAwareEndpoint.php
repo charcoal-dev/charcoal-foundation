@@ -34,7 +34,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
 
     public readonly string $userIpAddress;
     public readonly ?HttpInterfaceBinding $interface;
-    protected readonly ?AbstractFixedLenBuffer $deviceFp;
+    public readonly ?AbstractFixedLenBuffer $deviceFp;
 
     public readonly HttpLogLevel $requestLogLevel;
     private readonly ?InterfaceLogEntity $requestLog;
