@@ -24,6 +24,7 @@ class InterfaceLogEntity extends AbstractOrmEntity
     public ?int $responseCode;
     public ?int $flagSid = null;
     public ?int $flagUid = null;
+    public ?int $flagTid = null;
     public ?Buffer $snapshot;
 
     /**

@@ -32,7 +32,7 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
     /**
      * @return BodyResponse
      */
-    protected function response(): BodyResponse
+    public function response(): BodyResponse
     {
         /** @var BodyResponse */
         return $this->getResponseObject();

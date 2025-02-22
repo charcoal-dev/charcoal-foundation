@@ -42,6 +42,7 @@ class InterfaceLogTable extends AbstractOrmTable
         $cols->int("response_code")->bytes(2)->unSigned()->nullable();
         $cols->int("flag_sid")->bytes(8)->unSigned()->nullable();
         $cols->int("flag_uid")->bytes(8)->unSigned()->nullable();
+        $cols->int("flag_tid")->bytes(8)->unSigned()->nullable();
         $cols->blobBuffer("snapshot")->size("medium")->nullable();
         $cols->setPrimaryKey("id");
     }

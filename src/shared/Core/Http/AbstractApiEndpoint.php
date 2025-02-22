@@ -142,7 +142,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     /**
      * @return ApiResponse
      */
-    protected function response(): ApiResponse
+    public function response(): ApiResponse
     {
         /** @var ApiResponse */
         return parent::response();

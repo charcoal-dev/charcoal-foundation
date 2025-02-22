@@ -54,6 +54,7 @@ class InterfaceLogHandler extends AbstractOrmRepository
         $requestLog->responseCode = null;
         $requestLog->flagSid = $traceProvider?->getTraceSid();
         $requestLog->flagUid = $traceProvider?->getTraceUid();
+        $requestLog->flagTid = $traceProvider?->getTraceTid();
         $requestLog->snapshot = $snapshot ? new Buffer(serialize($snapshot)) : null;
         $this->dbInsertAndSetId($requestLog, "id");
         return $requestLog;
@@ -78,12 +79,13 @@ class InterfaceLogHandler extends AbstractOrmRepository
         $requestLog->endOn = round(microtime(true), 4);
         $requestLog->flagSid = $requestLog->flagSid ?: $traceProvider?->getTraceSid();
         $requestLog->flagUid = $requestLog->flagUid ?: $traceProvider?->getTraceUid();
+        $requestLog->flagTid = $requestLog->flagTid ?: $traceProvider?->getTraceTid();
         $requestLog->snapshot = $snapshot ? new Buffer(serialize($snapshot)) : null;
 
         try {
             $this->dbUpdateEntity(
                 $requestLog,
-                new StringVector("responseCode", "endOn", "flagSid", "flagUid", "snapshot"),
+                new StringVector("responseCode", "endOn", "flagSid", "flagUid", "flagTid", "snapshot"),
                 $requestLog->id,
                 "id"
             );

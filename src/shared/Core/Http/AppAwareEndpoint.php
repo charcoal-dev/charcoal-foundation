@@ -73,7 +73,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     /**
      * @return AbstractControllerResponse
      */
-    protected function response(): AbstractControllerResponse
+    public function response(): AbstractControllerResponse
     {
         return $this->getResponseObject();
     }
