@@ -34,10 +34,15 @@ class InterfaceLogHandler extends AbstractOrmRepository
     /**
      * @param AppAwareEndpoint $route
      * @param InterfaceLogSnapshot|null $snapshot
+     * @param RouteLogTraceProvider|null $traceProvider
      * @return InterfaceLogEntity
      * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
      */
-    public function createLog(AppAwareEndpoint $route, ?InterfaceLogSnapshot $snapshot): InterfaceLogEntity
+    public function createLog(
+        AppAwareEndpoint       $route,
+        ?InterfaceLogSnapshot  $snapshot,
+        ?RouteLogTraceProvider $traceProvider = null
+    ): InterfaceLogEntity
     {
         $requestLog = new InterfaceLogEntity();
         $requestLog->interface = $route->interface->enum;
@@ -47,8 +52,8 @@ class InterfaceLogHandler extends AbstractOrmRepository
         $requestLog->startOn = round(microtime(true), 4);
         $requestLog->endOn = null;
         $requestLog->responseCode = null;
-        $requestLog->flagSid = null;
-        $requestLog->flagUid = null;
+        $requestLog->flagSid = $traceProvider?->getTraceSid();
+        $requestLog->flagUid = $traceProvider?->getTraceUid();
         $requestLog->snapshot = $snapshot ? new Buffer(serialize($snapshot)) : null;
         $this->dbInsertAndSetId($requestLog, "id");
         return $requestLog;
@@ -58,22 +63,21 @@ class InterfaceLogHandler extends AbstractOrmRepository
      * @param AppAwareEndpoint $route
      * @param InterfaceLogEntity $requestLog
      * @param InterfaceLogSnapshot|null $snapshot
+     * @param RouteLogTraceProvider|null $traceProvider
      * @return void
      * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
      */
     public function updateLog(
-        AppAwareEndpoint      $route,
-        InterfaceLogEntity    $requestLog,
-        ?InterfaceLogSnapshot $snapshot
+        AppAwareEndpoint       $route,
+        InterfaceLogEntity     $requestLog,
+        ?InterfaceLogSnapshot  $snapshot,
+        ?RouteLogTraceProvider $traceProvider = null
     ): void
     {
         $requestLog->responseCode = $route->response()->getStatusCode();
         $requestLog->endOn = round(microtime(true), 4);
-        if ($route instanceof RouteLogTraceProvider) {
-            $requestLog->flagSid = $route->getTraceSid();
-            $requestLog->flagUid = $route->getTraceUid();
-        }
-
+        $requestLog->flagSid = $requestLog->flagSid ?: $traceProvider?->getTraceSid();
+        $requestLog->flagUid = $requestLog->flagUid ?: $traceProvider?->getTraceUid();
         $requestLog->snapshot = $snapshot ? new Buffer(serialize($snapshot)) : null;
 
         try {
