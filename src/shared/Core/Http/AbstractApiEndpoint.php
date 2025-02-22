@@ -145,7 +145,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     protected function response(): ApiResponse
     {
         /** @var ApiResponse */
-        return $this->getResponseObject();
+        return parent::response();
     }
 
     /**

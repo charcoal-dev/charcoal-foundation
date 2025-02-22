@@ -12,4 +12,6 @@ interface RouteLogTraceProvider
     public function getTraceSid(): ?int;
 
     public function getTraceUid(): ?int;
+
+    public function getTraceTid(): ?int;
 }

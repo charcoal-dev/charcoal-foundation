@@ -4,13 +4,14 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http;
 
 use App\Shared\CharcoalApp;
+use App\Shared\Core\Http\Auth\AuthContextResolverInterface;
+use App\Shared\Core\Http\Auth\AuthRouteInterface;
 use App\Shared\Core\Http\Response\CacheableResponse;
 use App\Shared\Exception\ApiValidationException;
 use App\Shared\Foundation\Http\HttpInterface;
 use App\Shared\Foundation\Http\HttpLogLevel;
 use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogEntity;
 use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogSnapshot;
-use App\Shared\Foundation\Http\InterfaceLog\RouteLogTraceProvider;
 use App\Shared\Utility\NetworkValidator;
 use App\Shared\Utility\StringHelper;
 use Charcoal\App\Kernel\Errors;
@@ -36,6 +37,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     public readonly string $userIpAddress;
     public readonly ?HttpInterfaceBinding $interface;
     public readonly ?AbstractFixedLenBuffer $deviceFp;
+    protected readonly ?AuthContextResolverInterface $authContext;
 
     public readonly HttpLogLevel $requestLogLevel;
     private readonly ?InterfaceLogEntity $requestLog;
@@ -62,23 +64,16 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         // Interface Configuration
         $this->interface = $this->declareHttpInterface();
         $this->deviceFp = $this instanceof DeviceFingerprintRequiredRoute ? $this->resolveDeviceFp() : null;
+        $this->authContext = $this instanceof AuthRouteInterface ? $this->resolveAuthContext() : null;
 
         // Proceed to entrypoint
         parent::dispatchEntrypoint();
     }
 
     /**
-     * @return RouteLogTraceProvider|null
-     */
-    protected function getInterfaceLogTraceProvider(): ?RouteLogTraceProvider
-    {
-        return null;
-    }
-
-    /**
      * @return AbstractControllerResponse
      */
-    public function response(): AbstractControllerResponse
+    protected function response(): AbstractControllerResponse
     {
         return $this->getResponseObject();
     }
@@ -147,7 +142,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
             $this->requestLog = $this->app->http->interfaceLog->createLog(
                 $this,
                 $this->requestLogSnapshot,
-                $this->getInterfaceLogTraceProvider()
+                $this->authContext ?: null,
             );
         }
 
