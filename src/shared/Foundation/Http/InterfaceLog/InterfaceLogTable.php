@@ -40,6 +40,7 @@ class InterfaceLogTable extends AbstractOrmTable
         $cols->double("start_on")->precision(14, 4)->unSigned();
         $cols->double("end_on")->precision(14, 4)->unSigned()->nullable();
         $cols->int("response_code")->bytes(2)->unSigned()->nullable();
+        $cols->int("error_count")->bytes(2)->unSigned()->nullable();
         $cols->int("flag_sid")->bytes(8)->unSigned()->nullable();
         $cols->int("flag_uid")->bytes(8)->unSigned()->nullable();
         $cols->int("flag_tid")->bytes(8)->unSigned()->nullable();

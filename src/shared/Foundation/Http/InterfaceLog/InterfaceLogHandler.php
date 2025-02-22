@@ -51,6 +51,7 @@ class InterfaceLogHandler extends AbstractOrmRepository
         $requestLog->endpoint = $route->request->url->path ?? "/";
         $requestLog->startOn = round(microtime(true), 4);
         $requestLog->endOn = null;
+        $requestLog->errorCount = 0;
         $requestLog->responseCode = null;
         $requestLog->flagSid = $traceProvider?->getTraceSid();
         $requestLog->flagUid = $traceProvider?->getTraceUid();
@@ -75,6 +76,10 @@ class InterfaceLogHandler extends AbstractOrmRepository
         ?RouteLogTraceProvider $traceProvider = null
     ): void
     {
+        $requestLog->errorCount = $snapshot ?
+            count($snapshot->errors) + count($snapshot->lifecycle["exceptions"] ?? []) :
+            $requestLog->errorCount;
+
         $requestLog->responseCode = $route->response()->getStatusCode();
         $requestLog->endOn = round(microtime(true), 4);
         $requestLog->flagSid = $requestLog->flagSid ?: $traceProvider?->getTraceSid();
@@ -85,7 +90,7 @@ class InterfaceLogHandler extends AbstractOrmRepository
         try {
             $this->dbUpdateEntity(
                 $requestLog,
-                new StringVector("responseCode", "endOn", "flagSid", "flagUid", "flagTid", "snapshot"),
+                new StringVector("responseCode", "endOn", "errorCount", "flagSid", "flagUid", "flagTid", "snapshot"),
                 $requestLog->id,
                 "id"
             );

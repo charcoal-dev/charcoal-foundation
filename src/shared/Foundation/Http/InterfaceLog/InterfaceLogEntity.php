@@ -21,6 +21,7 @@ class InterfaceLogEntity extends AbstractOrmEntity
     public string $endpoint;
     public float $startOn;
     public ?float $endOn;
+    public int $errorCount;
     public ?int $responseCode;
     public ?int $flagSid = null;
     public ?int $flagUid = null;
