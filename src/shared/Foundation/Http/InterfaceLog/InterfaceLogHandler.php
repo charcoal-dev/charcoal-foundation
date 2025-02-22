@@ -67,7 +67,7 @@ class InterfaceLogHandler extends AbstractOrmRepository
         ?InterfaceLogSnapshot $snapshot
     ): void
     {
-        $requestLog->responseCode = $route->response->getHttpStatusCode();
+        $requestLog->responseCode = $route->response()->getStatusCode();
         $requestLog->endOn = round(microtime(true), 4);
         if ($route instanceof RouteLogTraceProvider) {
             $requestLog->flagSid = $route->getTraceSid();
