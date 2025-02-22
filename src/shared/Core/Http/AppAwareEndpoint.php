@@ -10,6 +10,7 @@ use App\Shared\Foundation\Http\HttpInterface;
 use App\Shared\Foundation\Http\HttpLogLevel;
 use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogEntity;
 use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogSnapshot;
+use App\Shared\Foundation\Http\InterfaceLog\RouteLogTraceProvider;
 use App\Shared\Utility\NetworkValidator;
 use App\Shared\Utility\StringHelper;
 use Charcoal\App\Kernel\Errors;
@@ -64,6 +65,14 @@ abstract class AppAwareEndpoint extends AbstractRouteController
 
         // Proceed to entrypoint
         parent::dispatchEntrypoint();
+    }
+
+    /**
+     * @return RouteLogTraceProvider|null
+     */
+    protected function getInterfaceLogTraceProvider(): ?RouteLogTraceProvider
+    {
+        return null;
     }
 
     /**
@@ -135,7 +144,11 @@ abstract class AppAwareEndpoint extends AbstractRouteController
                 static::LOG_IGNORE_REQUEST_PARAMS,
             ) : null;
 
-            $this->requestLog = $this->app->http->interfaceLog->createLog($this, $this->requestLogSnapshot);
+            $this->requestLog = $this->app->http->interfaceLog->createLog(
+                $this,
+                $this->requestLogSnapshot,
+                $this->getInterfaceLogTraceProvider()
+            );
         }
 
         // Callback
