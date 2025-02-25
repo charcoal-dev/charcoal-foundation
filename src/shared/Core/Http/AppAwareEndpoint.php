@@ -126,7 +126,9 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         }
 
         // Handle Request Concurrency
-        $this->handleRequestConcurrency();
+        if ($this->concurrencyBinding) {
+            $this->handleRequestConcurrency();
+        }
 
         // InterfaceLog
         $routeLogLevel = $this->declareLogLevel();
