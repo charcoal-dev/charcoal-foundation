@@ -9,6 +9,7 @@ use App\Shared\Core\Http\Api\ApiResponse;
 use App\Shared\Exception\ApiEntrypointException;
 use App\Shared\Exception\ApiValidationException;
 use App\Shared\Exception\ConcurrentHttpRequestException;
+use App\Shared\Exception\WrappedException;
 
 /**
  * Class AbstractApiEndpoint
@@ -72,7 +73,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
         }
 
         // Log to Lifecycle
-        if ($t instanceof ApiValidationException) {
+        if ($t instanceof ApiValidationException || $t instanceof WrappedException) {
             if ($t->getPrevious()) {
                 $this->app->lifecycle->exception($t->getPrevious());
             }
