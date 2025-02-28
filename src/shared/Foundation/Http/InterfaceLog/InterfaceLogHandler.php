@@ -7,7 +7,6 @@ use App\Shared\AppDbTables;
 use App\Shared\Core\Http\AppAwareEndpoint;
 use App\Shared\Foundation\Http\HttpModule;
 use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
-use Charcoal\App\Kernel\Orm\Exception\NoChangesException;
 use Charcoal\App\Kernel\Orm\Repository\EntityInsertableTrait;
 use Charcoal\App\Kernel\Orm\Repository\EntityUpdatableTrait;
 use Charcoal\Buffers\Buffer;
@@ -87,14 +86,11 @@ class InterfaceLogHandler extends AbstractOrmRepository
         $requestLog->flagTid = $requestLog->flagTid ?: $traceProvider?->getTraceTid();
         $requestLog->snapshot = $snapshot ? new Buffer(serialize($snapshot)) : null;
 
-        try {
-            $this->dbUpdateEntity(
-                $requestLog,
-                new StringVector("responseCode", "endOn", "errorCount", "flagSid", "flagUid", "flagTid", "snapshot"),
-                $requestLog->id,
-                "id"
-            );
-        } catch (NoChangesException) {
-        }
+        $this->dbUpdateEntity(
+            $requestLog,
+            new StringVector("responseCode", "endOn", "errorCount", "flagSid", "flagUid", "flagTid", "snapshot"),
+            $requestLog->id,
+            "id"
+        );
     }
 }

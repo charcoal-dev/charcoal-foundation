@@ -8,7 +8,6 @@ use App\Shared\Foundation\Http\HttpLogLevel;
 use App\Shared\Foundation\Http\HttpModule;
 use App\Shared\Foundation\Http\ProxyServers\HttpProxy;
 use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
-use Charcoal\App\Kernel\Orm\Exception\NoChangesException;
 use Charcoal\App\Kernel\Orm\Repository\EntityInsertableTrait;
 use Charcoal\App\Kernel\Orm\Repository\EntityUpdatableTrait;
 use Charcoal\Buffers\Buffer;
@@ -102,14 +101,11 @@ class CallLogHandler extends AbstractOrmRepository
             $callLog->snapshot = new Buffer(serialize($snapshot));
         }
 
-        try {
-            $this->dbUpdateEntity(
-                $callLog,
-                new StringVector("endOn", "responseCode", "responseLength", "snapshot"),
-                $callLog->id,
-                "id"
-            );
-        } catch (NoChangesException) {
-        }
+        $this->dbUpdateEntity(
+            $callLog,
+            new StringVector("endOn", "responseCode", "responseLength", "snapshot"),
+            $callLog->id,
+            "id"
+        );
     }
 }

@@ -8,7 +8,6 @@ use App\Shared\Core\Cli\AppAwareCliScript;
 use App\Shared\Core\Cli\CliScriptState;
 use App\Shared\Foundation\Engine\EngineModule;
 use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
-use Charcoal\App\Kernel\Orm\Exception\NoChangesException;
 use Charcoal\App\Kernel\Orm\Repository\EntityInsertableTrait;
 use Charcoal\App\Kernel\Orm\Repository\EntityUpdatableTrait;
 use Charcoal\Buffers\Buffer;
@@ -72,9 +71,6 @@ class ExecutionLogOrm extends AbstractOrmRepository
         $execLog->context = new Buffer(serialize($execLog->context()));
         $execLog->updatedOn = round(microtime(true), 4);
 
-        try {
-            $this->dbUpdateEntity($execLog, new StringVector("state", "context", "updatedOn"), $execLog->id, "id");
-        } catch (NoChangesException) {
-        }
+        $this->dbUpdateEntity($execLog, new StringVector("state", "context", "updatedOn"), $execLog->id, "id");
     }
 }
