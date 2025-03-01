@@ -10,3 +10,9 @@ ciphers:
             entropy: "000000000000000000000000000000000000000000000000000000000000dead"
             # Encryption mode used by the cipher. Valid options: "CBC" or "GCM".
             mode: "cbc"
+        # Settings for the (project) domain-specific encryption key.
+        domain:
+            # A hexadecimal string providing 32 bytes of entropy (64 hex characters in total).
+            entropy: "000000000000000000000000000000000000000000000000000000000000dead"
+            # Encryption mode used by the cipher. Valid options: "CBC" or "GCM".
+            mode: "cbc"

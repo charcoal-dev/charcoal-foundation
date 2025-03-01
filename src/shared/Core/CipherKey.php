@@ -12,4 +12,5 @@ use Charcoal\App\Kernel\Cipher\CipherEnum;
 enum CipherKey: string implements CipherEnum
 {
     case PRIMARY = "primary";
+    case DOMAIN = "domain";
 }
