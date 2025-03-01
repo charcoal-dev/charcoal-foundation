@@ -37,7 +37,10 @@ class Install extends AppAwareCliScript
      */
     protected function execScript(): void
     {
-        $this->createDbTables();
+        for ($i = 1; $i <= 3; $i++) {
+            $this->createDbTables($i);
+        }
+
         $this->createRequiredStoredObjects();
     }
 
@@ -65,8 +68,8 @@ class Install extends AppAwareCliScript
      * @throws \Charcoal\Database\ORM\Exception\OrmQueryException
      */
     protected function handleRequiredStoredObject(
-        string                $objectClassname,
-        \Closure              $newInstance
+        string   $objectClassname,
+        \Closure $newInstance
     ): void
     {
         $objectStore = $this->getAppBuild()->coreData->objectStore;
@@ -93,28 +96,46 @@ class Install extends AppAwareCliScript
     }
 
     /**
+     * @param int $priority
      * @return void
      * @throws \Charcoal\Database\Exception\QueryExecuteException
      */
-    private function createDbTables(): void
+    private function createDbTables(int $priority): void
     {
         $app = $this->getAppBuild();
         $dbRegistry = $app->databases->orm;
         $dbDeclaredTables = $dbRegistry->getCollection();
 
         foreach ($dbDeclaredTables as $dbTag => $dbTables) {
-            $this->inline("Getting {invert}{yellow} " . $dbTag . " {/} database ... ");
-            $dbInstance = $app->databases->getDb($dbTag);
-            $this->print("{grey}[{green}OK{grey}]{/}");
+            if ($priority <= 1) {
+                $this->inline("Getting {invert}{yellow} " . $dbTag . " {/} database ... ");
+                $dbInstance = $app->databases->getDb($dbTag);
+                $this->print("{grey}[{green}OK{grey}]{/}");
+            } else {
+                $dbInstance = $app->databases->getDb($dbTag);
+            }
+
             $this->inline("{grey}Tables registered: {/}");
-            $tablesCount = count($dbTables);
-            $this->print("{yellow}" . $tablesCount);
+            $tablesCount = 0;
+            foreach ($dbTables as $tableInstance) {
+                if ($tableInstance->enum->getPriority() !== $priority) {
+                    continue;
+                }
+
+                $tablesCount++;
+            }
+
+            $this->print("{yellow}" . $tablesCount . "{/} {red}(Priority: " . $priority . "){/}");
 
             /**
              * @var string $tableTab
              * @var AbstractOrmTable $tableInstance
              */
             foreach ($dbTables as $tableInstance) {
+                if ($tableInstance->enum->getPriority() !== $priority) {
+                    continue;
+                }
+
                 $this->print(sprintf(
                     "{grey}[{green}+{grey}]{/} {cyan}%s{/}{grey} as {green}%s{/}{grey}",
                     get_class($tableInstance),
@@ -128,6 +149,10 @@ class Install extends AppAwareCliScript
 
             $progressIndex = 0;
             foreach ($dbTables as $tableInstance) {
+                if ($tableInstance->enum->getPriority() !== $priority) {
+                    continue;
+                }
+
                 $progressIndex++;
                 $this->print("{goUp3}{atLineStart}{clearRight}{clearRight}");
                 $this->print(sprintf("{grey}Progress: {/}%d{grey}/{yellow}%d", $progressIndex, $tablesCount));
