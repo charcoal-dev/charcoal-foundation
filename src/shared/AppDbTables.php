@@ -48,4 +48,12 @@ enum AppDbTables: string implements DbAwareTableEnum
     {
         return AppDatabase::PRIMARY;
     }
+
+    /**
+     * @return int
+     */
+    public function getPriority(): int
+    {
+        return 1;
+    }
 }
