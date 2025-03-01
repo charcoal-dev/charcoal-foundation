@@ -30,7 +30,7 @@ use Charcoal\Semaphore\FilesystemSemaphore;
  * @property Config $config
  * @property ErrorHandler $errors
  */
-class CharcoalApp extends AppBuild
+class CharcoalApp extends AppBuild implements AppConfigConstants
 {
     public readonly FilesystemSemaphore $semaphore;
 
