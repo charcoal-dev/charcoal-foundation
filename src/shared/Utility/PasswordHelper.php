@@ -77,4 +77,33 @@ class PasswordHelper
 
         return password_verify($password, $hash);
     }
+
+    /**
+     * @param string $password
+     * @return int
+     */
+    public static function checkStrength(string $password): int
+    {
+        $score = 0;
+        $passwordLength = strlen($password);
+
+        // Lowercase alphabets... +1
+        if (preg_match('/[a-z]/', $password)) $score++;
+        // Uppercase alphabets... +1
+        if (preg_match('/[A-Z]/', $password)) $score++;
+        // Numerals... +1
+        if (preg_match('/[0-9]/', $password)) $score++;
+        // Special characters... +1
+        if (preg_match('/[^a-zA-Z0-9]/', $password)) $score++;
+
+        // Length over or equals 12 ... +1
+        if ($passwordLength >= 12) $score++;
+        // Length over or equals 16 ... +1
+        if ($passwordLength >= 16) $score++;
+
+        // Penalty for repeating characters... -1
+        if (preg_match('/(.)\1{2,}/', $password)) $score--;
+
+        return max(0, $score);
+    }
 }
