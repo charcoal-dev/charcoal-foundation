@@ -27,7 +27,7 @@ class Fallback extends AppAwareCliScript
      */
     protected function onConstructHook(): void
     {
-        $this->scripts[] = ["install", "Install the application"];
+        $this->scripts[] = ["install", "Install the application", "yellow"];
     }
 
     /**
@@ -40,8 +40,9 @@ class Fallback extends AppAwareCliScript
 
 
         for ($i = 0; $i < count($this->scripts); $i++) {
-            $this->print(sprintf("{green}%d.{/} {yellow}{invert}%s{/}{grey} - %s",
+            $this->print(sprintf("{green}%d.{/} {%s}{invert} %s {/}{grey} - %s",
                 $i + 1,
+                $this->scripts[$i][2] ?? "yellow",
                 $this->scripts[$i][0],
                 $this->scripts[$i][1]
             ));
