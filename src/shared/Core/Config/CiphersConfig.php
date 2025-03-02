@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Config;
 
-use App\Shared\Core\CipherKey;
+use App\Shared\Context\CipherKey;
 use App\Shared\Utility\StringHelper;
 use Charcoal\Buffers\Frames\Bytes32;
 use Charcoal\Cipher\CipherMethod;

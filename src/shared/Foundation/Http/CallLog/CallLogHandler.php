@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Http\CallLog;
 
-use App\Shared\AppDbTables;
+use App\Shared\Context\AppDbTables;
 use App\Shared\Foundation\Http\HttpLogLevel;
 use App\Shared\Foundation\Http\HttpModule;
 use App\Shared\Foundation\Http\ProxyServers\HttpProxy;

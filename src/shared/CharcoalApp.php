@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared;
 
+use App\Shared\Context\BuildContext;
 use App\Shared\Core\Cache\CachePool;
 use App\Shared\Core\Config;
 use App\Shared\Core\Db\Databases;

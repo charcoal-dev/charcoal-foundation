@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\CoreData\SystemAlerts;
 
-use App\Shared\AppDbTables;
+use App\Shared\Context\AppDbTables;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
 use Charcoal\App\Kernel\Orm\Repository\EntityInsertableTrait;

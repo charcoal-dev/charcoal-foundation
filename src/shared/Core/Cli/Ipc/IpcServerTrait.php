@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Cli\Ipc;
 
+use App\Shared\Context\IpcService;
 use App\Shared\Core\Cli\AppAwareCliProcess;
 use App\Shared\Core\Cli\CliScriptState;
 use App\Shared\Core\Ipc\Internal\InternalIpcFrame;
 use App\Shared\Core\Ipc\Internal\IpcFrameCode;
-use App\Shared\Core\Ipc\IpcService;
 use App\Shared\Core\Ipc\IpcSocket;
 use App\Shared\Exception\IpcSocketReadException;
 

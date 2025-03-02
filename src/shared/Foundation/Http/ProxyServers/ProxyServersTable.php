@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Http\ProxyServers;
 
-use App\Shared\AppDbTables;
+use App\Shared\Context\AppDbTables;
 use App\Shared\Foundation\Http\HttpModule;
 use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;
 use Charcoal\Database\ORM\Schema\Charset;

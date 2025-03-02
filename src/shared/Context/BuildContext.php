@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared;
+namespace App\Shared\Context;
 
 use App\Shared\Foundation\CoreData\CoreData;
 use App\Shared\Foundation\CoreData\CoreDataModule;
@@ -15,8 +15,8 @@ use Charcoal\App\Kernel\Build\AppBuildPartial;
 use Charcoal\App\Kernel\Build\BuildPlan;
 
 /**
- * Class BuildContext
- * @package App\Shared
+ * Enumeration BuildContext representing different build contexts.
+ * Each context defines specific behavior and configuration settings.
  */
 enum BuildContext: string implements AppBuildEnum
 {

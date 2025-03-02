@@ -15,7 +15,7 @@ try {
     $stdout->write(sprintf("Creating {invert}{yellow} %s {/} build... ", $appClassname), false);
     $startOn = microtime(true);
     /** @var \App\Shared\CharcoalApp|string $app */
-    $app = new $appClass(\App\Shared\BuildContext::GLOBAL, $rootDirectory);
+    $app = new $appClass(\App\Shared\Context\BuildContext::GLOBAL, $rootDirectory);
     $app->lifecycle->startedOn = $startOn;
     $app->bootstrap(); # Bootstrap all modules & services
 

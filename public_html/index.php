@@ -19,7 +19,7 @@ try {
     // Bootstrap App
     $startOn = microtime(true);
     // $app = new $appClass($rootDirectory);
-    $app = $appClass::Load($rootDirectory, \App\Shared\BuildContext::GLOBAL, ["tmp"]);
+    $app = $appClass::Load($rootDirectory, \App\Shared\Context\BuildContext::GLOBAL, ["tmp"]);
     $app->lifecycle->startedOn = $startOn;
     $app->bootstrap(); # Bootstrap all loaded modules & services
     $bootstrappedOn = microtime(true);

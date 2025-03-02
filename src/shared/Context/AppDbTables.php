@@ -1,15 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared;
+namespace App\Shared\Context;
 
-use App\Shared\Core\Db\AppDatabase;
 use Charcoal\App\Kernel\Orm\Db\DatabaseEnum;
 use Charcoal\App\Kernel\Orm\Db\DbAwareTableEnum;
 
 /**
  * Class AppDbTables
- * @package App\Shared
+ * @package App\Shared\Context
  */
 enum AppDbTables: string implements DbAwareTableEnum
 {

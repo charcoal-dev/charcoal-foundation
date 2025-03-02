@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Http\InterfaceLog;
 
-use App\Shared\AppDbTables;
+use App\Shared\Context\AppDbTables;
 use App\Shared\Foundation\Http\HttpInterface;
 use App\Shared\Foundation\Http\HttpModule;
 use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;

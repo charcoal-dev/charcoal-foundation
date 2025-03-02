@@ -14,7 +14,7 @@ try {
     $arguments = explode(";", substr($argv[1] ?? "", 1, -1));
     $scriptName = $arguments[0] ?? null;
 
-    $app = $appClass::Load($rootDirectory, \App\Shared\BuildContext::GLOBAL, ["tmp"]);
+    $app = $appClass::Load($rootDirectory, \App\Shared\Context\BuildContext::GLOBAL, ["tmp"]);
     //$app = new $appClass($rootDirectory);
 
     $app->lifecycle->startedOn = $startOn;

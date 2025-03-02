@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Engine\ExecutionLog;
 
-use App\Shared\AppDbTables;
+use App\Shared\Context\AppDbTables;
 use App\Shared\Core\Cli\AppAwareCliScript;
 use App\Shared\Core\Cli\CliScriptState;
 use App\Shared\Foundation\Engine\EngineModule;

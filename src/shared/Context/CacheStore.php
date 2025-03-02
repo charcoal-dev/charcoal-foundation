@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Cache;
+namespace App\Shared\Context;
 
 use Charcoal\App\Kernel\Module\CacheStoreEnum;
 
 /**
  * Class CacheStore
- * @package App\Shared\Core\Cache
+ * @package App\Shared\Context
  */
 enum CacheStore: string implements CacheStoreEnum
 {

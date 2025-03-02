@@ -1,9 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Ipc;
+namespace App\Shared\Context;
 
 use App\Shared\Core\Directories;
+use App\Shared\Core\Ipc\IpcSocketBinding;
 
 /**
  * Class IpcService

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Db;
+namespace App\Shared\Context;
 
 use Charcoal\App\Kernel\Orm\Db\DatabaseEnum;
 

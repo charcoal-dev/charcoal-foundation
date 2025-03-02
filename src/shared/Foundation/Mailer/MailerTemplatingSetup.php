@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Shared\Foundation\Mailer;
 
 use Charcoal\Filesystem\Directory;
-use Charcoal\Mailer\Templating\EmailTemplateFile;
 use Charcoal\Mailer\TemplatingEngine;
 
 /**

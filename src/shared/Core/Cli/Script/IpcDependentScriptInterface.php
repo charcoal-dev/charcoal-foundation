@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Cli\Script;
 
-use App\Shared\Core\Ipc\IpcService;
+use App\Shared\Context\IpcService;
 
 /**
  * Interface IpcDependentScriptInterface

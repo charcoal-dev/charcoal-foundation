@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Mailer;
 
-use App\Shared\Core\Cache\CacheStore;
-use App\Shared\Core\CipherKey;
+use App\Shared\Context\CacheStore;
+use App\Shared\Context\CipherKey;
 use App\Shared\Core\Orm\ComponentsAwareModule;
 use App\Shared\Core\Orm\ModuleComponentEnum;
 use App\Shared\Foundation\Mailer\Backlog\BacklogHandler;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http\Response;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Core\Cache\CacheStore;
+use App\Shared\Context\CacheStore;
 use App\Shared\Core\Http\AppAwareEndpoint;
 use App\Shared\Foundation\Http\HttpInterface;
 use Charcoal\Buffers\Buffer;

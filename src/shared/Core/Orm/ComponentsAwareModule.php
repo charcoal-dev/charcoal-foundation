@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Orm;
 
-use App\Shared\Core\Cache\CacheStore;
+use App\Shared\Context\CacheStore;
 use Charcoal\App\Kernel\Build\AppBuildPartial;
 use Charcoal\App\Kernel\Orm\Db\DatabaseTableRegistry;
 use Charcoal\OOP\OOP;

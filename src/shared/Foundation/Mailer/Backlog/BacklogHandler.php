@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Mailer\Backlog;
 
-use App\Shared\AppDbTables;
+use App\Shared\Context\AppDbTables;
 use App\Shared\Foundation\Mailer\MailerModule;
 use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
 use Charcoal\App\Kernel\Orm\Repository\EntityInsertableTrait;
