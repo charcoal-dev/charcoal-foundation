@@ -5,7 +5,6 @@ namespace App\Interfaces\Engine\Scripts;
 
 use App\Shared\Core\Cli\AppAwareCliScript;
 use App\Shared\Core\Cli\ScriptExecutionLogBinding;
-use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;
 use Charcoal\App\Kernel\Orm\Exception\EntityNotFoundException;
 use Charcoal\Database\ORM\Migrations;
 use Charcoal\OOP\OOP;
@@ -33,14 +32,10 @@ class Install extends AppAwareCliScript
 
     /**
      * @return void
-     * @throws \Charcoal\Database\Exception\QueryExecuteException
      */
     protected function execScript(): void
     {
-        for ($i = 1; $i <= 3; $i++) {
-            $this->createDbTables($i);
-        }
-
+        $this->createDbTables();
         $this->createRequiredStoredObjects();
     }
 
@@ -96,44 +91,27 @@ class Install extends AppAwareCliScript
     }
 
     /**
-     * @param int $priority
      * @return void
-     * @throws \Charcoal\Database\Exception\QueryExecuteException
      */
-    private function createDbTables(int $priority): void
+    private function createDbTables(): void
     {
         $app = $this->getAppBuild();
-        $dbRegistry = $app->databases->orm;
-        $dbDeclaredTables = $dbRegistry->getCollection();
+        $dbDeclaredTables = $app->databases->orm->getCollection();
 
+        $installSequence = [];
         foreach ($dbDeclaredTables as $dbTag => $dbTables) {
-            if ($priority <= 1) {
-                $this->inline("Getting {invert}{yellow} " . $dbTag . " {/} database ... ");
-                $dbInstance = $app->databases->getDb($dbTag);
-                $this->print("{grey}[{green}OK{grey}]{/}");
-            } else {
-                $dbInstance = $app->databases->getDb($dbTag);
-            }
+            $this->inline("Getting {invert}{yellow} " . $dbTag . " {/} database ... ");
+            $dbInstance = $app->databases->getDb($dbTag);
+            $this->print("{grey}[{green}OK{grey}]{/}");
 
             $this->inline("{grey}Tables registered: {/}");
-            $tablesCount = 0;
+            $tablesCount = count($dbTables);
+            $this->print("{yellow}" . $tablesCount . "{/}");
+
+            $highestPriority = 0;
             foreach ($dbTables as $tableInstance) {
-                if ($tableInstance->enum->getPriority() !== $priority) {
-                    continue;
-                }
-
-                $tablesCount++;
-            }
-
-            $this->print("{yellow}" . $tablesCount . "{/} {red}(Priority: " . $priority . "){/}");
-
-            /**
-             * @var string $tableTab
-             * @var AbstractOrmTable $tableInstance
-             */
-            foreach ($dbTables as $tableInstance) {
-                if ($tableInstance->enum->getPriority() !== $priority) {
-                    continue;
+                if ($tableInstance->enum->getPriority() > $highestPriority) {
+                    $highestPriority = $tableInstance->enum->getPriority();
                 }
 
                 $this->print(sprintf(
@@ -141,17 +119,22 @@ class Install extends AppAwareCliScript
                     get_class($tableInstance),
                     $tableInstance->name
                 ), 200);
-            }
 
+                $installSequence[$tableInstance->enum->getPriority()][] = [$dbInstance, $tableInstance];
+            }
+        }
+
+        ksort($installSequence);
+
+        foreach ($installSequence as $tables) {
             $this->print("");
             $this->print("");
             $this->print("");
 
             $progressIndex = 0;
-            foreach ($dbTables as $tableInstance) {
-                if ($tableInstance->enum->getPriority() !== $priority) {
-                    continue;
-                }
+            $tablesCount = count($tables);
+            foreach ($tables as $table) {
+                list($dbInstance, $tableInstance) = $table;
 
                 $progressIndex++;
                 $this->print("{goUp3}{atLineStart}{clearRight}{clearRight}");
@@ -159,6 +142,8 @@ class Install extends AppAwareCliScript
                 $this->print(sprintf("{grey}CREATE TABLE `{green}%s{/}{grey}` IF NOT EXISTS", $tableInstance->name));
                 $stmt = Migrations::createTable($dbInstance, $tableInstance, true);
                 $dbInstance->exec(implode("", $stmt));
+
+                unset($dbInstance, $tableInstance, $stmt);
             }
 
             $this->print("{goUp3}{atLineStart}{clearRight}{clearRight}");
