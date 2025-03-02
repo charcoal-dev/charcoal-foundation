@@ -5,6 +5,7 @@ namespace App\Shared\Core\Cli;
 
 use App\Shared\CharcoalApp;
 use App\Shared\Core\Cli\Script\IpcDependentScriptInterface;
+use App\Shared\Exception\CliScriptException;
 use App\Shared\Foundation\CoreData\SystemAlerts\AlertTraceProviderInterface;
 use App\Shared\Utility\TypeCaster;
 use Charcoal\App\Kernel\Interfaces\Cli\AbstractCliScript;
@@ -125,6 +126,11 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
             if (isset($this->logBinding, $this->logger)) {
                 $this->logger->context->logException($t);
                 $this->closeScriptLogger($this->logger, CliScriptState::ERROR);
+            }
+
+            if ($t instanceof CliScriptException) {
+                $this->eol()->print("{red}" . $t->getMessage());
+                return;
             }
 
             throw $t;
