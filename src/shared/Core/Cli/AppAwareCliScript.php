@@ -130,6 +130,10 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
 
             if ($t instanceof CliScriptException) {
                 $this->eol()->print("{red}" . $t->getMessage());
+                if ($t->getPrevious()) {
+                    throw $t->getPrevious();
+                }
+
                 return;
             }
 
