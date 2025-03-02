@@ -12,6 +12,8 @@ use App\Shared\Core\Cli\ScriptExecutionLogBinding;
  */
 class Fallback extends AppAwareCliScript
 {
+    private array $scripts = [];
+
     /**
      * @return ScriptExecutionLogBinding
      */
@@ -25,6 +27,7 @@ class Fallback extends AppAwareCliScript
      */
     protected function onConstructHook(): void
     {
+        $this->scripts[] = ["install", "Install the application"];
     }
 
     /**
@@ -32,6 +35,20 @@ class Fallback extends AppAwareCliScript
      */
     protected function execScript(): void
     {
-        $this->print("This is a fallback script.");
+        $this->print("Use the following scripts to perform specific tasks:");
+        $this->print("");
+
+
+        for ($i = 0; $i < count($this->scripts); $i++) {
+            $this->print(sprintf("{green}%d.{/} {yellow}{invert}%s{/}{grey} - %s",
+                $i + 1,
+                $this->scripts[$i][0],
+                $this->scripts[$i][1]
+            ));
+        }
+
+        $this->print("");
+        $this->print("To run a script, use: {b}{cyan}./charcoal.sh [script-name]{/}");
+
     }
 }
