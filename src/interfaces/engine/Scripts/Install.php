@@ -139,7 +139,7 @@ class Install extends AppAwareCliScript
                 $progressIndex++;
                 $this->print("{goUp3}{atLineStart}{clearRight}{clearRight}");
                 $this->print(sprintf("{grey}Progress: {/}%d{grey}/{yellow}%d", $progressIndex, $tablesCount));
-                $this->print(sprintf("{grey}CREATE TABLE `{green}%s{/}{grey}` IF NOT EXISTS", $tableInstance->name));
+                $this->print(sprintf("{grey}CREATE TABLE `{green}%s{/}{grey}` IF NOT EXISTS", $tableInstance->name), 200);
                 $stmt = Migrations::createTable($dbInstance, $tableInstance, true);
                 $dbInstance->exec(implode("", $stmt));
 
