@@ -14,11 +14,20 @@ use Charcoal\Semaphore\FilesystemSemaphore;
  */
 abstract class AppOrmModule extends AbstractOrmModule
 {
+    protected ?FilesystemSemaphore $ormSemaphore = null;
+
     /**
      * @return FilesystemSemaphore
+     * @throws \Charcoal\Filesystem\Exception\FilesystemException
+     * @throws \Charcoal\Semaphore\Exception\SemaphoreException
      */
     public function getSemaphore(): FilesystemSemaphore
     {
-        return $this->app->semaphore;
+        if (!$this->ormSemaphore) {
+            $this->ormSemaphore = new FilesystemSemaphore(
+                $this->app->directories->semaphore->getDirectory("orm", true));
+        }
+
+        return $this->ormSemaphore;
     }
 }
