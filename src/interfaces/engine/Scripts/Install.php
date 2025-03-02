@@ -122,10 +122,11 @@ class Install extends AppAwareCliScript
 
                 $installSequence[$tableInstance->enum->getPriority()][] = [$dbInstance, $tableInstance];
             }
+
+            $this->print("");
         }
 
         ksort($installSequence);
-
         foreach ($installSequence as $tables) {
             $this->print("");
             $this->print("");
