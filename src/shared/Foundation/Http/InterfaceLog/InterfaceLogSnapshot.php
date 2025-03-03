@@ -29,6 +29,7 @@ class InterfaceLogSnapshot
     public array $dbQueries = [];
     public array $errors = [];
     public array $lifecycle = [];
+    public int $errorCount = 0;
 
     public function __construct(
         HttpLogLevel $logLevel,
@@ -43,12 +44,15 @@ class InterfaceLogSnapshot
             "fragment" => $request->url->fragment
         ];
 
-        // Headers
-        $this->requestHeaders = ArrayHelper::excludeKeys($request->headers->toArray(), $ignoreHeaders);
+        // Initial Parameters
+        if ($logLevel >= 2) {
+            // Headers
+            $this->requestHeaders = ArrayHelper::excludeKeys($request->headers->toArray(), $ignoreHeaders);
 
-        // Request Params
-        $this->requestParams = $logLevel === HttpLogLevel::COMPLETE ?
-            ArrayHelper::excludeKeys($request->payload->toArray(), $ignoreParams) : [];
+            if ($logLevel === HttpLogLevel::COMPLETE) {
+                $this->requestParams = ArrayHelper::excludeKeys($request->payload->toArray(), $ignoreParams);
+            }
+        }
     }
 
     /**
@@ -68,26 +72,36 @@ class InterfaceLogSnapshot
         array                      $ignoreParams = []
     ): void
     {
-        $this->responseHeaders = ArrayHelper::excludeKeys($response->headers->toArray(), $ignoreHeaders);
-        if ($response instanceof FileDownloadResponse) {
-            $this->responseFileDownload = $response->filepath;
+        if ($logLevel >= 2) {
+            // Response Headers
+            $this->responseHeaders = ArrayHelper::excludeKeys($response->headers->toArray(), $ignoreHeaders);
+            if ($response instanceof FileDownloadResponse) {
+                // File download path?
+                $this->responseFileDownload = $response->filepath;
+            }
+
+            if ($logLevel === HttpLogLevel::COMPLETE) {
+                // Response Payload
+                if ($response instanceof PayloadResponse) {
+                    $this->responseParams = ArrayHelper::excludeKeys($response->payload->toArray(), $ignoreParams);
+                }
+            }
         }
 
-        if ($logLevel === HttpLogLevel::COMPLETE) {
-            if ($response instanceof PayloadResponse) {
-                $this->responseParams = ArrayHelper::excludeKeys($response->payload->toArray(), $ignoreParams);
-            }
+        // Errors
+        $errors = $app->errors->getAll();
+        /** @var ErrorEntry $error */
+        foreach ($errors as $error) {
+            $this->errors[] = ArrayHelper::jsonFilter($error);
+            $this->errorCount++;
+        }
 
-            // Errors
-            $errors = $app->errors->getAll();
-            /** @var ErrorEntry $error */
-            foreach ($errors as $error) {
-                $this->errors[] = ArrayHelper::jsonFilter($error);
-            }
+        // Lifecycle Entries
+        $this->lifecycle = $app->lifecycle->toArray();
+        $this->errorCount += count($this->lifecycle["exceptions"] ?? []);
 
-            // Lifecycle Entries
-            $this->lifecycle = $app->lifecycle->toArray();
-
+        // Has errorCount > 0 OR HttpLogLevel === COMPLETE
+        if ($logLevel === HttpLogLevel::COMPLETE || $this->errorCount > 0) {
             // Database Queries
             $appDbQueries = $app->databases->getAllQueries();
             foreach ($appDbQueries as $dbQuery) {

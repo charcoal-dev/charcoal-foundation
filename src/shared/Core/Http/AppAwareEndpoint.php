@@ -153,12 +153,12 @@ abstract class AppAwareEndpoint extends AbstractRouteController
                 throw new \RuntimeException("HTTP module does not have InterfaceLog component built");
             }
 
-            $this->requestLogSnapshot = $this->requestLogLevel->value >= 2 ? new InterfaceLogSnapshot(
+            $this->requestLogSnapshot = new InterfaceLogSnapshot(
                 $this->requestLogLevel,
                 $this->request,
                 static::LOG_IGNORE_REQUEST_HEADERS,
                 static::LOG_IGNORE_REQUEST_PARAMS,
-            ) : null;
+            );
 
             $this->requestLog = $this->app->http->interfaceLog->createLog(
                 $this,

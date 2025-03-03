@@ -75,16 +75,18 @@ class InterfaceLogHandler extends AbstractOrmRepository
         ?RouteLogTraceProvider $traceProvider = null
     ): void
     {
-        $requestLog->errorCount = $snapshot ?
-            count($snapshot->errors) + count($snapshot->lifecycle["exceptions"] ?? []) :
-            $requestLog->errorCount;
-
+        $requestLog->errorCount = $snapshot ? $snapshot->errorCount : 0;
         $requestLog->responseCode = $route->response()->getStatusCode();
         $requestLog->endOn = round(microtime(true), 4);
         $requestLog->flagSid = $requestLog->flagSid ?: $traceProvider?->getTraceSid();
         $requestLog->flagUid = $requestLog->flagUid ?: $traceProvider?->getTraceUid();
         $requestLog->flagTid = $requestLog->flagTid ?: $traceProvider?->getTraceTid();
-        $requestLog->snapshot = $snapshot ? new Buffer(serialize($snapshot)) : null;
+        $requestLog->snapshot = null;
+        if ($snapshot) {
+            if ($snapshot->errorCount > 0 || $route->requestLogLevel->value >= 2) {
+                $requestLog->snapshot = new Buffer(serialize($snapshot));
+            }
+        }
 
         $this->dbUpdateEntity(
             $requestLog,
