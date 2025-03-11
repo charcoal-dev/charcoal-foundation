@@ -5,6 +5,7 @@ namespace App\Shared\Core\Http\Cors;
 
 use App\Shared\Core\Http\AppAwareEndpoint;
 use App\Shared\Exception\CorsOriginMismatchException;
+use App\Shared\Utility\NetworkValidator;
 
 /**
  * Class CorsBinding
@@ -37,9 +38,11 @@ readonly class CorsBinding
             return;
         }
 
-        if (in_array($route->userClient->origin, $this->allowedOrigins, true)) {
-            $this->headers->dispatch($route->userClient->origin, $route);
-            return;
+        if (NetworkValidator::isValidHttpOrigin($route->userClient->origin)) {
+            if (in_array(strtolower($route->userClient->origin), $this->allowedOrigins, true)) {
+                $this->headers->dispatch($route->userClient->origin, $route);
+                return;
+            }
         }
 
         if ($this->terminate) {

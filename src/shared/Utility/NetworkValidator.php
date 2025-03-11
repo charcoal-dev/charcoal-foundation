@@ -71,4 +71,21 @@ class NetworkValidator
 
         return false;
     }
+
+    /**
+     * @param mixed $origin
+     * @return bool
+     */
+    public static function isValidHttpOrigin(mixed $origin): bool
+    {
+        if (!is_string($origin) || trim($origin) === "") {
+            return false;
+        }
+
+        if (preg_match('/^(https?):\/\/([a-zA-Z0-9.-]+)(:\d+)?$/', $origin)) {
+            return true;
+        }
+
+        return false;
+    }
 }
