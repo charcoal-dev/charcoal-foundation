@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http;
 
+use App\Shared\Context\ApiError;
+use App\Shared\Core\Http\Api\ApiErrorCodeInterface;
 use App\Shared\Core\Http\Api\ApiInterfaceBinding;
 use App\Shared\Core\Http\Api\ApiNamespaceInterface;
 use App\Shared\Core\Http\Api\ApiResponse;
@@ -10,7 +12,9 @@ use App\Shared\Exception\ApiEntrypointException;
 use App\Shared\Exception\ApiValidationException;
 use App\Shared\Exception\ConcurrentHttpRequestException;
 use App\Shared\Exception\CorsOriginMismatchException;
+use App\Shared\Exception\HttpOptionsException;
 use App\Shared\Exception\WrappedException;
+use Charcoal\Http\Router\Controllers\Response\NoContentResponse;
 
 /**
  * Class AbstractApiEndpoint
@@ -63,13 +67,22 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
      */
     protected function handleException(\Throwable $t): void
     {
-        // Handleable Individual Exception?
-        list($statusCode,
-            $errorMessage,
-            $errorCode) = $this->individualExceptionHandler($t);
+        if ($t instanceof HttpOptionsException) {
+            $this->swapResponseObject(new NoContentResponse(204, $this->response()));
+            return;
+        }
 
-        if ($errorMessage || $errorCode) {
-            $this->responseFromErrorObject($statusCode, ["message" => $errorMessage, "code" => $errorCode]);
+        // Handleable Individual Exception?
+        $apiError = $this->individualExceptionHandler($t);
+        if ($apiError) {
+            $errorObject = ["message" => $apiError->getErrorMessage($t, $this) ?? $apiError->name];
+            $errorCode = $apiError->getErrorCode($t, $this);
+            if (is_int($errorCode)) {
+                $errorObject["code"] = $errorCode;
+            }
+
+            $this->responseFromErrorObject($apiError->getHttpCode(), count($errorObject) === 1 ?
+                $errorObject["message"] : $errorObject);
             return;
         }
 
@@ -82,15 +95,15 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
             $this->app->lifecycle->exception($t);
         }
 
-        $this->responseFromErrorObject($statusCode, $this->exceptionToArray($t));
+        $this->responseFromErrorObject(null, $this->exceptionToArray($t));
     }
 
     /**
      * @param int|null $statusCode
-     * @param array $errorObject
+     * @param string|array $errorObject
      * @return void
      */
-    private function responseFromErrorObject(null|int $statusCode, array $errorObject): void
+    private function responseFromErrorObject(null|int $statusCode, string|array $errorObject): void
     {
         if (!$statusCode) {
             $statusCode = 400;
@@ -102,44 +115,37 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
 
     /**
      * @param \Throwable $t
-     * @return array
+     * @return ApiErrorCodeInterface|null
      */
-    protected function individualExceptionHandler(\Throwable $t): array
+    protected function individualExceptionHandler(\Throwable $t): ?ApiErrorCodeInterface
     {
         if ($t instanceof ConcurrentHttpRequestException) {
-            return [429, "Too many requests", null];
+            return ApiError::CONCURRENT_TERMINATE;
         }
 
         if ($t instanceof CorsOriginMismatchException) {
-            return [403, "CORS origin not allowed", null];
+            return ApiError::CORS_TERMINATE;
         }
 
         if ($t instanceof ApiValidationException) {
             if ($t->errorCode) {
-                $errorCodeMessage = $t->errorCode->getErrorMessage($this);
-                return [$t->errorCode->getHttpCode(), $errorCodeMessage ?? $t->errorCode->name, $t->getCode()];
+                return $t->errorCode;
             }
         }
 
         if ($t instanceof ApiEntrypointException) {
-            return [405, "Method not allowed", null];
+            return ApiError::METHOD_NOT_ALLOWED;
         }
 
         if ($t instanceof \ErrorException) {
             if ($this->app->errors->isFatalError($t->getSeverity())) {
-                return [500, "Internal server error", null];
+                return ApiError::SERVER_ERROR;
             }
 
-            return [400, "An error has occurred", null];
+            return ApiError::FATAL_ERROR;
         }
 
-        $statusCode = 400;
-        $currentStatusCode = $this->response()->getStatusCode();
-        if ($currentStatusCode >= 400 && $currentStatusCode <= 599) {
-            $statusCode = $currentStatusCode;
-        }
-
-        return [$statusCode, null, null];
+        return null;
     }
 
     /**
@@ -160,9 +166,10 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     }
 
     /**
-     * @return array
+     * @return never
+     * @throws HttpOptionsException
      */
-    protected function options(): array
+    protected function options(): never
     {
         $options = [];
         foreach (["get", "post", "put", "delete"] as $httpOpt) {
@@ -171,6 +178,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
             }
         }
 
-        return $options;
+        $this->response()->headers->set("Allow", implode(", ", $options));
+        throw new HttpOptionsException();
     }
 }
