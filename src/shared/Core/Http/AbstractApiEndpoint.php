@@ -9,6 +9,7 @@ use App\Shared\Core\Http\Api\ApiResponse;
 use App\Shared\Exception\ApiEntrypointException;
 use App\Shared\Exception\ApiValidationException;
 use App\Shared\Exception\ConcurrentHttpRequestException;
+use App\Shared\Exception\CorsOriginMismatchException;
 use App\Shared\Exception\WrappedException;
 
 /**
@@ -107,6 +108,10 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     {
         if ($t instanceof ConcurrentHttpRequestException) {
             return [429, "Too many requests", null];
+        }
+
+        if ($t instanceof CorsOriginMismatchException) {
+            return [403, "CORS origin not allowed", null];
         }
 
         if ($t instanceof ApiValidationException) {

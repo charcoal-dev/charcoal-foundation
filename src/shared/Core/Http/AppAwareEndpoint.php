@@ -6,9 +6,11 @@ namespace App\Shared\Core\Http;
 use App\Shared\CharcoalApp;
 use App\Shared\Core\Http\Auth\AuthContextResolverInterface;
 use App\Shared\Core\Http\Auth\AuthRouteInterface;
+use App\Shared\Core\Http\Cors\CorsBinding;
 use App\Shared\Core\Http\Response\CacheableResponse;
 use App\Shared\Exception\ApiValidationException;
 use App\Shared\Exception\ConcurrentHttpRequestException;
+use App\Shared\Exception\CorsOriginMismatchException;
 use App\Shared\Foundation\Http\HttpInterface;
 use App\Shared\Foundation\Http\HttpLogLevel;
 use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogEntity;
@@ -46,6 +48,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     public readonly HttpLogLevel $requestLogLevel;
     private readonly ?InterfaceLogEntity $requestLog;
     private readonly ?InterfaceLogSnapshot $requestLogSnapshot;
+    protected readonly ?CorsBinding $corsBinding;
     protected readonly ?ConcurrencyBinding $concurrencyBinding;
     private ?FileLock $concurrencyLock = null;
 
@@ -71,6 +74,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         $this->interface = $this->declareHttpInterface();
         $this->deviceFp = $this instanceof DeviceFingerprintRequiredRoute ? $this->resolveDeviceFp() : null;
         $this->authContext = $this instanceof AuthRouteInterface ? $this->resolveAuthContext() : null;
+        $this->corsBinding = $this->declareCorsBinding();
         $this->concurrencyBinding = $this->declareConcurrencyBinding();
 
         // Proceed to entrypoint
@@ -81,6 +85,14 @@ abstract class AppAwareEndpoint extends AbstractRouteController
      * @return ConcurrencyBinding|null
      */
     protected function declareConcurrencyBinding(): ?ConcurrencyBinding
+    {
+        return null;
+    }
+
+    /**
+     * @return CorsBinding|null
+     */
+    protected function declareCorsBinding(): ?CorsBinding
     {
         return null;
     }
@@ -114,6 +126,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     /**
      * @return void
      * @throws ConcurrentHttpRequestException
+     * @throws CorsOriginMismatchException
      * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
      */
     final protected function beforeEntrypointCallback(): void
@@ -124,6 +137,9 @@ abstract class AppAwareEndpoint extends AbstractRouteController
                 sprintf('HTTP Interface "%s" is DISABLED', $this->interface->enum->name)
             );
         }
+
+        // CORS Binding
+        $this->corsBinding?->validateOrigin($this);
 
         // Handle Request Concurrency
         if ($this->concurrencyBinding) {
