@@ -47,7 +47,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
      * @return callable
      * @throws ApiEntrypointException
      */
-    protected function resolveEntrypoint(): callable
+    protected function resolveEntryPointMethod(): callable
     {
         $httpMethod = strtolower($this->request->method->name);
         if ($httpMethod === "options" && !$this->allowOptionsCall) {

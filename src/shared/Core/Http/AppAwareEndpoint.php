@@ -82,6 +82,30 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     }
 
     /**
+     * @return callable
+     * @throws CorsOriginMismatchException
+     */
+    final protected function resolveEntrypoint(): callable
+    {
+        // CORS Binding
+        $this->corsBinding?->validateOrigin($this);
+
+        // Interface Status
+        if ($this->interface && !$this->interface->config->status) {
+            throw new \RuntimeException(
+                sprintf('HTTP Interface "%s" is DISABLED', $this->interface->enum->name)
+            );
+        }
+
+        return $this->resolveEntryPointMethod();
+    }
+
+    /**
+     * @return callable
+     */
+    abstract protected function resolveEntryPointMethod(): callable;
+
+    /**
      * @return ConcurrencyBinding|null
      */
     protected function declareConcurrencyBinding(): ?ConcurrencyBinding
@@ -126,21 +150,10 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     /**
      * @return void
      * @throws ConcurrentHttpRequestException
-     * @throws CorsOriginMismatchException
      * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
      */
     final protected function beforeEntrypointCallback(): void
     {
-        // Interface Status
-        if ($this->interface && !$this->interface->config->status) {
-            throw new \RuntimeException(
-                sprintf('HTTP Interface "%s" is DISABLED', $this->interface->enum->name)
-            );
-        }
-
-        // CORS Binding
-        $this->corsBinding?->validateOrigin($this);
-
         // Handle Request Concurrency
         if ($this->concurrencyBinding) {
             $this->handleRequestConcurrency();

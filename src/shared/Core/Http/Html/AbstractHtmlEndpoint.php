@@ -41,7 +41,7 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
     /**
      * @return callable
      */
-    final protected function resolveEntrypoint(): callable
+    final protected function resolveEntryPointMethod(): callable
     {
         $this->getResponseObject()->headers->set("Content-Type", "text/html");
 
