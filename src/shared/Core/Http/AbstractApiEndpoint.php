@@ -161,7 +161,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
      */
     protected function prepareResponseCallback(): void
     {
-        $this->response()->prepareResponseCallback($this, $this->authContext, $this->requestLog);
+        $this->response()->prepareResponseCallback($this, $this->authContext, $this->requestLog ?? null);
     }
 
     /**
