@@ -46,8 +46,8 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     protected readonly ?AuthContextResolverInterface $authContext;
 
     public readonly HttpLogLevel $requestLogLevel;
-    private readonly ?InterfaceLogEntity $requestLog;
-    private readonly ?InterfaceLogSnapshot $requestLogSnapshot;
+    protected readonly ?InterfaceLogEntity $requestLog;
+    protected readonly ?InterfaceLogSnapshot $requestLogSnapshot;
     protected readonly ?CorsBinding $corsBinding;
     protected readonly ?ConcurrencyBinding $concurrencyBinding;
     private ?FileLock $concurrencyLock = null;
@@ -233,11 +233,16 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     }
 
     /**
+     * @return void
+     */
+    abstract protected function prepareResponseCallback(): void;
+
+    /**
      * @return never
      * @throws \Charcoal\Filesystem\Exception\FilesystemException
      * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
      */
-    public function sendResponse(): never
+    final public function sendResponse(): never
     {
         if (isset($this->concurrencyLock)) {
             try {
@@ -263,6 +268,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
             }
         }
 
+        $this->prepareResponseCallback();
         parent::sendResponse();
     }
 

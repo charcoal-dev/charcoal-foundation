@@ -30,6 +30,13 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
     }
 
     /**
+     * @return void
+     */
+    protected function prepareResponseCallback(): void
+    {
+    }
+
+    /**
      * @return BodyResponse
      */
     public function response(): BodyResponse

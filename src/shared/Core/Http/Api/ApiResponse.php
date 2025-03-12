@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Api;
 
+use App\Shared\Core\Http\AbstractApiEndpoint;
+use App\Shared\Core\Http\Auth\AuthContextResolverInterface;
+use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogEntity;
 use Charcoal\Http\Router\Controllers\Response\PayloadResponse;
 
 /**
@@ -26,6 +29,20 @@ class ApiResponse extends PayloadResponse
 
         $this->isSuccess = $status;
         return $this;
+    }
+
+    /**
+     * @param AbstractApiEndpoint $route
+     * @param AuthContextResolverInterface|null $authContext
+     * @param InterfaceLogEntity|null $logEntity
+     * @return void
+     */
+    public function prepareResponseCallback(
+        AbstractApiEndpoint           $route,
+        ?AuthContextResolverInterface $authContext,
+        ?InterfaceLogEntity           $logEntity,
+    ): void
+    {
     }
 
     /**
