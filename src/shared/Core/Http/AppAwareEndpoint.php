@@ -333,6 +333,12 @@ abstract class AppAwareEndpoint extends AbstractRouteController
             "code" => $t->getCode()
         ];
 
+        if ($t instanceof ApiValidationException) {
+            if ($t->param) {
+                $errorObject["param"] = $t->param;
+            }
+        }
+
         if (!$t instanceof ApiValidationException) {
             $errorObject["exception"] = $this->exceptionFullClassname ?
                 $t::class : OOP::baseClassName($t::class);
