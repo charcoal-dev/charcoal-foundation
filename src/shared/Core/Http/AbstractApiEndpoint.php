@@ -161,15 +161,18 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
      */
     protected function prepareResponseCallback(): void
     {
-        $this->response()->prepareResponseCallback($this, $this->authContext, $this->requestLog ?? null);
+        $response = $this->response();
+        if ($response instanceof ApiResponse) {
+            $response->prepareResponseCallback($this, $this->authContext, $this->requestLog ?? null);
+        }
     }
 
     /**
-     * @return ApiResponse
+     * @return ApiResponse|NoContentResponse
      */
-    public function response(): ApiResponse
+    public function response(): ApiResponse|NoContentResponse
     {
-        /** @var ApiResponse */
+        /** @var ApiResponse|NoContentResponse */
         return parent::response();
     }
 
