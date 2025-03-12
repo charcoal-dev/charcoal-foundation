@@ -45,8 +45,14 @@ This guide outlines the fastest way to deploy **Charcoal Monolith Foundation** u
    ```
 
    If everything is running correctly, you should see your services listed as active.
-
-6. **Access the application**
+    
+6. **Run the installer**
+   ```sh
+   ./charcoal.sh install
+   ```
+   This script will create database tables and fill all initially required objects for the application to run.
+  
+7. **Access the application**
    Open your web browser and go to:
    ```
    http://your-ip-address:3000
