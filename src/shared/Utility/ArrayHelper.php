@@ -31,6 +31,38 @@ class ArrayHelper
     }
 
     /**
+     * @param array $data
+     * @return array
+     */
+    public static function canonicalizeLexicographic(array $data): array
+    {
+        if (!static::isSequential($data)) {
+            ksort($data, SORT_STRING);
+        }
+
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $data[$key] = static::canonicalizeLexicographic($value);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param array $data
+     * @return bool
+     */
+    public static function isSequential(array $data): bool
+    {
+        if (!$data) {
+            return true;
+        }
+
+        return array_keys($data) === range(0, count($data) - 1);
+    }
+
+    /**
      * @param array|object $input
      * @return array
      * @throws \JsonException

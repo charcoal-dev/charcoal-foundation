@@ -13,6 +13,7 @@ use App\Shared\Exception\ApiValidationException;
 use App\Shared\Exception\ConcurrentHttpRequestException;
 use App\Shared\Exception\CorsOriginMismatchException;
 use App\Shared\Exception\HttpOptionsException;
+use App\Shared\Exception\HttpUnrecognizedPayloadException;
 use App\Shared\Exception\WrappedException;
 use Charcoal\Http\Router\Controllers\Response\NoContentResponse;
 
@@ -125,6 +126,10 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
 
         if ($t instanceof CorsOriginMismatchException) {
             return ApiError::CORS_TERMINATE;
+        }
+
+        if ($t instanceof HttpUnrecognizedPayloadException) {
+            return ApiError::UNRECOGNIZED_REQUEST_PAYLOAD;
         }
 
         if ($t instanceof ApiValidationException) {
