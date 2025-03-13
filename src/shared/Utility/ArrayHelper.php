@@ -37,7 +37,13 @@ class ArrayHelper
     public static function canonicalizeLexicographic(array $data): array
     {
         if (!static::isSequential($data)) {
-            ksort($data, SORT_STRING);
+            uksort($data, function ($a, $b) {
+                if (ctype_digit((string)$a) && ctype_digit((string)$b)) {
+                    return strnatcmp((string)$a, (string)$b);
+                }
+
+                return strcmp((string)$a, (string)$b);
+            });
         }
 
         foreach ($data as $key => $value) {
@@ -46,7 +52,17 @@ class ArrayHelper
             }
         }
 
-        return $data;
+        return static::isSequential($data) ? $data : (count($data) === 0 ? [] : $data);
+    }
+
+    /**
+     * @param array $data
+     * @return string
+     */
+    public static function canonicalizeLexicographicJson(array $data): string
+    {
+        return json_encode(static::canonicalizeLexicographic($data),
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
     /**
@@ -55,10 +71,6 @@ class ArrayHelper
      */
     public static function isSequential(array $data): bool
     {
-        if (!$data) {
-            return true;
-        }
-
         return array_keys($data) === range(0, count($data) - 1);
     }
 
@@ -66,7 +78,6 @@ class ArrayHelper
      * @param array|object $input
      * @return array
      * @throws \JsonException
-     * @noinspection PhpMultipleClassDeclarationsInspection
      */
     public static function jsonFilter(array|object $input): array
     {
