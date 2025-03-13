@@ -9,5 +9,5 @@ namespace App\Shared\Core\Http\Auth;
  */
 interface AuthRouteInterface
 {
-    public function declareAuthContextProvider(): AuthContextResolverInterface;
+    public function resolveAuthContext(): AuthContextResolverInterface;
 }

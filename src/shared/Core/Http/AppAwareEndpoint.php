@@ -11,7 +11,6 @@ use App\Shared\Core\Http\Response\CacheableResponse;
 use App\Shared\Exception\ApiValidationException;
 use App\Shared\Exception\ConcurrentHttpRequestException;
 use App\Shared\Exception\CorsOriginMismatchException;
-use App\Shared\Exception\HttpUnrecognizedPayloadException;
 use App\Shared\Foundation\Http\HttpInterface;
 use App\Shared\Foundation\Http\HttpLogLevel;
 use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogEntity;
@@ -74,7 +73,6 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         // Interface Configuration
         $this->interface = $this->declareHttpInterface();
         $this->deviceFp = $this instanceof DeviceFingerprintRequiredRoute ? $this->resolveDeviceFp() : null;
-        $this->authContext = $this instanceof AuthRouteInterface ? $this->resolveAuthContext() : null;
         $this->corsBinding = $this->declareCorsBinding();
         $this->concurrencyBinding = $this->declareConcurrencyBinding();
 
@@ -97,6 +95,10 @@ abstract class AppAwareEndpoint extends AbstractRouteController
                 sprintf('HTTP Interface "%s" is DISABLED', $this->interface->enum->name)
             );
         }
+
+        // AuthContext
+        $this->authContext = $this instanceof AuthRouteInterface ?
+            $this->resolveAuthContext() : null;
 
         return $this->resolveEntryPointMethod();
     }
@@ -146,19 +148,6 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     protected function declareLogLevel(): HttpLogLevel
     {
         return HttpLogLevel::NONE;
-    }
-
-    /**
-     * @param string ...$accepted
-     * @return void
-     * @throws HttpUnrecognizedPayloadException
-     */
-    protected function validateUnrecognizedRequestPayload(string ...$accepted): void
-    {
-        $unrecognised = $this->request->payload->getUnrecognizedKeys(...$accepted);
-        if (!empty($unrecognised)) {
-            throw new HttpUnrecognizedPayloadException("HTTP request contains unrecognized payload keys", $unrecognised);
-        }
     }
 
     /**
