@@ -168,7 +168,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     {
         $response = $this->response();
         if ($response instanceof ApiResponse) {
-            $response->prepareResponseCallback($this, $this->authContext, $this->requestLog ?? null);
+            $response->prepareResponseCallback($this, $this->authContext ?? null, $this->requestLog ?? null);
         }
     }
 
