@@ -255,6 +255,14 @@ abstract class AppAwareEndpoint extends AbstractRouteController
             }
         }
 
+        if (isset($this->authContext)) {
+            try {
+                $this->authContext->onSendResponseCallback();
+            } catch (\Throwable $t) {
+                $this->app->lifecycle->exception($t);
+            }
+        }
+
         if (isset($this->requestLog)) {
             try {
                 $this->requestLogSnapshot?->finalise(
