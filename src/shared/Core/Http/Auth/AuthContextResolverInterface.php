@@ -16,4 +16,9 @@ interface AuthContextResolverInterface extends RouteLogTraceProvider
      * @return int
      */
     public function getPrimaryId(): int;
+
+    /**
+     * @return void
+     */
+    public function onSendResponseCallback(): void;
 }
