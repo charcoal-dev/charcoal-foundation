@@ -21,6 +21,10 @@ use Charcoal\Http\Router\Controllers\Response\NoContentResponse;
  * Class AbstractApiEndpoint
  * @package App\Shared\Core\Http
  * @property ApiInterfaceBinding $interface
+ * @method void put()
+ * @method void get()
+ * @method void post()
+ * @method void delete()
  */
 abstract class AbstractApiEndpoint extends AppAwareEndpoint
 {
