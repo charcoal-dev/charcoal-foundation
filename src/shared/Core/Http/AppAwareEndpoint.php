@@ -96,14 +96,6 @@ abstract class AppAwareEndpoint extends AbstractRouteController
             );
         }
 
-        // AuthContext
-        if ($this->request->method === HttpMethod::OPTIONS) {
-            $this->authContext = null;
-        } else {
-            $this->authContext = $this instanceof AuthRouteInterface ?
-                $this->resolveAuthContext() : null;
-        }
-
         return $this->resolveEntryPointMethod();
     }
 
@@ -161,6 +153,14 @@ abstract class AppAwareEndpoint extends AbstractRouteController
      */
     final protected function beforeEntrypointCallback(): void
     {
+        if ($this->request->method === HttpMethod::OPTIONS) {
+            return;
+        }
+
+        // AuthContext
+        $this->authContext = $this instanceof AuthRouteInterface ?
+            $this->resolveAuthContext() : null;
+
         // Handle Request Concurrency
         if ($this->concurrencyBinding) {
             $this->handleRequestConcurrency();
@@ -168,13 +168,8 @@ abstract class AppAwareEndpoint extends AbstractRouteController
 
         // InterfaceLog
         $routeLogLevel = $this->declareLogLevel();
-        $configLogLevel = $this->interface ? $this->interface->config->logData : HttpLogLevel::NONE;
-        if ($this->request->method === HttpMethod::OPTIONS) {
-            if (!$this->interface?->config?->logHttpMethodOptions) {
-                $configLogLevel = HttpLogLevel::NONE;
-                $routeLogLevel = HttpLogLevel::NONE;
-            }
-        }
+        $configLogLevel = $this->interface ?
+            $this->interface->config->logData : HttpLogLevel::NONE;
 
         $this->requestLogLevel = HttpLogLevel::from(max($routeLogLevel->value, $configLogLevel->value));
         if ($this->requestLogLevel->value === 0) {
