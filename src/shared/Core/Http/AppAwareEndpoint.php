@@ -97,8 +97,12 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         }
 
         // AuthContext
-        $this->authContext = $this instanceof AuthRouteInterface ?
-            $this->resolveAuthContext() : null;
+        if ($this->request->method === HttpMethod::OPTIONS) {
+            $this->authContext = null;
+        } else {
+            $this->authContext = $this instanceof AuthRouteInterface ?
+                $this->resolveAuthContext() : null;
+        }
 
         return $this->resolveEntryPointMethod();
     }
