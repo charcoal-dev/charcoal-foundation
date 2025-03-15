@@ -366,7 +366,8 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         }
 
         if (!$t instanceof ApiValidationException && $this->exceptionIncludePrevious) {
-            $errorObject["previous"] = $this->exceptionToArray($t->getPrevious());
+            $errorObject["previous"] = $t->getPrevious() ?
+                $this->exceptionToArray($t->getPrevious()) : [];
         }
 
         return $errorObject;
