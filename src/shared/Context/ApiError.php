@@ -18,6 +18,7 @@ enum ApiError: string implements ApiErrorCodeInterface
     case METHOD_NOT_ALLOWED = "Method not allowed";
     case SERVER_ERROR = "Internal server error";
     case FATAL_ERROR = "An error occurred";
+    case USER_AGENT_REQUIRED = "User-Agent header is required";
     case UNRECOGNIZED_REQUEST_PAYLOAD = 'Unrecognized parameter: "%s"';
 
     public function getErrorMessage(\Throwable $context = null, AbstractApiEndpoint $route = null): string

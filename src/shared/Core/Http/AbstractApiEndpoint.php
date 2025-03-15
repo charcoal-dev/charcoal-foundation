@@ -15,6 +15,7 @@ use App\Shared\Exception\CorsOriginMismatchException;
 use App\Shared\Exception\HttpOptionsException;
 use App\Shared\Exception\HttpUnrecognizedPayloadException;
 use App\Shared\Exception\WrappedException;
+use App\Shared\Utility\StringHelper;
 use Charcoal\Http\Router\Controllers\Response\NoContentResponse;
 
 /**
@@ -28,6 +29,7 @@ use Charcoal\Http\Router\Controllers\Response\NoContentResponse;
  */
 abstract class AbstractApiEndpoint extends AppAwareEndpoint
 {
+    public readonly string $userAgent;
     protected bool $allowOptionsCall = true;
 
     /**
@@ -51,9 +53,17 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     /**
      * @return callable
      * @throws ApiEntrypointException
+     * @throws ApiValidationException
      */
     protected function resolveEntryPointMethod(): callable
     {
+        $userAgent = StringHelper::getTrimmedOrNull($this->userClient->userAgent);
+        if (!$userAgent) {
+            throw new ApiValidationException(ApiError::USER_AGENT_REQUIRED);
+        }
+
+        $this->userAgent = $userAgent;
+
         $httpMethod = strtolower($this->request->method->name);
         if ($httpMethod === "options" && !$this->allowOptionsCall) {
             throw new ApiEntrypointException();
