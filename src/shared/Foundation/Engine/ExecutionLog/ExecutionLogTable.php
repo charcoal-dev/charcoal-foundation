@@ -36,6 +36,10 @@ class ExecutionLogTable extends AbstractOrmTable
         $cols->double("started_on")->precision(14, 4)->unSigned();
         $cols->double("updated_on")->precision(14, 4)->unSigned()->nullable();
         $cols->setPrimaryKey("id");
+
+        $constraints->addIndex("script");
+        $constraints->addIndex("state");
+        $constraints->addIndex("updated_on");
     }
 
     protected function migrations(TableMigrations $migrations): void

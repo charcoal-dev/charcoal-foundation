@@ -47,6 +47,9 @@ class LogStatsTable extends AbstractOrmTable
         $cols->setPrimaryKey("id");
 
         $constraints->foreignKey("log")->table(AppDbTables::ENGINE_EXEC_LOG->value, "id");
+
+        $constraints->addIndex("log");
+        $constraints->addIndex("timestamp");
     }
 
     /**

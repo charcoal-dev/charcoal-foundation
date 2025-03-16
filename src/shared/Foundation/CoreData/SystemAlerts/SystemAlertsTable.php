@@ -34,6 +34,8 @@ class SystemAlertsTable extends AbstractOrmTable
         $cols->int("trace_qid")->bytes(8)->unSigned()->nullable();
         $cols->blobBuffer("context")->nullable();
         $cols->setPrimaryKey("id");
+
+        $constraints->addIndex("trace_interface");
     }
 
     protected function migrations(TableMigrations $migrations): void

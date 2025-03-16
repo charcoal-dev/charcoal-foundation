@@ -46,6 +46,9 @@ class InterfaceLogTable extends AbstractOrmTable
         $cols->int("flag_tid")->bytes(8)->unSigned()->nullable();
         $cols->blobBuffer("snapshot")->size("medium")->nullable();
         $cols->setPrimaryKey("id");
+
+        $constraints->addIndexComposite("idx_interface_method")->columns("interface", "method");
+        $constraints->addIndex("start_on");
     }
 
     protected function migrations(TableMigrations $migrations): void
