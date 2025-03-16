@@ -28,6 +28,9 @@ class BfcTable extends AbstractOrmTable
         $cols->string("caller")->length(45);
         $cols->int("timestamp")->bytes(4)->unSigned();
         $cols->setPrimaryKey("id");
+
+        $constraints->addIndexComposite("idx_action_caller_timestamp")
+            ->columns("action", "caller", "timestamp");
     }
 
     protected function migrations(TableMigrations $migrations): void
