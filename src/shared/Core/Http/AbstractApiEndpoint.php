@@ -88,7 +88,6 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     /**
      * @param \Throwable $t
      * @return void
-     * @throws ApiResponseFinalizedException
      */
     protected function handleException(\Throwable $t): void
     {
@@ -110,8 +109,13 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
                 $errorObject["code"] = $errorCode;
             }
 
-            $this->response()->setError(count($errorObject) === 1 ?
-                $errorObject["message"] : $errorObject, $apiError->getHttpCode());
+            try {
+                $this->response()->setError(count($errorObject) === 1 ?
+                    $errorObject["message"] : $errorObject, $apiError->getHttpCode());
+            } catch (ApiResponseFinalizedException) {
+            }
+
+            return;
         }
 
         // Log to Lifecycle
@@ -123,7 +127,10 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
             $this->app->lifecycle->exception($t);
         }
 
-        $this->response()->setError($this->exceptionToArray($t));
+        try {
+            $this->response()->setError($this->exceptionToArray($t));
+        } catch (ApiResponseFinalizedException) {
+        }
     }
 
     /**
