@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Utility;
 
+use Charcoal\Buffers\Frames\Bytes32;
+
 /**
  * Class TypeCaster
  * @package App\Shared\Utility
@@ -28,5 +30,15 @@ class TypeCaster
         }
 
         return false;
+    }
+
+    /**
+     * @param string $input
+     * @return Bytes32|null
+     */
+    public static function getBytes32OrNull(string $input): ?Bytes32
+    {
+        return strlen($input) === 64 && ctype_xdigit($input) ?
+            new Bytes32(hex2bin($input)) : null;
     }
 }
