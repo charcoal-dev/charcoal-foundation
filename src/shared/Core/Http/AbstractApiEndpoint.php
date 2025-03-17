@@ -9,6 +9,7 @@ use App\Shared\Core\Http\Api\ApiInterfaceBinding;
 use App\Shared\Core\Http\Api\ApiNamespaceInterface;
 use App\Shared\Core\Http\Api\ApiResponse;
 use App\Shared\Exception\ApiEntrypointException;
+use App\Shared\Exception\ApiResponseFinalizedException;
 use App\Shared\Exception\ApiValidationException;
 use App\Shared\Exception\ConcurrentHttpRequestException;
 use App\Shared\Exception\CorsOriginMismatchException;
@@ -22,10 +23,10 @@ use Charcoal\Http\Router\Controllers\Response\NoContentResponse;
  * Class AbstractApiEndpoint
  * @package App\Shared\Core\Http
  * @property ApiInterfaceBinding $interface
- * @method void put()
- * @method void get()
- * @method void post()
- * @method void delete()
+ * @method never put()
+ * @method never get()
+ * @method never post()
+ * @method never delete()
  */
 abstract class AbstractApiEndpoint extends AppAwareEndpoint
 {
@@ -48,6 +49,14 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     final protected function declareHttpInterface(): ?HttpInterfaceBinding
     {
         return $this->declareApiInterface();
+    }
+
+    /**
+     * This method is not to be used because of ApiResponseFinalizedException
+     * @return void
+     */
+    final protected function afterEntrypointCallback(): void
+    {
     }
 
     /**
@@ -79,9 +88,14 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     /**
      * @param \Throwable $t
      * @return void
+     * @throws ApiResponseFinalizedException
      */
     protected function handleException(\Throwable $t): void
     {
+        if ($t instanceof ApiResponseFinalizedException) {
+            return;
+        }
+
         if ($t instanceof HttpOptionsException) {
             $this->swapResponseObject(new NoContentResponse(204, $this->response()));
             return;
@@ -96,9 +110,8 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
                 $errorObject["code"] = $errorCode;
             }
 
-            $this->responseFromErrorObject($apiError->getHttpCode(), count($errorObject) === 1 ?
-                $errorObject["message"] : $errorObject);
-            return;
+            $this->response()->setError(count($errorObject) === 1 ?
+                $errorObject["message"] : $errorObject, $apiError->getHttpCode());
         }
 
         // Log to Lifecycle
@@ -110,22 +123,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
             $this->app->lifecycle->exception($t);
         }
 
-        $this->responseFromErrorObject(null, $this->exceptionToArray($t));
-    }
-
-    /**
-     * @param int|null $statusCode
-     * @param string|array $errorObject
-     * @return void
-     */
-    private function responseFromErrorObject(null|int $statusCode, string|array $errorObject): void
-    {
-        if (!$statusCode) {
-            $statusCode = 400;
-        }
-
-        $this->response()->setSuccess(false, $statusCode)
-            ->set("error", $errorObject);
+        $this->response()->setError($this->exceptionToArray($t));
     }
 
     /**
