@@ -21,18 +21,18 @@ class ApiResponse extends PayloadResponse
     protected bool $isSuccess = false;
 
     /**
-     * @param bool $status
-     * @param int $statusCode
+     * @param int|null $statusCode
      * @return never
      * @throws ApiResponseFinalizedException
      */
-    public function setSuccess(bool $status, int $statusCode = 200): never
+    public function setSuccess(?int $statusCode = 200): never
     {
-        if ($statusCode) {
-            $this->setStatusCode($statusCode);
+        if (!$statusCode) {
+            $statusCode = 200;
         }
 
-        $this->isSuccess = $status;
+        $this->isSuccess = true;
+        $this->setStatusCode($statusCode);
         throw new ApiResponseFinalizedException();
     }
 
