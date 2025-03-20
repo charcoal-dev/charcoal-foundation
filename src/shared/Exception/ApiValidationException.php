@@ -19,12 +19,14 @@ class ApiValidationException extends \Exception
      * @param int $code
      * @param string|null $param
      * @param \Throwable|null $previous
+     * @param array|null $baggage
      */
     public function __construct(
         string|ApiErrorCodeInterface $message = "",
         int                          $code = 0,
         ?string                      $param = null,
-        ?\Throwable                  $previous = null
+        ?\Throwable                  $previous = null,
+        public readonly ?array       $baggage = null
     )
     {
         $errorCode = null;

@@ -5,7 +5,7 @@ namespace App\Shared\Context;
 
 use App\Shared\Core\Http\AbstractApiEndpoint;
 use App\Shared\Core\Http\Api\ApiErrorCodeInterface;
-use App\Shared\Exception\HttpUnrecognizedPayloadException;
+use App\Shared\Exception\ApiValidationException;
 
 /**
  * Class ApiError
@@ -23,8 +23,9 @@ enum ApiError: string implements ApiErrorCodeInterface
 
     public function getErrorMessage(\Throwable $context = null, AbstractApiEndpoint $route = null): string
     {
-        if ($context instanceof HttpUnrecognizedPayloadException) {
-            return sprintf($this->value, $context->unrecognized[0]);
+        if ($this === self::UNRECOGNIZED_REQUEST_PAYLOAD) {
+            $param = $context instanceof ApiValidationException ? ($context->baggage[0] ?? null) : null;
+            return sprintf($this->value, $param ?? "");
         }
 
         return $this->value;

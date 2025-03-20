@@ -3,8 +3,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Validation;
 
+use App\Shared\Context\ApiError;
 use App\Shared\Core\Http\AppAwareEndpoint;
-use App\Shared\Exception\HttpUnrecognizedPayloadException;
+use App\Shared\Exception\ApiValidationException;
 
 /**
  * Trait ValidateHttpRequestTrait
@@ -16,13 +17,13 @@ trait ValidateHttpRequestTrait
     /**
      * @param string ...$accepted
      * @return $this
-     * @throws HttpUnrecognizedPayloadException
+     * @throws ApiValidationException
      */
     protected function validateUnrecognizedRequestPayload(string ...$accepted): static
     {
         $unrecognised = $this->request->payload->getUnrecognizedKeys(...$accepted);
         if (!empty($unrecognised)) {
-            throw new HttpUnrecognizedPayloadException("HTTP request contains unrecognized payload keys", $unrecognised);
+            throw new ApiValidationException(ApiError::UNRECOGNIZED_REQUEST_PAYLOAD, baggage: $unrecognised);
         }
 
         return $this;
