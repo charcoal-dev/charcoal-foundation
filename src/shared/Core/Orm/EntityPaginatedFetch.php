@@ -14,8 +14,8 @@ use Charcoal\OOP\OOP;
  */
 readonly class EntityPaginatedFetch
 {
-    public int $totalRows;
-    public array $rows;
+    public int $totalCount;
+    public array $entities;
     public int $count;
 
     /**
@@ -45,9 +45,9 @@ readonly class EntityPaginatedFetch
         }
 
         $whereQuery = $whereQuery ? implode(" AND ", $whereQuery) : "1";
-        $this->totalRows = $this->getTotalRowCount($table, $whereQuery, $whereData);
-        if (!$this->totalRows) {
-            $this->rows = [];
+        $this->totalCount = $this->getTotalRowCount($table, $whereQuery, $whereData);
+        if (!$this->totalCount) {
+            $this->entities = [];
             $this->count = 0;
             return;
         }
@@ -81,7 +81,7 @@ readonly class EntityPaginatedFetch
             $result[] = $entity;
         }
 
-        $this->rows = $result;
+        $this->entities = $result;
         $this->count = count($result);
     }
 
