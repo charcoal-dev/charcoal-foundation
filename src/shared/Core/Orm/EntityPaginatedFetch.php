@@ -33,7 +33,7 @@ readonly class EntityPaginatedFetch
         AbstractOrmTable $table,
         array            $whereQuery,
         array            $whereData,
-        SortFlag         $sortFlag,
+        public SortFlag  $sortFlag,
         string           $sortColumn = "id",
         public int       $page = 1,
         public int       $perPage = 100,
