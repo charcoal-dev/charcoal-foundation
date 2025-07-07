@@ -95,4 +95,16 @@ class InterfaceLogHandler extends AbstractOrmRepository
             "id"
         );
     }
+
+    /**
+     * @param int $id
+     * @return InterfaceLogEntity
+     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityNotFoundException
+     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
+     */
+    public function getLog(int $id): InterfaceLogEntity
+    {
+        /** @var InterfaceLogEntity */
+        return $this->getFromDbColumn("id", $id);
+    }
 }
