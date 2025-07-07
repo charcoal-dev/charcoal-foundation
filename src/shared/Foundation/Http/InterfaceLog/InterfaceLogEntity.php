@@ -43,4 +43,26 @@ class InterfaceLogEntity extends AbstractOrmEntity
     {
         throw new \LogicException(static::class . " does not need to be serialized");
     }
+
+    /**
+     * @return InterfaceLogSnapshot|null
+     */
+    public function getSnapshotObject(): ?InterfaceLogSnapshot
+    {
+        if (!$this->snapshot || $this->snapshot->len() < 1) {
+            return null;
+        }
+
+        $snapshot = unserialize($this->snapshot->raw(), ["allowed_classes" => InterfaceLogSnapshot::class]);
+        if (!$snapshot instanceof InterfaceLogSnapshot) {
+            throw new \RuntimeException(
+                sprintf('%s encountered value of type "%s"',
+                    __METHOD__,
+                    is_object($snapshot) ? get_class($snapshot) : gettype($snapshot)
+                )
+            );
+        }
+
+        return $snapshot;
+    }
 }
