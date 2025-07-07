@@ -63,7 +63,7 @@ class ExecutionLogEntity extends AbstractOrmEntity
             return $this->contextObject;
         }
 
-        $contextObject = unserialize($this->context->raw(), ["allowed_classes" => ExecutionLogContext::class]);
+        $contextObject = unserialize($this->context->raw(), ["allowed_classes" => [ExecutionLogContext::class]]);
         if (!$contextObject instanceof ExecutionLogContext) {
             throw new \RuntimeException(
                 sprintf('%s encountered value of type "%s"',

@@ -53,7 +53,7 @@ class InterfaceLogEntity extends AbstractOrmEntity
             return null;
         }
 
-        $snapshot = unserialize($this->snapshot->raw(), ["allowed_classes" => InterfaceLogSnapshot::class]);
+        $snapshot = unserialize($this->snapshot->raw(), ["allowed_classes" => [InterfaceLogSnapshot::class]]);
         if (!$snapshot instanceof InterfaceLogSnapshot) {
             throw new \RuntimeException(
                 sprintf('%s encountered value of type "%s"',
