@@ -48,7 +48,7 @@ class InterfaceLogSnapshot
         ];
 
         // Initial Parameters
-        if ($logLevel >= 2) {
+        if ($logLevel->value >= 2) {
             // Headers
             $this->requestHeaders = ArrayHelper::excludeKeys($request->headers->toArray(), $ignoreHeaders);
 
@@ -77,7 +77,7 @@ class InterfaceLogSnapshot
     {
         $this->logLevelFinal = $logLevel->value;
 
-        if ($logLevel >= 2) {
+        if ($logLevel->value >= 2) {
             // Response Headers
             $this->responseHeaders = ArrayHelper::excludeKeys($response->headers->toArray(), $ignoreHeaders);
             if ($response instanceof FileDownloadResponse) {
