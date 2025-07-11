@@ -30,6 +30,8 @@ class InterfaceLogSnapshot
     public array $errors = [];
     public array $lifecycle = [];
     public int $errorCount = 0;
+    public ?int $logLevelInitial = null;
+    public ?int $logLevelFinal = null;
 
     public function __construct(
         HttpLogLevel $logLevel,
@@ -39,6 +41,7 @@ class InterfaceLogSnapshot
     )
     {
         // Request URL
+        $this->logLevelInitial = $logLevel->value;
         $this->requestUrl = [
             "queryStr" => $request->url->query,
             "fragment" => $request->url->fragment
@@ -72,6 +75,8 @@ class InterfaceLogSnapshot
         array                      $ignoreParams = []
     ): void
     {
+        $this->logLevelFinal = $logLevel->value;
+
         if ($logLevel >= 2) {
             // Response Headers
             $this->responseHeaders = ArrayHelper::excludeKeys($response->headers->toArray(), $ignoreHeaders);
