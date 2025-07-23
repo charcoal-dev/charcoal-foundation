@@ -12,6 +12,7 @@ use Charcoal\Buffers\Buffer;
 use Charcoal\Filesystem\Directory;
 use Charcoal\Filesystem\Exception\FilesystemError;
 use Charcoal\Filesystem\Exception\FilesystemException;
+use Charcoal\Http\Commons\KeyValuePair;
 use Charcoal\Http\Commons\WritableHeaders;
 use Charcoal\Http\Commons\WritablePayload;
 use Charcoal\Http\Router\Controllers\CacheControl;
@@ -144,7 +145,8 @@ class CacheableResponse
                 Buffer::class,
                 FileDownloadResponse::class,
                 WritableHeaders::class,
-                WritablePayload::class
+                WritablePayload::class,
+                KeyValuePair::class
             ], $additionalAllowedClasses)]);
 
             $this->returnCheckInstance($response, $validity, $integrityTag);
