@@ -6,6 +6,7 @@ namespace App\Shared\Core\Http\Response;
 use App\Shared\Context\CacheStore;
 use App\Shared\Core\Http\AppAwareEndpoint;
 use App\Shared\Exception\ApiResponseFinalizedException;
+use App\Shared\Exception\CacheableResponseSuccessException;
 use Charcoal\Http\Router\Controllers\CacheControl;
 
 /**
@@ -22,9 +23,10 @@ trait CacheableResponseTrait
      * @param CacheStore|null $cacheStore
      * @param callable $responseGeneratorFn
      * @return never
-     * @throws ApiResponseFinalizedException
+     * @throws CacheableResponseSuccessException
      * @throws \Charcoal\Filesystem\Exception\FilesystemException
      * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
+     * @throws \Throwable
      */
     protected function sendCacheableResponse(
         CacheSource   $cacheSource,
@@ -57,6 +59,10 @@ trait CacheableResponseTrait
         try {
             call_user_func($responseGeneratorFn);
         } catch (ApiResponseFinalizedException) {
+            // Add any exception that indicates a response was successfully generated
+        } catch (\Throwable $t) {
+            // Re-throw any caught error, preventing the error itself from being cached
+            throw $t;
         }
 
         if (isset($cacheable)) {
@@ -73,6 +79,6 @@ trait CacheableResponseTrait
             }
         }
 
-        throw new ApiResponseFinalizedException();
+        throw new CacheableResponseSuccessException();
     }
 }
