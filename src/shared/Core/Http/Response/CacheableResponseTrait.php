@@ -18,9 +18,10 @@ use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
  */
 trait CacheableResponseTrait
 {
-    private array $unserializeAllowedClasses = [];
-
-    abstract protected function declareCacheableResponseSerializeClasses(): void;
+    /**
+     * @return CacheableResponseBinding
+     */
+    abstract protected function declareCacheableResponse(): CacheableResponseBinding;
 
     /**
      * @param CacheSource $cacheSource
@@ -48,8 +49,6 @@ trait CacheableResponseTrait
         bool          $purgeExpiredResponse = false
     ): never
     {
-        $this->declareCacheableResponseSerializeClasses();
-
         if ($cacheSource === CacheSource::CACHE && !$cacheStore) {
             throw new \LogicException("No cache storage provided for cacheable response");
         }
@@ -59,7 +58,11 @@ trait CacheableResponseTrait
             try {
                 $cached = $cacheStore ?
                     $cacheable->getFromCache($cacheStore, $cacheValidity, $cacheIntegrityTag) :
-                    $cacheable->getFromFilesystem($cacheValidity, $cacheIntegrityTag, $this->unserializeAllowedClasses);
+                    $cacheable->getFromFilesystem(
+                        $cacheValidity,
+                        $cacheIntegrityTag,
+                        $this->cacheableResponseBinding->responseUnserializeClasses
+                    );
             } catch (CacheableResponseRedundantException) {
                 unset($cached);
                 if ($purgeExpiredResponse) {
@@ -76,7 +79,8 @@ trait CacheableResponseTrait
                 $this->app->lifecycle->exception(new \RuntimeException($errorMsg, previous: $e));
             }
 
-            if (isset($cached) && $cached instanceof AbstractControllerResponse) {
+            if (isset($cached) && $cached instanceof AbstractControllerResponse &&
+                is_a($cached, $this->cacheableResponseBinding->responseClassname)) {
                 $this->sendResponseFromCache($cacheable, $cached, true);
             }
         }

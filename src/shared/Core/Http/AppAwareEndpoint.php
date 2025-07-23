@@ -8,6 +8,8 @@ use App\Shared\Core\Http\Auth\AuthContextResolverInterface;
 use App\Shared\Core\Http\Auth\AuthRouteInterface;
 use App\Shared\Core\Http\Cors\CorsBinding;
 use App\Shared\Core\Http\Response\CacheableResponse;
+use App\Shared\Core\Http\Response\CacheableResponseBinding;
+use App\Shared\Core\Http\Response\CacheableResponseInterface;
 use App\Shared\Exception\ApiValidationException;
 use App\Shared\Exception\ConcurrentHttpRequestException;
 use App\Shared\Exception\CorsOriginMismatchException;
@@ -52,6 +54,8 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     protected readonly ?ConcurrencyBinding $concurrencyBinding;
     private ?FileLock $concurrencyLock = null;
 
+    protected readonly ?CacheableResponseBinding $cacheableResponseBinding;
+
     protected bool $exceptionReturnTrace = false;
     protected bool $exceptionFullClassname = false;
     protected bool $exceptionIncludePrevious = false;
@@ -75,6 +79,8 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         $this->deviceFp = $this instanceof DeviceFingerprintRequiredRoute ? $this->resolveDeviceFp() : null;
         $this->corsBinding = $this->declareCorsBinding();
         $this->concurrencyBinding = $this->declareConcurrencyBinding();
+        $this->cacheableResponseBinding = $this instanceof CacheableResponseInterface ?
+            $this->declareCacheableResponseBinding() : null;
 
         // Proceed to entrypoint
         parent::dispatchEntrypoint();
