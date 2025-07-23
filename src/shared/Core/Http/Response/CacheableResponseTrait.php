@@ -21,7 +21,7 @@ trait CacheableResponseTrait
     /**
      * @return CacheableResponseBinding
      */
-    abstract protected function declareCacheableResponse(): CacheableResponseBinding;
+    abstract protected function declareCacheableResponseBinding(): CacheableResponseBinding;
 
     /**
      * @param CacheSource $cacheSource

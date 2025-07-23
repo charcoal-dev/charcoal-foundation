@@ -9,4 +9,5 @@ namespace App\Shared\Core\Http\Response;
  */
 interface CacheableResponseInterface
 {
+    function declareCacheableResponseBinding(): CacheableResponseBinding;
 }
