@@ -84,7 +84,7 @@ class ImportCountries extends AppAwareCliScript
                 "dialCode" => $country[6]
             ];
 
-            $this->inline(sprintf('%s {cyan}%s{/} ... ', $saveCountryData["name"], $saveCountryData["code"]));
+            $this->inline(sprintf('%s {cyan}%s{/} ... ', $saveCountryData["name"], $saveCountryData["code2"]));
             try {
                 $saveCountryQuery = $db->exec(sprintf($saveCountryQuery, $countriesOrm->table->name), $saveCountryData);
                 // Todo: dump value to execution log
