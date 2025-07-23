@@ -19,6 +19,7 @@ use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 use Charcoal\Http\Router\Controllers\Response\BodyResponse;
 use Charcoal\Http\Router\Controllers\Response\FileDownloadResponse;
 use Charcoal\Http\Router\Controllers\Response\PayloadResponse;
+use Charcoal\OOP\Vectors\StringVector;
 
 /**
  * Class CacheableResponse
@@ -118,11 +119,16 @@ class CacheableResponse
     /**
      * @param int $validity
      * @param string|null $integrityTag
+     * @param string[]|null $additionalAllowedClasses
      * @return AbstractControllerResponse|null
      * @throws CacheableResponseRedundantException
      * @throws FilesystemException
      */
-    public function getFromFilesystem(int $validity = 0, ?string $integrityTag = null): ?AbstractControllerResponse
+    public function getFromFilesystem(
+        int     $validity = 0,
+        ?string $integrityTag = null,
+        array   $additionalAllowedClasses = []
+    ): ?AbstractControllerResponse
     {
         try {
             $tmpDir = $this->getFilesystemDirectory();
@@ -131,7 +137,7 @@ class CacheableResponse
                 createIfNotExists: false
             );
 
-            $response = unserialize($response->read(), ["allowed_classes" => [
+            $response = unserialize($response->read(), ["allowed_classes" => array_merge([
                 AbstractControllerResponse::class,
                 PayloadResponse::class,
                 BodyResponse::class,
@@ -139,7 +145,7 @@ class CacheableResponse
                 FileDownloadResponse::class,
                 WritableHeaders::class,
                 WritablePayload::class
-            ]]);
+            ], $additionalAllowedClasses)]);
 
             $this->returnCheckInstance($response, $validity, $integrityTag);
             return $response;
