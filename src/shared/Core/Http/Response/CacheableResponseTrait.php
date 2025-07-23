@@ -18,6 +18,10 @@ use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
  */
 trait CacheableResponseTrait
 {
+    private array $unserializeAllowedClasses = [];
+
+    abstract protected function declareCacheableResponseSerializeClasses(): void;
+
     /**
      * @param CacheSource $cacheSource
      * @param string $uniqueRequestId
@@ -44,6 +48,8 @@ trait CacheableResponseTrait
         bool          $purgeExpiredResponse = false
     ): never
     {
+        $this->declareCacheableResponseSerializeClasses();
+
         if ($cacheSource === CacheSource::CACHE && !$cacheStore) {
             throw new \LogicException("No cache storage provided for cacheable response");
         }
@@ -53,7 +59,7 @@ trait CacheableResponseTrait
             try {
                 $cached = $cacheStore ?
                     $cacheable->getFromCache($cacheStore, $cacheValidity, $cacheIntegrityTag) :
-                    $cacheable->getFromFilesystem($cacheValidity, $cacheIntegrityTag);
+                    $cacheable->getFromFilesystem($cacheValidity, $cacheIntegrityTag, $this->unserializeAllowedClasses);
             } catch (CacheableResponseRedundantException) {
                 unset($cached);
                 if ($purgeExpiredResponse) {
