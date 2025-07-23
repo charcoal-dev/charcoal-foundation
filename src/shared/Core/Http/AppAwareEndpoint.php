@@ -11,6 +11,7 @@ use App\Shared\Core\Http\Response\CacheableResponse;
 use App\Shared\Core\Http\Response\CacheableResponseBinding;
 use App\Shared\Core\Http\Response\CacheableResponseInterface;
 use App\Shared\Exception\ApiValidationException;
+use App\Shared\Exception\CacheableResponseSuccessException;
 use App\Shared\Exception\ConcurrentHttpRequestException;
 use App\Shared\Exception\CorsOriginMismatchException;
 use App\Shared\Foundation\Http\HttpInterface;
@@ -293,8 +294,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
      * @param AbstractControllerResponse $response
      * @param bool $includeAppCachedResponseHeader
      * @return never
-     * @throws \Charcoal\Filesystem\Exception\FilesystemException
-     * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
+     * @throws CacheableResponseSuccessException
      */
     protected function sendResponseFromCache(
         CacheableResponse          $cacheableResponse,
@@ -318,7 +318,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
             }
         }
 
-        $this->sendResponse();
+        throw new CacheableResponseSuccessException();
     }
 
     /**
