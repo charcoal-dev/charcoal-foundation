@@ -24,7 +24,7 @@ class CountryEntity extends AbstractOrmEntity implements CacheableEntityInterfac
 
     public function getPrimaryId(): string
     {
-        return $this->code3;
+        return $this->code2;
     }
 
     protected function collectSerializableData(): array

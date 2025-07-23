@@ -24,16 +24,16 @@ class CountriesOrm extends AbstractOrmRepository
     }
 
     /**
-     * @param string $code3
+     * @param string $code2
      * @param bool $useCache
      * @return CountryEntity
      * @throws \Charcoal\App\Kernel\Orm\Exception\EntityNotFoundException
      * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
      */
-    public function get(string $code3, bool $useCache): CountryEntity
+    public function get(string $code2, bool $useCache): CountryEntity
     {
         /** @var CountryEntity */
-        return $this->getEntity(strtoupper($code3), $useCache, "`code3`=?", [$code3], $useCache);
+        return $this->getEntity(strtoupper($code2), $useCache, "`code2`=?", [$code2], $useCache);
     }
 
     /**
@@ -48,12 +48,12 @@ class CountriesOrm extends AbstractOrmRepository
     }
 
     /**
-     * @param CountryEntity|string $code3OrEntity
+     * @param CountryEntity|string $code2OrEntity
      * @return void
      * @throws \Charcoal\Cache\Exception\CacheException
      */
-    public function deleteFromCache(CountryEntity|string $code3OrEntity): void
+    public function deleteFromCache(CountryEntity|string $code2OrEntity): void
     {
-        $this->cacheDeleteEntity($code3OrEntity);
+        $this->cacheDeleteEntity($code2OrEntity);
     }
 }
