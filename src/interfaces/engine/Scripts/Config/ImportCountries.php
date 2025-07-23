@@ -72,9 +72,9 @@ class ImportCountries extends AppAwareCliScript
                 throw new CliScriptException('Failed to read a country line');
             }
 
-            $saveCountryQuery = "INSERT INTO `%s` (`status`, `name`, `region`, `code`, `code_short`, `dial_code`) " .
-                "VALUES (:status, :name, :region, :code, :codeShort, :dialCode) ON DUPLICATE KEY UPDATE `name`=:name, " .
-                "`region`=:region, `code3`=:code3, `code2`=:code3, `dial_code`=:dialCode";
+            $saveCountryQuery = "INSERT INTO `%s` (`status`, `name`, `region`, `code3`, `code2`, `dial_code`) " .
+                "VALUES (:status, :name, :region, :code3, :code2, :dialCode) ON DUPLICATE KEY UPDATE `name`=:name, " .
+                "`region`=:region, `code3`=:code3, `code2`=:code2, `dial_code`=:dialCode";
             $saveCountryData = [
                 "status" => 0,
                 "name" => $country[0],
