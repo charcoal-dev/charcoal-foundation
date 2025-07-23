@@ -5,6 +5,7 @@ namespace App\Shared\Core\Http\Response;
 
 use App\Shared\Context\CacheStore;
 use App\Shared\Core\Http\AppAwareEndpoint;
+use App\Shared\Exception\ApiResponseFinalizedException;
 use Charcoal\Http\Router\Controllers\CacheControl;
 
 /**
@@ -20,17 +21,18 @@ trait CacheableResponseTrait
      * @param CacheControl|null $cacheControl
      * @param CacheStore|null $cacheStore
      * @param callable $responseGeneratorFn
-     * @return void
+     * @return never
+     * @throws ApiResponseFinalizedException
      * @throws \Charcoal\Filesystem\Exception\FilesystemException
      * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
      */
-    protected function getCacheableResponse(
+    protected function sendCacheableResponse(
         CacheSource   $cacheSource,
         string        $uniqueRequestId,
         ?CacheControl $cacheControl,
         ?CacheStore   $cacheStore,
         callable      $responseGeneratorFn,
-    ): void
+    ): never
     {
         if ($cacheSource === CacheSource::CACHE && !$cacheStore) {
             throw new \LogicException("No cache storage provided for cacheable response");
@@ -52,7 +54,10 @@ trait CacheableResponseTrait
             }
         }
 
-        call_user_func($responseGeneratorFn);
+        try {
+            call_user_func($responseGeneratorFn);
+        } catch (ApiResponseFinalizedException) {
+        }
 
         if (isset($cacheable)) {
             try {
@@ -67,5 +72,7 @@ trait CacheableResponseTrait
                 $this->app->lifecycle->exception(new \RuntimeException($errorMsg, previous: $e));
             }
         }
+
+        throw new ApiResponseFinalizedException();
     }
 }
