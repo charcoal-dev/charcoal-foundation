@@ -49,6 +49,10 @@ trait CacheableResponseTrait
         bool          $purgeExpiredResponse = false
     ): never
     {
+        if (!$this instanceof CacheableResponseInterface) {
+            throw new \LogicException("Endpoint class does not implement CacheableResponseInterface");
+        }
+
         if ($cacheSource === CacheSource::CACHE && !$cacheStore) {
             throw new \LogicException("No cache storage provided for cacheable response");
         }
