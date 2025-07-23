@@ -11,6 +11,7 @@ use App\Shared\Core\Http\Api\ApiResponse;
 use App\Shared\Exception\ApiEntrypointException;
 use App\Shared\Exception\ApiResponseFinalizedException;
 use App\Shared\Exception\ApiValidationException;
+use App\Shared\Exception\CacheableResponseSuccessException;
 use App\Shared\Exception\ConcurrentHttpRequestException;
 use App\Shared\Exception\CorsOriginMismatchException;
 use App\Shared\Exception\HttpOptionsException;
@@ -90,7 +91,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
      */
     protected function handleException(\Throwable $t): void
     {
-        if ($t instanceof ApiResponseFinalizedException) {
+        if ($t instanceof ApiResponseFinalizedException || $t instanceof CacheableResponseSuccessException) {
             return;
         }
 

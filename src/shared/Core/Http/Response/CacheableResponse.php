@@ -6,6 +6,7 @@ namespace App\Shared\Core\Http\Response;
 use App\Shared\CharcoalApp;
 use App\Shared\Context\CacheStore;
 use App\Shared\Core\Http\AppAwareEndpoint;
+use App\Shared\Exception\CacheableResponseRedundantException;
 use App\Shared\Foundation\Http\HttpInterface;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Filesystem\Directory;
@@ -47,17 +48,20 @@ class CacheableResponse
 
     /**
      * @param CacheStore $cacheStore
+     * @param int $validity
+     * @param string|null $integrityTag
      * @return AbstractControllerResponse|null
+     * @throws CacheableResponseRedundantException
      * @throws \Charcoal\Cache\Exception\CacheDriverOpException
      * @throws \Charcoal\Cache\Exception\CachedEntityException
      */
-    public function getFromCache(CacheStore $cacheStore): ?AbstractControllerResponse
+    public function getFromCache(CacheStore $cacheStore, int $validity = 0, ?string $integrityTag = null): ?AbstractControllerResponse
     {
         /** @var AbstractControllerResponse $cached */
         $cached = $this->app->cache->get($cacheStore)
             ->get($this->cachePrefixedKey($this->uniqueRequestId));
 
-        $this->returnCheckInstance($cached);
+        $this->returnCheckInstance($cached, $validity, $integrityTag);
         return $cached;
     }
 
@@ -71,6 +75,16 @@ class CacheableResponse
     {
         $this->app->cache->get($cacheStore)
             ->set($this->cachePrefixedKey($this->uniqueRequestId), $response);
+    }
+
+    /**
+     * @param CacheStore $cacheStore
+     * @return void
+     * @throws \Charcoal\Cache\Exception\CacheDriverOpException
+     */
+    public function deleteFromCache(CacheStore $cacheStore): void
+    {
+        $this->app->cache->get($cacheStore)->delete($this->cachePrefixedKey($this->uniqueRequestId));
     }
 
     /**
@@ -102,10 +116,13 @@ class CacheableResponse
     }
 
     /**
+     * @param int $validity
+     * @param string|null $integrityTag
      * @return AbstractControllerResponse|null
+     * @throws CacheableResponseRedundantException
      * @throws FilesystemException
      */
-    public function getFromFilesystem(): ?AbstractControllerResponse
+    public function getFromFilesystem(int $validity = 0, ?string $integrityTag = null): ?AbstractControllerResponse
     {
         try {
             $tmpDir = $this->getFilesystemDirectory();
@@ -124,7 +141,7 @@ class CacheableResponse
                 WritablePayload::class
             ]]);
 
-            $this->returnCheckInstance($response);
+            $this->returnCheckInstance($response, $validity, $integrityTag);
             return $response;
         } catch (FilesystemException $e) {
             if (in_array($e->error, [FilesystemError::PATH_NOT_EXISTS, FilesystemError::PATH_TYPE_ERR])) {
@@ -136,10 +153,22 @@ class CacheableResponse
     }
 
     /**
-     * @param object $result
      * @return void
+     * @throws FilesystemException
      */
-    private function returnCheckInstance(object $result): void
+    public function deleteFromFilesystem(): void
+    {
+        $this->getFilesystemDirectory()->delete($this->uniqueRequestId);
+    }
+
+    /**
+     * @param object $result
+     * @param int $validity
+     * @param string|null $integrityTag
+     * @return void
+     * @throws CacheableResponseRedundantException
+     */
+    private function returnCheckInstance(object $result, int $validity = 0, ?string $integrityTag = null): void
     {
         if (!$result instanceof AbstractControllerResponse || !is_a($result, $this->responseClassname)) {
             throw new \RuntimeException(
@@ -148,6 +177,18 @@ class CacheableResponse
                     get_class($result)
                 )
             );
+        }
+
+        if ($validity > 0) {
+            if ((time() - $result->createdOn) >= $validity) {
+                throw new CacheableResponseRedundantException();
+            }
+        }
+
+        if ($integrityTag) {
+            if (!$result->getIntegrityTag() || $result->getIntegrityTag() !== $integrityTag) {
+                throw new CacheableResponseRedundantException();
+            }
         }
     }
 

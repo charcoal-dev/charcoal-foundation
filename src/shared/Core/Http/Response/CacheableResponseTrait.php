@@ -6,8 +6,10 @@ namespace App\Shared\Core\Http\Response;
 use App\Shared\Context\CacheStore;
 use App\Shared\Core\Http\AppAwareEndpoint;
 use App\Shared\Exception\ApiResponseFinalizedException;
+use App\Shared\Exception\CacheableResponseRedundantException;
 use App\Shared\Exception\CacheableResponseSuccessException;
 use Charcoal\Http\Router\Controllers\CacheControl;
+use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 
 /**
  * Trait CacheableResponseTrait
@@ -22,6 +24,9 @@ trait CacheableResponseTrait
      * @param CacheControl|null $cacheControl
      * @param CacheStore|null $cacheStore
      * @param callable $responseGeneratorFn
+     * @param int $cacheValidity
+     * @param string|null $cacheIntegrityTag
+     * @param bool $purgeExpiredResponse
      * @return never
      * @throws CacheableResponseSuccessException
      * @throws \Charcoal\Filesystem\Exception\FilesystemException
@@ -34,6 +39,9 @@ trait CacheableResponseTrait
         ?CacheControl $cacheControl,
         ?CacheStore   $cacheStore,
         callable      $responseGeneratorFn,
+        int           $cacheValidity = 0,
+        ?string       $cacheIntegrityTag = null,
+        bool          $purgeExpiredResponse = false
     ): never
     {
         if ($cacheSource === CacheSource::CACHE && !$cacheStore) {
@@ -44,14 +52,25 @@ trait CacheableResponseTrait
             $cacheable = new CacheableResponse($this, $uniqueRequestId, $cacheControl);
             try {
                 $cached = $cacheStore ?
-                    $cacheable->getFromCache($cacheStore) : $cacheable->getFromFilesystem();
+                    $cacheable->getFromCache($cacheStore, $cacheValidity, $cacheIntegrityTag) :
+                    $cacheable->getFromFilesystem($cacheValidity, $cacheIntegrityTag);
+            } catch (CacheableResponseRedundantException) {
+                unset($cached);
+                if ($purgeExpiredResponse) {
+                    try {
+                        $cacheStore ? $cacheable->deleteFromCache($cacheStore) :
+                            $cacheable->deleteFromFilesystem();
+                    } catch (\Exception $e) {
+                        $this->app->lifecycle->exception($e);
+                    }
+                }
             } catch (\Exception $e) {
                 $errorMsg = "Failed to retrieve cached response: " . $e::class;
                 trigger_error($errorMsg, E_USER_NOTICE);
                 $this->app->lifecycle->exception(new \RuntimeException($errorMsg, previous: $e));
             }
 
-            if (isset($cached)) {
+            if (isset($cached) && $cached instanceof AbstractControllerResponse) {
                 $this->sendResponseFromCache($cacheable, $cached, true);
             }
         }
