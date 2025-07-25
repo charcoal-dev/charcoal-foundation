@@ -11,9 +11,9 @@ use App\Shared\Core\Http\AppAwareEndpoint;
  */
 class CorsHeaders
 {
-    private string $methods;
-    private string $allowHeaders;
-    private string $exposeHeaders;
+    private array $methods = [];
+    private array $allowHeaders = [];
+    private array $exposeHeaders = [];
     public bool $allowCredentials = false;
     public ?int $maxAge = null;
 
@@ -40,7 +40,7 @@ class CorsHeaders
      */
     public function allowMethods(string ...$methods): static
     {
-        $this->methods = implode(",", $methods);
+        $this->methods = array_merge($this->methods, $methods);
         return $this;
     }
 
@@ -50,7 +50,7 @@ class CorsHeaders
      */
     public function allowHeaders(string ...$headers): static
     {
-        $this->allowHeaders = implode(",", $headers);
+        $this->allowHeaders = array_merge($this->allowHeaders, $headers);
         return $this;
     }
 
@@ -60,7 +60,7 @@ class CorsHeaders
      */
     public function exposeHeaders(string ...$headers): static
     {
-        $this->exposeHeaders = implode(",", $headers);
+        $this->exposeHeaders = array_merge($this->exposeHeaders, $headers);
         return $this;
     }
 
@@ -72,9 +72,9 @@ class CorsHeaders
     public function dispatch(string $origin, AppAwareEndpoint $route): void
     {
         $route->response()->headers->set("Access-Control-Allow-Origin", $origin)
-            ->set("Access-Control-Allow-Methods", $this->methods)
-            ->set("Access-Control-Allow-Headers", $this->allowHeaders)
-            ->set("Access-Control-Expose-Headers", $this->exposeHeaders);
+            ->set("Access-Control-Allow-Methods", implode(",", $this->methods))
+            ->set("Access-Control-Allow-Headers", implode(",", $this->allowHeaders))
+            ->set("Access-Control-Expose-Headers", implode(",", $this->exposeHeaders));
 
         if ($this->maxAge > 0) {
             $route->response()->headers->set("Access-Control-Max-Age", strval($this->maxAge));
