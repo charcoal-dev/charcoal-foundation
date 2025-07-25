@@ -102,6 +102,7 @@ class InterfaceLogSnapshot
         }
 
         // Lifecycle Entries
+        $app->lifecycle->updateExecutionMetrics();
         $this->lifecycle = $app->lifecycle->toArray();
         $this->errorCount += count($this->lifecycle["exceptions"] ?? []);
 
