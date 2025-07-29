@@ -8,6 +8,8 @@ use App\Shared\Exception\ApiResponseFinalizedException;
 use App\Shared\Exception\CacheableResponseRedundantException;
 use App\Shared\Exception\CacheableResponseSuccessException;
 use App\Shared\Foundation\Http\HttpInterface;
+use Charcoal\Filesystem\Exception\FilesystemError;
+use Charcoal\Filesystem\Exception\FilesystemException;
 use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 
 /**
@@ -101,7 +103,13 @@ trait CacheableResponseTrait
     ): void
     {
         try {
-            $this->getCacheableResponse($context, $interface)->deleteCached();
+            try {
+                $this->getCacheableResponse($context, $interface)->deleteCached();
+            } catch (FilesystemException $e) {
+                if ($e->error !== FilesystemError::PATH_NOT_EXISTS) {
+                    throw $e;
+                }
+            }
         } catch (\Exception $e) {
             if ($throwEx) {
                 throw $e;
