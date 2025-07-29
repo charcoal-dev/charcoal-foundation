@@ -3,12 +3,10 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Response;
 
-use App\Shared\Context\CacheStore;
 use App\Shared\Core\Http\AppAwareEndpoint;
 use App\Shared\Exception\ApiResponseFinalizedException;
 use App\Shared\Exception\CacheableResponseRedundantException;
 use App\Shared\Exception\CacheableResponseSuccessException;
-use Charcoal\Http\Router\Controllers\CacheControl;
 use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 
 /**
@@ -18,83 +16,17 @@ use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
  */
 trait CacheableResponseTrait
 {
-    private ?CacheableResponse $cacheableResponse = null;
-    private ?string $cacheableResponseClassname = null;
-    private ?array $cacheableResponseUnserializeClasses = null;
-
     /**
-     * @return CacheableResponseBinding
-     */
-    abstract public function declareCacheableResponseBinding(): CacheableResponseBinding;
-
-    /**
-     * @param string $classname
-     * @param array $unserializeClasses
-     * @return void
-     */
-    protected function setCacheableResponseClasses(string $classname, array $unserializeClasses): void
-    {
-        $this->cacheableResponseClassname = $classname;
-        $this->cacheableResponseUnserializeClasses = $unserializeClasses;
-    }
-
-    /**
-     * @param string $uniqueRequestId
-     * @param CacheSource $source
-     * @param CacheControl|null $cacheControlHeader
-     * @param CacheStore|null $cacheStore
-     * @param int $validity
-     * @param string|null $integrityTag
-     * @return CacheableResponseBinding
-     */
-    protected function createCacheableResponseBinding(
-        string        $uniqueRequestId,
-        CacheSource   $source,
-        ?CacheControl $cacheControlHeader,
-        ?CacheStore   $cacheStore,
-        int           $validity = 0,
-        ?string       $integrityTag = null,
-    ): CacheableResponseBinding
-    {
-        return new CacheableResponseBinding(
-            $uniqueRequestId,
-            $source,
-            $cacheStore,
-            $cacheControlHeader,
-            $validity,
-            $integrityTag,
-            $this->cacheableResponseClassname ?? get_class($this->response()),
-            $this->cacheableResponseUnserializeClasses ?? [get_class($this->response())]
-        );
-    }
-
-    /**
+     * @param CacheableResponseContext $context
      * @return CacheableResponse
      */
-    protected function getCacheableResponse(): CacheableResponse
+    protected function getCacheableResponse(CacheableResponseContext $context): CacheableResponse
     {
-        if ($this->cacheableResponse) {
-            return $this->cacheableResponse;
-        }
-
-        if (!$this instanceof CacheableResponseInterface) {
-            throw new \LogicException("Endpoint class does not implement CacheableResponseInterface");
-        }
-
-        if (!isset($this->cacheableResponseBinding)) {
-            throw new \LogicException("CacheableResponseBinding not declared");
-        }
-
-        if ($this->cacheableResponseBinding->source === CacheSource::CACHE &&
-            !$this->cacheableResponseBinding->cacheStore) {
-            throw new \LogicException("No cache store provided for cacheable response");
-        }
-
-        return $this->cacheableResponse = new CacheableResponse($this, $this->cacheableResponseBinding);
+        return new CacheableResponse($this, $context);
     }
 
-
     /**
+     * @param CacheableResponse $cacheable
      * @param callable $responseGeneratorFn
      * @param bool $purgeExpiredResponse
      * @return never
@@ -102,12 +34,11 @@ trait CacheableResponseTrait
      * @throws \Throwable
      */
     protected function sendCacheableResponse(
-        callable $responseGeneratorFn,
-        bool     $purgeExpiredResponse = false
+        CacheableResponse $cacheable,
+        callable          $responseGeneratorFn,
+        bool              $purgeExpiredResponse = false
     ): never
     {
-        $cacheable = $this->getCacheableResponse();
-
         try {
             $cached = $cacheable->getCached();
         } catch (CacheableResponseRedundantException) {
@@ -126,7 +57,7 @@ trait CacheableResponseTrait
         }
 
         if (isset($cached) && $cached instanceof AbstractControllerResponse &&
-            is_a($cached, $this->cacheableResponseBinding->responseClassname)) {
+            is_a($cached, $cacheable->context->responseClassname)) {
             $this->sendResponseFromCache($cacheable, $cached, true);
         }
 

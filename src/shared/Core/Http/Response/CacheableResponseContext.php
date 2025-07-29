@@ -10,7 +10,7 @@ use Charcoal\Http\Router\Controllers\CacheControl;
  * Class CacheableResponseBinding
  * @package App\Shared\Core\Http\Response
  */
-readonly class CacheableResponseBinding
+readonly class CacheableResponseContext
 {
     /**
      * @param string $uniqueRequestId

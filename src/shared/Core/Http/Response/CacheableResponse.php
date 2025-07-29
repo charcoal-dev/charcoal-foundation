@@ -27,20 +27,18 @@ class CacheableResponse
 {
     private CharcoalApp $app;
     private readonly HttpInterface $interface;
-    private readonly string $responseClassname;
 
     /**
      * @param AppAwareEndpoint $route
-     * @param CacheableResponseBinding $binding
+     * @param CacheableResponseContext $context
      */
     public function __construct(
         AppAwareEndpoint                         $route,
-        public readonly CacheableResponseBinding $binding,
+        public readonly CacheableResponseContext $context,
     )
     {
         $this->app = $route->app;
         $this->interface = $route->interface->enum;
-        $this->responseClassname = $route->getResponseObject()::class;
     }
 
     /**
@@ -52,12 +50,12 @@ class CacheableResponse
      */
     public function getCached(): ?AbstractControllerResponse
     {
-        if ($this->binding->source === CacheSource::NONE) {
+        if ($this->context->source === CacheSource::NONE) {
             return null;
         }
 
-        return $this->binding->cacheStore ?
-            $this->getFromCache() : $this->getFromFilesystem($this->binding->responseUnserializeClasses);
+        return $this->context->cacheStore ?
+            $this->getFromCache() : $this->getFromFilesystem($this->context->responseUnserializeClasses);
     }
 
     /**
@@ -67,7 +65,7 @@ class CacheableResponse
      */
     public function deleteCached(): void
     {
-        $this->binding->cacheStore ?
+        $this->context->cacheStore ?
             $this->deleteFromCache() : $this->deleteFromFilesystem();
     }
 
@@ -79,11 +77,11 @@ class CacheableResponse
      */
     public function cacheResponse(AbstractControllerResponse $response): void
     {
-        if ($this->binding->source === CacheSource::NONE) {
+        if ($this->context->source === CacheSource::NONE) {
             return;
         }
 
-        $this->binding->cacheStore ?
+        $this->context->cacheStore ?
             $this->storeInCache($response) : $this->storeInFilesystem($response);
     }
 
@@ -96,8 +94,8 @@ class CacheableResponse
     protected function getFromCache(): ?AbstractControllerResponse
     {
         /** @var AbstractControllerResponse $cached */
-        $cached = $this->app->cache->get($this->binding->cacheStore)
-            ->get($this->cachePrefixedKey($this->binding->uniqueRequestId));
+        $cached = $this->app->cache->get($this->context->cacheStore)
+            ->get($this->cachePrefixedKey($this->context->uniqueRequestId));
 
         $this->returnCheckInstance($cached);
         return $cached;
@@ -110,8 +108,8 @@ class CacheableResponse
      */
     protected function storeInCache(AbstractControllerResponse $response): void
     {
-        $this->app->cache->get($this->binding->cacheStore)
-            ->set($this->cachePrefixedKey($this->binding->uniqueRequestId), $response);
+        $this->app->cache->get($this->context->cacheStore)
+            ->set($this->cachePrefixedKey($this->context->uniqueRequestId), $response);
     }
 
     /**
@@ -120,8 +118,8 @@ class CacheableResponse
      */
     protected function deleteFromCache(): void
     {
-        $this->app->cache->get($this->binding->cacheStore)
-            ->delete($this->cachePrefixedKey($this->binding->uniqueRequestId));
+        $this->app->cache->get($this->context->cacheStore)
+            ->delete($this->cachePrefixedKey($this->context->uniqueRequestId));
     }
 
     /**
@@ -146,7 +144,7 @@ class CacheableResponse
         }
 
         $tmpDir->writeToFile(
-            $this->binding->uniqueRequestId,
+            $this->context->uniqueRequestId,
             $this->getSerializedResponse($response),
             append: false,
         );
@@ -163,7 +161,7 @@ class CacheableResponse
         try {
             $tmpDir = $this->getFilesystemDirectory();
             $response = $tmpDir->getFile(
-                $this->binding->uniqueRequestId,
+                $this->context->uniqueRequestId,
                 createIfNotExists: false
             );
 
@@ -195,7 +193,7 @@ class CacheableResponse
      */
     protected function deleteFromFilesystem(): void
     {
-        $this->getFilesystemDirectory()->delete($this->binding->uniqueRequestId);
+        $this->getFilesystemDirectory()->delete($this->context->uniqueRequestId);
     }
 
     /**
@@ -205,23 +203,23 @@ class CacheableResponse
      */
     private function returnCheckInstance(object $result): void
     {
-        if (!$result instanceof AbstractControllerResponse || !is_a($result, $this->responseClassname)) {
+        if (!$result instanceof AbstractControllerResponse || !is_a($result, $this->context->responseClassname)) {
             throw new \RuntimeException(
                 sprintf('Expected cached response of type "%s", got "%s"',
-                    $this->responseClassname,
+                    $this->context->responseClassname,
                     get_class($result)
                 )
             );
         }
 
-        if ($this->binding->validity > 0) {
-            if ((time() - $result->createdOn) >= $this->binding->validity) {
+        if ($this->context->validity > 0) {
+            if ((time() - $result->createdOn) >= $this->context->validity) {
                 throw new CacheableResponseRedundantException();
             }
         }
 
-        if ($this->binding->integrityTag) {
-            if (!$result->getIntegrityTag() || $result->getIntegrityTag() !== $this->binding->integrityTag) {
+        if ($this->context->integrityTag) {
+            if (!$result->getIntegrityTag() || $result->getIntegrityTag() !== $this->context->integrityTag) {
                 throw new CacheableResponseRedundantException();
             }
         }

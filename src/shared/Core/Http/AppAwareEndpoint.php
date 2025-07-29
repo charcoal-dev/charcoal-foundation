@@ -8,8 +8,6 @@ use App\Shared\Core\Http\Auth\AuthContextResolverInterface;
 use App\Shared\Core\Http\Auth\AuthRouteInterface;
 use App\Shared\Core\Http\Cors\CorsBinding;
 use App\Shared\Core\Http\Response\CacheableResponse;
-use App\Shared\Core\Http\Response\CacheableResponseBinding;
-use App\Shared\Core\Http\Response\CacheableResponseInterface;
 use App\Shared\Exception\ApiValidationException;
 use App\Shared\Exception\CacheableResponseSuccessException;
 use App\Shared\Exception\ConcurrentHttpRequestException;
@@ -55,8 +53,6 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     protected readonly ?ConcurrencyBinding $concurrencyBinding;
     private ?FileLock $concurrencyLock = null;
 
-    protected readonly ?CacheableResponseBinding $cacheableResponseBinding;
-
     protected bool $exceptionReturnTrace = false;
     protected bool $exceptionFullClassname = false;
     protected bool $exceptionIncludePrevious = false;
@@ -80,8 +76,6 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         $this->deviceFp = $this instanceof DeviceFingerprintRequiredRoute ? $this->resolveDeviceFp() : null;
         $this->corsBinding = $this->declareCorsBinding();
         $this->concurrencyBinding = $this->declareConcurrencyBinding();
-        $this->cacheableResponseBinding = $this instanceof CacheableResponseInterface ?
-            $this->declareCacheableResponseBinding() : null;
 
         // Proceed to entrypoint
         parent::dispatchEntrypoint();
@@ -303,10 +297,10 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     ): never
     {
         $this->swapResponseObject($response);
-        if ($cacheableResponse->cacheControl) {
-            $this->useCacheControl($cacheableResponse->cacheControl);
-            if ($cacheableResponse->cacheControl->store === CacheStoreDirective::PUBLIC ||
-                $cacheableResponse->cacheControl->store === CacheStoreDirective::PRIVATE) {
+        if ($cacheableResponse->context->cacheControlHeader) {
+            $this->useCacheControl($cacheableResponse->context->cacheControlHeader);
+            if ($cacheableResponse->context->cacheControlHeader->store === CacheStoreDirective::PUBLIC ||
+                $cacheableResponse->context->cacheControlHeader->store === CacheStoreDirective::PRIVATE) {
                 $response->headers->set("Last-Modified", gmdate("D, d M Y H:i:s", $response->createdOn) . " GMT");
             }
         }
