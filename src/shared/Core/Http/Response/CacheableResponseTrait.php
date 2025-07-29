@@ -3,12 +3,10 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Response;
 
-use App\Shared\Context\CacheStore;
 use App\Shared\Core\Http\AppAwareEndpoint;
 use App\Shared\Exception\ApiResponseFinalizedException;
 use App\Shared\Exception\CacheableResponseRedundantException;
 use App\Shared\Exception\CacheableResponseSuccessException;
-use Charcoal\Http\Router\Controllers\CacheControl;
 use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 
 /**
@@ -18,75 +16,74 @@ use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
  */
 trait CacheableResponseTrait
 {
+    protected ?CacheableResponseBinding $cacheableResponseBinding = null;
+    private ?CacheableResponse $cacheableResponse = null;
+
     /**
      * @return CacheableResponseBinding
      */
     abstract protected function declareCacheableResponseBinding(): CacheableResponseBinding;
 
     /**
-     * @param CacheSource $cacheSource
-     * @param string $uniqueRequestId
-     * @param CacheControl|null $cacheControl
-     * @param CacheStore|null $cacheStore
-     * @param callable $responseGeneratorFn
-     * @param int $cacheValidity
-     * @param string|null $cacheIntegrityTag
-     * @param bool $purgeExpiredResponse
-     * @return never
-     * @throws CacheableResponseSuccessException
-     * @throws \Charcoal\Filesystem\Exception\FilesystemException
-     * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
-     * @throws \Throwable
+     * @return CacheableResponse
      */
-    protected function sendCacheableResponse(
-        CacheSource   $cacheSource,
-        string        $uniqueRequestId,
-        ?CacheControl $cacheControl,
-        ?CacheStore   $cacheStore,
-        callable      $responseGeneratorFn,
-        int           $cacheValidity = 0,
-        ?string       $cacheIntegrityTag = null,
-        bool          $purgeExpiredResponse = false
-    ): never
+    protected function getCacheableResponse(): CacheableResponse
     {
+        if ($this->cacheableResponse) {
+            return $this->cacheableResponse;
+        }
+
         if (!$this instanceof CacheableResponseInterface) {
             throw new \LogicException("Endpoint class does not implement CacheableResponseInterface");
         }
 
-        if ($cacheSource === CacheSource::CACHE && !$cacheStore) {
-            throw new \LogicException("No cache storage provided for cacheable response");
+        if (!$this->cacheableResponseBinding) {
+            throw new \LogicException("CacheableResponseBinding not declared");
         }
 
-        if ($cacheSource !== CacheSource::NONE) {
-            $cacheable = new CacheableResponse($this, $uniqueRequestId, $cacheControl);
-            try {
-                $cached = $cacheStore ?
-                    $cacheable->getFromCache($cacheStore, $cacheValidity, $cacheIntegrityTag) :
-                    $cacheable->getFromFilesystem(
-                        $cacheValidity,
-                        $cacheIntegrityTag,
-                        $this->cacheableResponseBinding->responseUnserializeClasses
-                    );
-            } catch (CacheableResponseRedundantException) {
-                unset($cached);
-                if ($purgeExpiredResponse) {
-                    try {
-                        $cacheStore ? $cacheable->deleteFromCache($cacheStore) :
-                            $cacheable->deleteFromFilesystem();
-                    } catch (\Exception $e) {
-                        $this->app->lifecycle->exception($e);
-                    }
-                }
-            } catch (\Exception $e) {
-                $errorMsg = "Failed to retrieve cached response: " . $e::class;
-                trigger_error($errorMsg, E_USER_NOTICE);
-                $this->app->lifecycle->exception(new \RuntimeException($errorMsg, previous: $e));
-            }
+        if ($this->cacheableResponseBinding->source === CacheSource::CACHE &&
+            !$this->cacheableResponseBinding->cacheStore) {
+            throw new \LogicException("No cache store provided for cacheable response");
+        }
 
-            if (isset($cached) && $cached instanceof AbstractControllerResponse &&
-                is_a($cached, $this->cacheableResponseBinding->responseClassname)) {
-                $this->sendResponseFromCache($cacheable, $cached, true);
+        return $this->cacheableResponse = new CacheableResponse($this, $this->cacheableResponseBinding);
+    }
+
+
+    /**
+     * @param callable $responseGeneratorFn
+     * @param bool $purgeExpiredResponse
+     * @return never
+     * @throws CacheableResponseSuccessException
+     * @throws \Throwable
+     */
+    protected function sendCacheableResponse(
+        callable $responseGeneratorFn,
+        bool     $purgeExpiredResponse = false
+    ): never
+    {
+        $cacheable = $this->getCacheableResponse();
+
+        try {
+            $cached = $cacheable->getCached();
+        } catch (CacheableResponseRedundantException) {
+            unset($cached);
+            if ($purgeExpiredResponse) {
+                try {
+                    $cacheable->deleteCached();
+                } catch (\Exception $e) {
+                    $this->app->lifecycle->exception($e);
+                }
             }
+        } catch (\Exception $e) {
+            $errorMsg = "Failed to retrieve cached response: " . $e::class;
+            trigger_error($errorMsg, E_USER_NOTICE);
+            $this->app->lifecycle->exception(new \RuntimeException($errorMsg, previous: $e));
+        }
+
+        if (isset($cached) && $cached instanceof AbstractControllerResponse &&
+            is_a($cached, $this->cacheableResponseBinding->responseClassname)) {
+            $this->sendResponseFromCache($cacheable, $cached, true);
         }
 
         try {
@@ -98,18 +95,12 @@ trait CacheableResponseTrait
             throw $t;
         }
 
-        if (isset($cacheable)) {
-            try {
-                if ($cacheStore) {
-                    $cacheable->storeInCache($cacheStore, $this->response());
-                } else {
-                    $cacheable->storeInFilesystem($this->response());
-                }
-            } catch (\Exception $e) {
-                $errorMsg = "Failed to STORE cached response: " . $e::class;
-                trigger_error($errorMsg, E_USER_NOTICE);
-                $this->app->lifecycle->exception(new \RuntimeException($errorMsg, previous: $e));
-            }
+        try {
+            $cacheable->cacheResponse($this->response());
+        } catch (\Exception $e) {
+            $errorMsg = "Failed to STORE cached response: " . $e::class;
+            trigger_error($errorMsg, E_USER_NOTICE);
+            $this->app->lifecycle->exception(new \RuntimeException($errorMsg, previous: $e));
         }
 
         throw new CacheableResponseSuccessException();
