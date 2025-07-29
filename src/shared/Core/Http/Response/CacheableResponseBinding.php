@@ -19,8 +19,8 @@ readonly class CacheableResponseBinding
      * @param CacheControl|null $cacheControlHeader
      * @param int $validity
      * @param string|null $integrityTag
-     * @param string $responseClassname
-     * @param array $responseUnserializeClasses
+     * @param class-string $responseClassname
+     * @param class-string[] $responseUnserializeClasses
      */
     public function __construct(
         public string        $uniqueRequestId,

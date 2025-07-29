@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Response;
 
+use App\Shared\Context\CacheStore;
 use App\Shared\Core\Http\AppAwareEndpoint;
 use App\Shared\Exception\ApiResponseFinalizedException;
 use App\Shared\Exception\CacheableResponseRedundantException;
 use App\Shared\Exception\CacheableResponseSuccessException;
+use Charcoal\Http\Router\Controllers\CacheControl;
 use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 
 /**
@@ -17,11 +19,54 @@ use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 trait CacheableResponseTrait
 {
     private ?CacheableResponse $cacheableResponse = null;
+    private ?string $cacheableResponseClassname = null;
+    private ?array $cacheableResponseUnserializeClasses = null;
 
     /**
      * @return CacheableResponseBinding
      */
-    abstract protected function declareCacheableResponseBinding(): CacheableResponseBinding;
+    abstract public function declareCacheableResponseBinding(): CacheableResponseBinding;
+
+    /**
+     * @param string $classname
+     * @param array $unserializeClasses
+     * @return void
+     */
+    protected function setCacheableResponseClasses(string $classname, array $unserializeClasses): void
+    {
+        $this->cacheableResponseClassname = $classname;
+        $this->cacheableResponseUnserializeClasses = $unserializeClasses;
+    }
+
+    /**
+     * @param string $uniqueRequestId
+     * @param CacheSource $source
+     * @param CacheControl|null $cacheControlHeader
+     * @param CacheStore|null $cacheStore
+     * @param int $validity
+     * @param string|null $integrityTag
+     * @return CacheableResponseBinding
+     */
+    protected function createCacheableResponseBinding(
+        string        $uniqueRequestId,
+        CacheSource   $source,
+        ?CacheControl $cacheControlHeader,
+        ?CacheStore   $cacheStore,
+        int           $validity = 0,
+        ?string       $integrityTag = null,
+    ): CacheableResponseBinding
+    {
+        return new CacheableResponseBinding(
+            $uniqueRequestId,
+            $source,
+            $cacheStore,
+            $cacheControlHeader,
+            $validity,
+            $integrityTag,
+            $this->cacheableResponseClassname ?? get_class($this->response()),
+            $this->cacheableResponseUnserializeClasses ?? [get_class($this->response())]
+        );
+    }
 
     /**
      * @return CacheableResponse
