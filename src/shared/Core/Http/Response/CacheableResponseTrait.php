@@ -16,7 +16,6 @@ use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
  */
 trait CacheableResponseTrait
 {
-    protected ?CacheableResponseBinding $cacheableResponseBinding = null;
     private ?CacheableResponse $cacheableResponse = null;
 
     /**
@@ -37,7 +36,7 @@ trait CacheableResponseTrait
             throw new \LogicException("Endpoint class does not implement CacheableResponseInterface");
         }
 
-        if (!$this->cacheableResponseBinding) {
+        if (!isset($this->cacheableResponseBinding)) {
             throw new \LogicException("CacheableResponseBinding not declared");
         }
 
