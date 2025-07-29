@@ -33,5 +33,8 @@ readonly class CacheableResponseContext
         public array         $responseUnserializeClasses = []
     )
     {
+        if ($this->source === CacheSource::CACHE && !$this->cacheStore) {
+            throw new \LogicException("CacheStore is required when source is Cache");
+        }
     }
 }

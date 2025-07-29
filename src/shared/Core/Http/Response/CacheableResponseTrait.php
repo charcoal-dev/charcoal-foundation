@@ -7,6 +7,7 @@ use App\Shared\Core\Http\AppAwareEndpoint;
 use App\Shared\Exception\ApiResponseFinalizedException;
 use App\Shared\Exception\CacheableResponseRedundantException;
 use App\Shared\Exception\CacheableResponseSuccessException;
+use App\Shared\Foundation\Http\HttpInterface;
 use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 
 /**
@@ -18,11 +19,15 @@ trait CacheableResponseTrait
 {
     /**
      * @param CacheableResponseContext $context
+     * @param HttpInterface|null $interface
      * @return CacheableResponse
      */
-    protected function getCacheableResponse(CacheableResponseContext $context): CacheableResponse
+    protected function getCacheableResponse(
+        CacheableResponseContext $context,
+        ?HttpInterface           $interface = null
+    ): CacheableResponse
     {
-        return new CacheableResponse($this, $context);
+        return new CacheableResponse($this->app, $interface ?? $this->interface->enum, $context);
     }
 
     /**
@@ -71,7 +76,7 @@ trait CacheableResponseTrait
         }
 
         try {
-            $cacheable->cacheResponse($this->response());
+            $cacheable->saveCachedResponse($this->response());
         } catch (\Exception $e) {
             $errorMsg = "Failed to STORE cached response: " . $e::class;
             trigger_error($errorMsg, E_USER_NOTICE);
@@ -79,5 +84,32 @@ trait CacheableResponseTrait
         }
 
         throw new CacheableResponseSuccessException();
+    }
+
+    /**
+     * @param CacheableResponseContext $context
+     * @param bool $throwEx
+     * @param HttpInterface|null $interface
+     * @return void
+     * @throws \Charcoal\Cache\Exception\CacheDriverOpException
+     * @throws \Charcoal\Filesystem\Exception\FilesystemException
+     */
+    protected function purgeCacheableResponse(
+        CacheableResponseContext $context,
+        bool                     $throwEx,
+        ?HttpInterface           $interface = null
+    ): void
+    {
+        try {
+            $this->getCacheableResponse($context, $interface)->deleteCached();
+        } catch (\Exception $e) {
+            if ($throwEx) {
+                throw $e;
+            }
+
+            $errorMsg = "Failed to DELETE cached response: " . $e::class;
+            trigger_error($errorMsg, E_USER_NOTICE);
+            $this->app->lifecycle->exception(new \RuntimeException($errorMsg, previous: $e));
+        }
     }
 }

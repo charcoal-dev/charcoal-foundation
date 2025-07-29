@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http\Response;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Core\Http\AppAwareEndpoint;
 use App\Shared\Exception\CacheableResponseRedundantException;
 use App\Shared\Foundation\Http\HttpInterface;
 use Charcoal\Buffers\Buffer;
@@ -23,22 +22,19 @@ use Charcoal\Http\Router\Controllers\Response\PayloadResponse;
  * Class CacheableResponse
  * @package App\Shared\Core\Http\Response
  */
-class CacheableResponse
+readonly class CacheableResponse
 {
-    private CharcoalApp $app;
-    private readonly HttpInterface $interface;
-
     /**
-     * @param AppAwareEndpoint $route
+     * @param CharcoalApp $app
+     * @param HttpInterface $interface
      * @param CacheableResponseContext $context
      */
     public function __construct(
-        AppAwareEndpoint                         $route,
-        public readonly CacheableResponseContext $context,
+        private CharcoalApp             $app,
+        private HttpInterface           $interface,
+        public CacheableResponseContext $context,
     )
     {
-        $this->app = $route->app;
-        $this->interface = $route->interface->enum;
     }
 
     /**
@@ -55,7 +51,7 @@ class CacheableResponse
         }
 
         return $this->context->cacheStore ?
-            $this->getFromCache() : $this->getFromFilesystem($this->context->responseUnserializeClasses);
+            $this->getFromCacheStore() : $this->getFromFilesystem($this->context->responseUnserializeClasses);
     }
 
     /**
@@ -66,7 +62,7 @@ class CacheableResponse
     public function deleteCached(): void
     {
         $this->context->cacheStore ?
-            $this->deleteFromCache() : $this->deleteFromFilesystem();
+            $this->deleteFromCacheStore() : $this->deleteFromFilesystem();
     }
 
     /**
@@ -75,14 +71,14 @@ class CacheableResponse
      * @throws FilesystemException
      * @throws \Charcoal\Cache\Exception\CacheException
      */
-    public function cacheResponse(AbstractControllerResponse $response): void
+    public function saveCachedResponse(AbstractControllerResponse $response): void
     {
         if ($this->context->source === CacheSource::NONE) {
             return;
         }
 
         $this->context->cacheStore ?
-            $this->storeInCache($response) : $this->storeInFilesystem($response);
+            $this->storeInCacheStore($response) : $this->storeInFilesystem($response);
     }
 
     /**
@@ -91,7 +87,7 @@ class CacheableResponse
      * @throws \Charcoal\Cache\Exception\CacheDriverOpException
      * @throws \Charcoal\Cache\Exception\CachedEntityException
      */
-    protected function getFromCache(): ?AbstractControllerResponse
+    protected function getFromCacheStore(): ?AbstractControllerResponse
     {
         /** @var AbstractControllerResponse $cached */
         $cached = $this->app->cache->get($this->context->cacheStore)
@@ -106,7 +102,7 @@ class CacheableResponse
      * @return void
      * @throws \Charcoal\Cache\Exception\CacheException
      */
-    protected function storeInCache(AbstractControllerResponse $response): void
+    protected function storeInCacheStore(AbstractControllerResponse $response): void
     {
         $this->app->cache->get($this->context->cacheStore)
             ->set($this->cachePrefixedKey($this->context->uniqueRequestId), $response);
@@ -116,7 +112,7 @@ class CacheableResponse
      * @return void
      * @throws \Charcoal\Cache\Exception\CacheDriverOpException
      */
-    protected function deleteFromCache(): void
+    protected function deleteFromCacheStore(): void
     {
         $this->app->cache->get($this->context->cacheStore)
             ->delete($this->cachePrefixedKey($this->context->uniqueRequestId));
