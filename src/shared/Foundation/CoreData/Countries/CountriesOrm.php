@@ -38,12 +38,12 @@ class CountriesOrm extends AbstractOrmRepository
 
     /**
      * @param CountryEntity $country
-     * @return void
+     * @return int
      * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
      */
-    public function upsert(CountryEntity $country): void
+    public function upsert(CountryEntity $country): int
     {
-        $this->dbUpsertEntity($country,
+        return $this->dbUpsertEntity($country,
             new StringVector("status", "name", "region", "code3", "code2", "dialCode"));
     }
 
