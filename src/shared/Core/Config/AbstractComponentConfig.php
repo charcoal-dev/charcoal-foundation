@@ -4,14 +4,19 @@ declare(strict_types=1);
 namespace App\Shared\Core\Config;
 
 use App\Shared\Foundation\CoreData\ObjectStore\StoredObjectInterface;
+use Charcoal\App\Kernel\Contracts\StorageHooks\StorageHooksInterface;
 use Charcoal\App\Kernel\Entity\AbstractEntity;
+use Charcoal\App\Kernel\Entity\EntitySource;
+use Charcoal\OOP\OOP;
 
 /**
  * Class AbstractComponentConfig
  * @package App\Shared\Core\Config
  */
-class AbstractComponentConfig extends AbstractEntity implements StoredObjectInterface
+class AbstractComponentConfig extends AbstractEntity
+    implements StoredObjectInterface, StorageHooksInterface
 {
+    public const bool STORAGE_HOOKS = true;
     public const ?string CONFIG_ID = null;
     public const int CACHE_TTL = 86400;
 
@@ -70,5 +75,34 @@ class AbstractComponentConfig extends AbstractEntity implements StoredObjectInte
         }
 
         return static::CACHE_TTL;
+    }
+
+    /**
+     * @param EntitySource $source
+     * @return string|null
+     */
+    public function onRetrieve(EntitySource $source): ?string
+    {
+        if(!static::STORAGE_HOOKS) {
+            return null;
+        }
+
+        if (in_array($source, [EntitySource::DATABASE, EntitySource::CACHE])) {
+            return sprintf('%s retrieved from %s', OOP::baseClassName(static::class), $source->name);
+        }
+
+        return null;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function onCacheStore(): ?string
+    {
+        if(!static::STORAGE_HOOKS) {
+            return null;
+        }
+
+        return OOP::baseClassName(static::class) . " stored in CACHE";
     }
 }
