@@ -108,14 +108,8 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
             if (is_int($errorCode)) {
                 $errorObject["code"] = $errorCode;
             }
-
-            try {
-                $this->response()->setError(count($errorObject) === 1 ?
-                    $errorObject["message"] : $errorObject, $apiError->getHttpCode());
-            } catch (ApiResponseFinalizedException) {
-            }
-
-            return;
+        } else {
+            $errorObject = $this->exceptionToArray($t);
         }
 
         // Log to Lifecycle
@@ -128,7 +122,8 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
         }
 
         try {
-            $this->response()->setError($this->exceptionToArray($t));
+            $this->response()->setError(count($errorObject) === 1 && isset($errorObject["message"]) ?
+                $errorObject["message"] : $errorObject, $apiError->getHttpCode());
         } catch (ApiResponseFinalizedException) {
         }
     }
