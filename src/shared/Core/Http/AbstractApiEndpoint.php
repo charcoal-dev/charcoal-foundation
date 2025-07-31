@@ -123,7 +123,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
 
         try {
             $this->response()->setError(count($errorObject) === 1 && isset($errorObject["message"]) ?
-                $errorObject["message"] : $errorObject, $apiError->getHttpCode());
+                $errorObject["message"] : $errorObject, $apiError?->getHttpCode());
         } catch (ApiResponseFinalizedException) {
         }
     }
