@@ -6,17 +6,10 @@ namespace App\Shared\Core\Http\Response;
 use App\Shared\CharcoalApp;
 use App\Shared\Exception\CacheableResponseRedundantException;
 use App\Shared\Foundation\Http\HttpInterface;
-use Charcoal\Buffers\Buffer;
 use Charcoal\Filesystem\Directory;
 use Charcoal\Filesystem\Exception\FilesystemError;
 use Charcoal\Filesystem\Exception\FilesystemException;
-use Charcoal\Http\Commons\KeyValuePair;
-use Charcoal\Http\Commons\WritableHeaders;
-use Charcoal\Http\Commons\WritablePayload;
 use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
-use Charcoal\Http\Router\Controllers\Response\BodyResponse;
-use Charcoal\Http\Router\Controllers\Response\FileDownloadResponse;
-use Charcoal\Http\Router\Controllers\Response\PayloadResponse;
 
 /**
  * Class CacheableResponse
@@ -147,12 +140,12 @@ readonly class CacheableResponse
     }
 
     /**
-     * @param array $additionalAllowedClasses
+     * @param class-string[] $allowedClasses
      * @return AbstractControllerResponse|null
      * @throws CacheableResponseRedundantException
      * @throws FilesystemException
      */
-    protected function getFromFilesystem(array $additionalAllowedClasses = []): ?AbstractControllerResponse
+    protected function getFromFilesystem(array $allowedClasses = []): ?AbstractControllerResponse
     {
         try {
             $tmpDir = $this->getFilesystemDirectory();
@@ -161,16 +154,7 @@ readonly class CacheableResponse
                 createIfNotExists: false
             );
 
-            $response = unserialize($response->read(), ["allowed_classes" => array_merge([
-                AbstractControllerResponse::class,
-                PayloadResponse::class,
-                BodyResponse::class,
-                Buffer::class,
-                FileDownloadResponse::class,
-                WritableHeaders::class,
-                WritablePayload::class,
-                KeyValuePair::class
-            ], $additionalAllowedClasses)]);
+            $response = unserialize($response->read(), ["allowed_classes" => $allowedClasses]);
 
             $this->returnCheckInstance($response);
             return $response;
