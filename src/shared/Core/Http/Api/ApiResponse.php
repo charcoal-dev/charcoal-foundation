@@ -76,4 +76,32 @@ class ApiResponse extends PayloadResponse
         $body = parent::getBodyArray();
         return [static::PARAM_SUCCESS => $this->isSuccess, ...$body];
     }
+
+    /**
+     * @return array
+     */
+    public function collectSerializableData(): array
+    {
+        $data = parent::collectSerializableData();
+        $data["isSuccess"] = $this->isSuccess;
+        return $data;
+    }
+
+    /**
+     * @return class-string[]
+     */
+    public static function unserializeDependencies(): array
+    {
+        return [static::class, ...parent::unserializeDependencies()];
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        $this->isSuccess = $data["isSuccess"];
+        parent::__unserialize($data);
+    }
 }
