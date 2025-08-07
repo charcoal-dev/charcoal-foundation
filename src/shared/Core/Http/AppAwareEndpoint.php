@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http;
 
 use App\Shared\CharcoalApp;
+use App\Shared\Context\ApiError;
 use App\Shared\Core\Http\Auth\AuthContextResolverInterface;
 use App\Shared\Core\Http\Auth\AuthRouteInterface;
 use App\Shared\Core\Http\Cors\CorsBinding;
@@ -103,12 +104,11 @@ abstract class AppAwareEndpoint extends AbstractRouteController
 
     /**
      * @return never
+     * @throws ApiValidationException
      */
     protected function handleInterfaceIsDisabled(): never
     {
-        throw new \RuntimeException(
-            sprintf('HTTP Interface "%s" is DISABLED', $this->interface->enum->name)
-        );
+        throw new ApiValidationException(ApiError::INTERFACE_DISABLED);
     }
 
     /**

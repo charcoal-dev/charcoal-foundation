@@ -6,6 +6,7 @@ namespace App\Shared\Context;
 use App\Shared\Core\Http\AbstractApiEndpoint;
 use App\Shared\Core\Http\Api\ApiErrorCodeInterface;
 use App\Shared\Exception\ApiValidationException;
+use App\Shared\Foundation\Http\HttpInterface;
 
 /**
  * Class ApiError
@@ -13,6 +14,7 @@ use App\Shared\Exception\ApiValidationException;
  */
 enum ApiError: string implements ApiErrorCodeInterface
 {
+    case INTERFACE_DISABLED = 'HTTP Interface "%s" is DISABLED';
     case CONCURRENT_TERMINATE = "Too many requests";
     case CORS_TERMINATE = "CORS origin not allowed";
     case METHOD_NOT_ALLOWED = "Method not allowed";
@@ -23,6 +25,10 @@ enum ApiError: string implements ApiErrorCodeInterface
 
     public function getErrorMessage(\Throwable $context = null, AbstractApiEndpoint $route = null): string
     {
+        if ($this === self::INTERFACE_DISABLED) {
+            return sprintf($this->value, $route->interface->enum->name);
+        }
+
         if ($this === self::UNRECOGNIZED_REQUEST_PAYLOAD) {
             $param = $context instanceof ApiValidationException ? ($context->baggage[0] ?? null) : null;
             return sprintf($this->value, $param ?? "");
