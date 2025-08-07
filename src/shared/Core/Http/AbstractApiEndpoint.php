@@ -17,6 +17,7 @@ use App\Shared\Exception\CorsOriginMismatchException;
 use App\Shared\Exception\HttpOptionsException;
 use App\Shared\Exception\WrappedException;
 use App\Shared\Utility\StringHelper;
+use Charcoal\Http\Commons\HttpMethod;
 use Charcoal\Http\Router\Controllers\Response\NoContentResponse;
 
 /**
@@ -49,6 +50,20 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     final protected function declareHttpInterface(): ?HttpInterfaceBinding
     {
         return $this->declareApiInterface();
+    }
+
+    /**
+     * @return never
+     * @throws HttpOptionsException
+     */
+    protected function handleInterfaceIsDisabled(): never
+    {
+        if ($this->request->method === HttpMethod::OPTIONS) {
+            $this->response()->headers->set("Allow", "");
+            throw new HttpOptionsException();
+        }
+
+        parent::handleInterfaceIsDisabled();
     }
 
     /**

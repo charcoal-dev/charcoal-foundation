@@ -7,6 +7,8 @@ use App\Shared\CharcoalApp;
 use App\Shared\Core\Http\Auth\AuthContextResolverInterface;
 use App\Shared\Core\Http\Auth\AuthRouteInterface;
 use App\Shared\Core\Http\Cors\CorsBinding;
+use App\Shared\Core\Http\Cors\CorsHeaders;
+use App\Shared\Core\Http\Cors\CorsPolicy;
 use App\Shared\Core\Http\Response\CacheableResponse;
 use App\Shared\Exception\ApiValidationException;
 use App\Shared\Exception\CacheableResponseSuccessException;
@@ -49,7 +51,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     public readonly HttpLogLevel $requestLogLevel;
     protected readonly ?InterfaceLogEntity $requestLog;
     protected readonly ?InterfaceLogSnapshot $requestLogSnapshot;
-    protected readonly ?CorsBinding $corsBinding;
+    protected readonly CorsBinding $corsBinding;
     protected readonly ?ConcurrencyBinding $concurrencyBinding;
     private ?FileLock $concurrencyLock = null;
 
@@ -88,16 +90,25 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     final protected function resolveEntrypoint(): callable
     {
         // CORS Binding
-        $this->corsBinding?->validateOrigin($this);
+        $this->corsBinding->validateOrigin($this);
 
         // Interface Status
-        if ($this->interface && !$this->interface->config->status) {
-            throw new \RuntimeException(
-                sprintf('HTTP Interface "%s" is DISABLED', $this->interface->enum->name)
-            );
+        if ($this->interface && $this->interface->config->status) {
+            return $this->resolveEntryPointMethod();
         }
 
-        return $this->resolveEntryPointMethod();
+        // Terminate
+        $this->handleInterfaceIsDisabled();
+    }
+
+    /**
+     * @return never
+     */
+    protected function handleInterfaceIsDisabled(): never
+    {
+        throw new \RuntimeException(
+            sprintf('HTTP Interface "%s" is DISABLED', $this->interface->enum->name)
+        );
     }
 
     /**
@@ -114,11 +125,11 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     }
 
     /**
-     * @return CorsBinding|null
+     * @return CorsBinding
      */
-    protected function declareCorsBinding(): ?CorsBinding
+    protected function declareCorsBinding(): CorsBinding
     {
-        return null;
+        return new CorsBinding(CorsPolicy::ALLOW_ALL, CorsHeaders::getDefaultCors());
     }
 
     /**
