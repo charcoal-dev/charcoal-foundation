@@ -20,6 +20,42 @@ class AbstractComponentConfig extends AbstractEntity
     public const ?string CONFIG_ID = null;
     public const int CACHE_TTL = 86400;
 
+    protected ?int $configCachedOn = null;
+
+    /**
+     * @return $this
+     */
+    public function getCacheableClone(): static
+    {
+        return clone $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFromCache(): bool
+    {
+        return isset($this->configCachedOn) && is_int($this->configCachedOn) && $this->configCachedOn > 0;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getCachedOn(): ?int
+    {
+        return $this->configCachedOn;
+    }
+
+    /**
+     * @return array
+     */
+    final public function __serialize(): array
+    {
+        $data = parent::__serialize();
+        $data["configCachedOn"] = time();
+        return $data;
+    }
+
     /**
      * @return array
      */
@@ -83,7 +119,7 @@ class AbstractComponentConfig extends AbstractEntity
      */
     public function onRetrieve(EntitySource $source): ?string
     {
-        if(!static::STORAGE_HOOKS) {
+        if (!static::STORAGE_HOOKS) {
             return null;
         }
 
@@ -99,7 +135,7 @@ class AbstractComponentConfig extends AbstractEntity
      */
     public function onCacheStore(): ?string
     {
-        if(!static::STORAGE_HOOKS) {
+        if (!static::STORAGE_HOOKS) {
             return null;
         }
 
