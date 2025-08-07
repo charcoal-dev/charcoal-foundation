@@ -54,6 +54,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
 
     /**
      * @return never
+     * @throws ApiValidationException
      * @throws HttpOptionsException
      */
     protected function handleInterfaceIsDisabled(): never
