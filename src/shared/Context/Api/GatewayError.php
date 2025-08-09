@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Context;
+namespace App\Shared\Context\Api;
 
 use App\Shared\Core\Http\AbstractApiEndpoint;
 use App\Shared\Core\Http\Api\ApiErrorCodeInterface;
@@ -9,10 +9,10 @@ use App\Shared\Exception\ApiValidationException;
 use App\Shared\Validation\ValidationException;
 
 /**
- * Class ApiError
- * @package App\Shared\Context
+ * Class GatewayError
+ * @package App\Shared\Context\Api
  */
-enum ApiError: string implements ApiErrorCodeInterface
+enum GatewayError: string implements ApiErrorCodeInterface
 {
     case INTERFACE_DISABLED = 'HTTP Interface "%s" is DISABLED';
     case CONCURRENT_TERMINATE = "Too many requests";

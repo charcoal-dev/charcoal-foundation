@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Context\ApiError;
+use App\Shared\Context\Api\GatewayError;
 use App\Shared\Core\Http\Auth\AuthContextResolverInterface;
 use App\Shared\Core\Http\Auth\AuthRouteInterface;
 use App\Shared\Core\Http\Cors\CorsBinding;
@@ -109,7 +109,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
      */
     protected function handleInterfaceIsDisabled(): never
     {
-        throw new ApiValidationException(ApiError::INTERFACE_DISABLED);
+        throw new ApiValidationException(GatewayError::INTERFACE_DISABLED);
     }
 
     /**

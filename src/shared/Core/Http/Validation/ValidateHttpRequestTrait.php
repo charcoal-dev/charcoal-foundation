@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Validation;
 
-use App\Shared\Context\ApiError;
+use App\Shared\Context\Api\GatewayError;
 use App\Shared\Core\Http\AppAwareEndpoint;
 use App\Shared\Exception\ApiValidationException;
 
@@ -23,7 +23,7 @@ trait ValidateHttpRequestTrait
     {
         $unrecognised = $this->request->payload->getUnrecognizedKeys(...$accepted);
         if (!empty($unrecognised)) {
-            throw new ApiValidationException(ApiError::UNRECOGNIZED_REQUEST_PAYLOAD, baggage: $unrecognised);
+            throw new ApiValidationException(GatewayError::UNRECOGNIZED_REQUEST_PAYLOAD, baggage: $unrecognised);
         }
 
         return $this;

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http;
 
-use App\Shared\Context\ApiError;
+use App\Shared\Context\Api\GatewayError;
 use App\Shared\Core\Http\Api\ApiErrorCodeInterface;
 use App\Shared\Core\Http\Api\ApiInterfaceBinding;
 use App\Shared\Core\Http\Api\ApiNamespaceInterface;
@@ -85,7 +85,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     {
         $userAgent = StringHelper::getTrimmedOrNull($this->userClient->userAgent);
         if (!$userAgent) {
-            throw new ApiValidationException(ApiError::USER_AGENT_REQUIRED);
+            throw new ApiValidationException(GatewayError::USER_AGENT_REQUIRED);
         }
 
         $this->userAgent = $userAgent;
@@ -152,11 +152,11 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     protected function individualExceptionHandler(\Throwable $t): ?ApiErrorCodeInterface
     {
         if ($t instanceof ConcurrentHttpRequestException) {
-            return ApiError::CONCURRENT_TERMINATE;
+            return GatewayError::CONCURRENT_TERMINATE;
         }
 
         if ($t instanceof CorsOriginMismatchException) {
-            return ApiError::CORS_TERMINATE;
+            return GatewayError::CORS_TERMINATE;
         }
 
         if ($t instanceof ApiValidationException) {
@@ -170,15 +170,15 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
         }
 
         if ($t instanceof ApiEntrypointException) {
-            return ApiError::METHOD_NOT_ALLOWED;
+            return GatewayError::METHOD_NOT_ALLOWED;
         }
 
         if ($t instanceof \ErrorException) {
             if ($this->app->errors->isFatalError($t->getSeverity())) {
-                return ApiError::SERVER_ERROR;
+                return GatewayError::SERVER_ERROR;
             }
 
-            return ApiError::FATAL_ERROR;
+            return GatewayError::FATAL_ERROR;
         }
 
         return null;
@@ -191,7 +191,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
      */
     protected function handleValidationException(ValidationException $exception): ?ApiErrorCodeInterface
     {
-        return ApiError::VALIDATION_ERROR;
+        return GatewayError::VALIDATION_ERROR;
     }
 
     /**
