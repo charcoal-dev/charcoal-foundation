@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http\Cors;
+namespace App\Shared\Core\Http\Policy\Cors;
 
 use App\Shared\Core\Http\AppAwareEndpoint;
 

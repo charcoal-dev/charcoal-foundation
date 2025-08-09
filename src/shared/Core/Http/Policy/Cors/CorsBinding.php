@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http\Cors;
+namespace App\Shared\Core\Http\Policy\Cors;
 
 use App\Shared\Core\Http\AppAwareEndpoint;
 use App\Shared\Exception\CorsOriginMismatchException;
@@ -13,6 +13,12 @@ use App\Shared\Utility\NetworkValidator;
  */
 readonly class CorsBinding
 {
+    /**
+     * @param CorsPolicy $policy
+     * @param CorsHeaders $headers
+     * @param array $allowedOrigins
+     * @param bool $terminate
+     */
     public function __construct(
         public CorsPolicy  $policy = CorsPolicy::DISABLED,
         public CorsHeaders $headers,
