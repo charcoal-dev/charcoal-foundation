@@ -46,9 +46,9 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     abstract protected function declareApiInterface(): ApiInterfaceBinding;
 
     /**
-     * @return HttpInterfaceBinding|null
+     * @return ApiInterfaceBinding
      */
-    final protected function declareHttpInterface(): ?HttpInterfaceBinding
+    final protected function declareHttpInterface(): ApiInterfaceBinding
     {
         return $this->declareApiInterface();
     }
@@ -122,7 +122,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
         if ($apiError) {
             $errorObject = ["message" => $apiError->getErrorMessage($t, $this) ?? $apiError->name];
             $errorCode = $apiError->getErrorCode($t, $this);
-            if (is_int($errorCode)) {
+            if ($errorCode && $errorCode !== 0) {
                 $errorObject["code"] = $errorCode;
             }
         } else {
