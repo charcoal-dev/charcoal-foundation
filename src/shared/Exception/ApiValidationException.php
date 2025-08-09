@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Exception;
 
-use App\Shared\Core\Http\Api\ApiErrorCodeInterface;
+use App\Shared\Core\Http\Api\Error\ApiErrorCodeInterface;
 
 /**
  * Class ApiValidationException

@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http;
 
 use App\Shared\Context\Api\GatewayError;
-use App\Shared\Core\Http\Api\ApiErrorCodeInterface;
 use App\Shared\Core\Http\Api\ApiInterfaceBinding;
 use App\Shared\Core\Http\Api\ApiNamespaceInterface;
 use App\Shared\Core\Http\Api\ApiResponse;
+use App\Shared\Core\Http\Api\Error\ApiErrorCodeInterface;
 use App\Shared\Exception\ApiEntrypointException;
 use App\Shared\Exception\ApiResponseFinalizedException;
 use App\Shared\Exception\ApiValidationException;

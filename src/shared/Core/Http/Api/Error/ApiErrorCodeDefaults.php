@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http\Api;
+namespace App\Shared\Core\Http\Api\Error;
 
 use App\Shared\Core\Http\AbstractApiEndpoint;
 

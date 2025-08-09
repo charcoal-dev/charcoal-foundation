@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Context\Api;
 
 use App\Shared\Core\Http\AbstractApiEndpoint;
-use App\Shared\Core\Http\Api\ApiErrorCodeInterface;
+use App\Shared\Core\Http\Api\Error\ApiErrorCodeInterface;
 use App\Shared\Exception\ApiValidationException;
 use App\Shared\Validation\ValidationException;
 
