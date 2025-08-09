@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Interfaces\Web;
 
 use App\Shared\Core\Http\Html\AbstractHtmlEndpoint;
-use App\Shared\Core\Http\HttpInterfaceBinding;
+use App\Shared\Core\Http\HttpInterfaceProfile;
 use App\Shared\Foundation\Http\Config\HttpInterfaceConfig;
 use App\Shared\Foundation\Http\HttpInterface;
 
@@ -23,8 +23,8 @@ abstract class AbstractWebEndpoint extends AbstractHtmlEndpoint
     {
     }
 
-    protected function declareHttpInterface(): ?HttpInterfaceBinding
+    protected function declareHttpInterface(): ?HttpInterfaceProfile
     {
-        return new HttpInterfaceBinding($this->app, HttpInterface::WEB, true, false, HttpInterfaceConfig::class);
+        return new HttpInterfaceProfile($this->app, HttpInterface::WEB, true, false, HttpInterfaceConfig::class);
     }
 }

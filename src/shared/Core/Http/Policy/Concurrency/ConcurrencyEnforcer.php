@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Policy\Concurrency;
 
-use App\Shared\Core\Http\HttpInterfaceBinding;
+use App\Shared\Core\Http\HttpInterfaceProfile;
 use App\Shared\Exception\ConcurrentHttpRequestException;
 use Charcoal\Filesystem\Directory;
 use Charcoal\Semaphore\Exception\SemaphoreException;
@@ -24,14 +24,14 @@ readonly class ConcurrencyEnforcer
     }
 
     /**
-     * @param HttpInterfaceBinding|null $interface
+     * @param HttpInterfaceProfile|null $interface
      * @param Directory $semaphoreDirectory
      * @param bool $autoRelease
      * @return FileLock
      * @throws ConcurrentHttpRequestException
      */
     public function acquireFileLock(
-        ?HttpInterfaceBinding $interface,
+        ?HttpInterfaceProfile $interface,
         Directory             $semaphoreDirectory,
         bool                  $autoRelease = true
     ): FileLock

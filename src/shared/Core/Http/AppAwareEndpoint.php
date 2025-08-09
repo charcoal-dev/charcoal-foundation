@@ -46,7 +46,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     protected const array LOG_IGNORE_RESPONSE_PARAMS = [];
 
     public readonly string $userIpAddress;
-    public readonly ?HttpInterfaceBinding $interface;
+    public readonly ?HttpInterfaceProfile $interface;
     public readonly ?AbstractFixedLenBuffer $deviceFp;
     protected readonly ?AuthContextResolverInterface $authContext;
 
@@ -151,7 +151,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     /**
      * @return HttpInterface|null
      */
-    abstract protected function declareHttpInterface(): ?HttpInterfaceBinding;
+    abstract protected function declareHttpInterface(): ?HttpInterfaceProfile;
 
     /**
      * @return HttpLogLevel

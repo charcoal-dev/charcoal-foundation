@@ -10,10 +10,10 @@ use App\Shared\Foundation\Http\Config\HttpInterfaceConfig;
 use App\Shared\Foundation\Http\HttpInterface;
 
 /**
- * Class HttpInterfaceBinding
+ * Class HttpInterfaceProfile
  * @package App\Shared\Core\Http
  */
-class HttpInterfaceBinding
+class HttpInterfaceProfile
 {
     public HttpInterfaceConfig $config;
 

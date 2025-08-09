@@ -4,15 +4,15 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http\Api;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Core\Http\HttpInterfaceBinding;
+use App\Shared\Core\Http\HttpInterfaceProfile;
 use App\Shared\Foundation\Http\Config\HttpInterfaceConfig;
 use App\Shared\Foundation\Http\HttpInterface;
 
 /**
- * Class ApiInterfaceBinding
+ * Class ApiInterfaceProfile
  * @package App\Shared\Core\Http\Api
  */
-class ApiInterfaceBinding extends HttpInterfaceBinding
+class ApiInterfaceProfile extends HttpInterfaceProfile
 {
     public readonly ApiNamespaceInterface $namespace;
 

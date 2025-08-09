@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http;
 
 use App\Shared\Context\Api\Errors\GatewayError;
-use App\Shared\Core\Http\Api\ApiInterfaceBinding;
+use App\Shared\Core\Http\Api\ApiInterfaceProfile;
 use App\Shared\Core\Http\Api\ApiNamespaceInterface;
 use App\Shared\Core\Http\Api\ApiResponse;
 use App\Shared\Core\Http\Api\Error\ApiErrorCodeInterface;
@@ -25,7 +25,7 @@ use Charcoal\Http\Router\Controllers\Response\NoContentResponse;
 /**
  * Class AbstractApiEndpoint
  * @package App\Shared\Core\Http
- * @property ApiInterfaceBinding $interface
+ * @property ApiInterfaceProfile $interface
  * @method never put()
  * @method never get()
  * @method never post()
@@ -42,14 +42,14 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     abstract protected function declareApiNamespace(): ApiNamespaceInterface;
 
     /**
-     * @return ApiInterfaceBinding
+     * @return ApiInterfaceProfile
      */
-    abstract protected function declareApiInterface(): ApiInterfaceBinding;
+    abstract protected function declareApiInterface(): ApiInterfaceProfile;
 
     /**
-     * @return ApiInterfaceBinding
+     * @return ApiInterfaceProfile
      */
-    final protected function declareHttpInterface(): ApiInterfaceBinding
+    final protected function declareHttpInterface(): ApiInterfaceProfile
     {
         return $this->declareApiInterface();
     }
