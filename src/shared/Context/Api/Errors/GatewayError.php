@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Context\Api;
+namespace App\Shared\Context\Api\Errors;
 
 use App\Shared\Core\Http\AbstractApiEndpoint;
 use App\Shared\Core\Http\Api\Error\ApiErrorCodeInterface;

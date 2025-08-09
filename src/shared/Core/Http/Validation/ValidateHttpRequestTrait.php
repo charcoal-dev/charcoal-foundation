@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Validation;
 
-use App\Shared\Context\Api\GatewayError;
+use App\Shared\Context\Api\Errors\GatewayError;
 use App\Shared\Core\Http\AppAwareEndpoint;
 use App\Shared\Exception\ApiValidationException;
 

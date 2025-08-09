@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Context\Api\GatewayError;
+use App\Shared\Context\Api\Errors\GatewayError;
 use App\Shared\Core\Http\Auth\AuthContextResolverInterface;
 use App\Shared\Core\Http\Auth\AuthRouteInterface;
 use App\Shared\Core\Http\Cors\CorsBinding;
