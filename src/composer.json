@@ -1,6 +1,7 @@
 {
   "require": {
     "php": "^8.3",
+    "charcoal-dev/base": "dev-main",
     "charcoal-dev/app-kernel": "dev-main",
     "charcoal-dev/db-orm": "^0.1.9",
     "charcoal-dev/oop-base": "^0.1.5",

@@ -6,7 +6,7 @@ namespace App\Shared\Context;
 use App\Shared\Core\Http\AbstractApiEndpoint;
 use App\Shared\Core\Http\Api\ApiErrorCodeInterface;
 use App\Shared\Exception\ApiValidationException;
-use App\Shared\Foundation\Http\HttpInterface;
+use App\Shared\Validation\ValidationException;
 
 /**
  * Class ApiError
@@ -22,9 +22,19 @@ enum ApiError: string implements ApiErrorCodeInterface
     case FATAL_ERROR = "An error occurred";
     case USER_AGENT_REQUIRED = "User-Agent header is required";
     case UNRECOGNIZED_REQUEST_PAYLOAD = 'Unrecognized parameter: "%s"';
+    case VALIDATION_ERROR = "Validation error: %s";
 
+    /**
+     * @param \Throwable|null $context
+     * @param AbstractApiEndpoint|null $route
+     * @return string
+     */
     public function getErrorMessage(\Throwable $context = null, AbstractApiEndpoint $route = null): string
     {
+        if ($this === self::VALIDATION_ERROR && $context instanceof ValidationException) {
+            return sprintf($this->value, $context->getMessage());
+        }
+
         if ($this === self::INTERFACE_DISABLED) {
             return sprintf($this->value, $route->interface->enum->name);
         }
@@ -37,11 +47,19 @@ enum ApiError: string implements ApiErrorCodeInterface
         return $this->value;
     }
 
+    /**
+     * @param \Throwable|null $context
+     * @param AbstractApiEndpoint|null $route
+     * @return int|string|null
+     */
     public function getErrorCode(\Throwable $context = null, AbstractApiEndpoint $route = null): null|int|string
     {
         return $context->getCode() ?: null;
     }
 
+    /**
+     * @return int
+     */
     public function getHttpCode(): int
     {
         return match ($this) {

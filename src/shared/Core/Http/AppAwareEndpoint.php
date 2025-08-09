@@ -86,6 +86,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
 
     /**
      * @return callable
+     * @throws ApiValidationException
      * @throws CorsOriginMismatchException
      */
     final protected function resolveEntrypoint(): callable

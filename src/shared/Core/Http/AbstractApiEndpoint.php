@@ -17,6 +17,7 @@ use App\Shared\Exception\CorsOriginMismatchException;
 use App\Shared\Exception\HttpOptionsException;
 use App\Shared\Exception\WrappedException;
 use App\Shared\Utility\StringHelper;
+use App\Shared\Validation\ValidationException;
 use Charcoal\Http\Commons\HttpMethod;
 use Charcoal\Http\Router\Controllers\Response\NoContentResponse;
 
@@ -164,6 +165,10 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
             }
         }
 
+        if ($t instanceof ValidationException) {
+            return $this->handleValidationException($t);
+        }
+
         if ($t instanceof ApiEntrypointException) {
             return ApiError::METHOD_NOT_ALLOWED;
         }
@@ -177,6 +182,16 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
         }
 
         return null;
+    }
+
+    /**
+     * @param ValidationException $exception
+     * @return ApiErrorCodeInterface|null
+     * @noinspection PhpUnusedParameterInspection
+     */
+    protected function handleValidationException(ValidationException $exception): ?ApiErrorCodeInterface
+    {
+        return ApiError::VALIDATION_ERROR;
     }
 
     /**
