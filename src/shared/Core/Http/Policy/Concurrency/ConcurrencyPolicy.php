@@ -6,8 +6,8 @@ namespace App\Shared\Core\Http\Policy\Concurrency;
 use App\Shared\Core\Http\Auth\AuthContextResolverInterface;
 
 /**
- * Class ConcurrencyBinding
- * @package App\Shared\Core\Http
+ * Class ConcurrencyPolicy
+ * @package App\Shared\Core\Http\Policy\Concurrency
  */
 readonly class ConcurrencyPolicy
 {
