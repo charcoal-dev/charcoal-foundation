@@ -48,14 +48,14 @@ class ContactHelper
     }
 
     /**
-     * @param mixed $input
+     * @param string $input
      * @param bool $onlyAscii
      * @param int $maxLength
      * @return bool
      */
-    public static function isValidEmailAddress(mixed $input, bool $onlyAscii = true, int $maxLength = 254): bool
+    public static function isValidEmailAddress(string $input, bool $onlyAscii = true, int $maxLength = 254): bool
     {
-        if (is_string($input) && NumberHelper::inRange(strlen($input), 6, $maxLength)) {
+        if (NumberHelper::inRange(strlen($input), 6, $maxLength)) {
             if ($onlyAscii) {
                 if (!preg_match('/^[\w@\-._+]+$/', $input)) {
                     return false;
