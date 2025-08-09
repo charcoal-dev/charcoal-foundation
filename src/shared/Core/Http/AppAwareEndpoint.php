@@ -7,6 +7,8 @@ use App\Shared\CharcoalApp;
 use App\Shared\Context\Api\Errors\GatewayError;
 use App\Shared\Core\Http\Auth\AuthContextResolverInterface;
 use App\Shared\Core\Http\Auth\AuthRouteInterface;
+use App\Shared\Core\Http\Policy\Concurrency\ConcurrencyEnforcer;
+use App\Shared\Core\Http\Policy\Concurrency\ConcurrencyPolicy;
 use App\Shared\Core\Http\Policy\Cors\CorsBinding;
 use App\Shared\Core\Http\Policy\Cors\CorsHeaders;
 use App\Shared\Core\Http\Policy\Cors\CorsPolicy;
@@ -28,9 +30,7 @@ use Charcoal\Http\Commons\HttpMethod;
 use Charcoal\Http\Router\Controllers\CacheStoreDirective;
 use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 use Charcoal\OOP\OOP;
-use Charcoal\Semaphore\Exception\SemaphoreException;
 use Charcoal\Semaphore\Filesystem\FileLock;
-use Charcoal\Semaphore\FilesystemSemaphore;
 
 /**
  * Class AppAwareEndpoint
@@ -52,8 +52,9 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     public readonly HttpLogLevel $requestLogLevel;
     protected readonly ?InterfaceLogEntity $requestLog;
     protected readonly ?InterfaceLogSnapshot $requestLogSnapshot;
+
     protected readonly CorsBinding $corsBinding;
-    protected readonly ?ConcurrencyBinding $concurrencyBinding;
+    protected readonly ?ConcurrencyPolicy $concurrencyPolicy;
     private ?FileLock $concurrencyLock = null;
 
     protected bool $exceptionReturnTrace = false;
@@ -78,7 +79,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         $this->interface = $this->declareHttpInterface();
         $this->deviceFp = $this instanceof DeviceFingerprintRequiredRoute ? $this->resolveDeviceFp() : null;
         $this->corsBinding = $this->declareCorsBinding();
-        $this->concurrencyBinding = $this->declareConcurrencyBinding();
+        $this->concurrencyPolicy = $this->declareconcurrencyPolicy();
 
         // Proceed to entrypoint
         parent::dispatchEntrypoint();
@@ -118,9 +119,9 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     abstract protected function resolveEntryPointMethod(): callable;
 
     /**
-     * @return ConcurrencyBinding|null
+     * @return ConcurrencyPolicy|null
      */
-    protected function declareConcurrencyBinding(): ?ConcurrencyBinding
+    protected function declareConcurrencyPolicy(): ?ConcurrencyPolicy
     {
         return null;
     }
@@ -175,7 +176,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
             $this->resolveAuthContext() : null;
 
         // Handle Request Concurrency
-        if ($this->concurrencyBinding) {
+        if ($this->concurrencyPolicy) {
             $this->handleRequestConcurrency();
         }
 
@@ -221,30 +222,14 @@ abstract class AppAwareEndpoint extends AbstractRouteController
      */
     private function handleRequestConcurrency(): void
     {
-        $concurrencyLockKey = match ($this->concurrencyBinding->policy) {
-            ConcurrencyPolicy::IP_ADDR => "ip_" . md5($this->userIpAddress),
-            ConcurrencyPolicy::AUTH_CONTEXT => "auth_" . $this->authContext->getPrimaryId(),
-            default => throw new \LogicException("Cannot determine semaphore key for concurrency policy")
-        };
-
-        try {
-            $httpSemaphore = new FilesystemSemaphore(
-                $this->app->directories->semaphore->getDirectory($this->interface?->enum->value ?? "http", true)
-            );
-        } catch (\Exception $e) {
-            throw new \LogicException("Failed to initialize HTTP Semaphore", previous: $e);
+        $concurrencyScopeLockId = $this->concurrencyPolicy->getScopeLockId($this->userIpAddress,
+            $this->authContext?->getPrimaryId());
+        if (!$concurrencyScopeLockId) {
+            return;
         }
 
-        try {
-            $this->concurrencyLock = $httpSemaphore->obtainLock($concurrencyLockKey,
-                $this->concurrencyBinding->maximumWaitTime > 0 ? $this->concurrencyBinding->tickInterval : null,
-                max($this->concurrencyBinding->maximumWaitTime, 0),
-            );
-
-            $this->concurrencyLock->setAutoRelease();
-        } catch (SemaphoreException) {
-            throw new ConcurrentHttpRequestException($this->concurrencyBinding->policy, $concurrencyLockKey);
-        }
+        $this->concurrencyLock = (new ConcurrencyEnforcer($this->concurrencyPolicy, $concurrencyScopeLockId))
+            ->acquireFileLock($this->interface, $this->app->directories->semaphore, true);
     }
 
     /**

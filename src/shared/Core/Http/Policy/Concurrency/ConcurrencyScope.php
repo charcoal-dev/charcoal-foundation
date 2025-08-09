@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http;
+namespace App\Shared\Core\Http\Policy\Concurrency;
 
 /**
  * Class ConcurrencyPolicy
  * @package App\Shared\Core\Http
  */
-enum ConcurrencyPolicy: int
+enum ConcurrencyScope: int
 {
     case NONE = 0;
     case IP_ADDR = 1;

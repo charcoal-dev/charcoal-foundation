@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Exception;
 
-use App\Shared\Core\Http\ConcurrencyPolicy;
+use App\Shared\Core\Http\Policy\Concurrency\ConcurrencyScope;
 
 /**
  * Class ConcurrentHttpRequestException
@@ -12,8 +12,8 @@ use App\Shared\Core\Http\ConcurrencyPolicy;
 class ConcurrentHttpRequestException extends \Exception
 {
     public function __construct(
-        public readonly ConcurrencyPolicy $policy,
-        public readonly string            $semaphoreLockKey,
+        public readonly ConcurrencyScope $policy,
+        public readonly string           $semaphoreLockKey,
     )
     {
         parent::__construct("", 0, null);
