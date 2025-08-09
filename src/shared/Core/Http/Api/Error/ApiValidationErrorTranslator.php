@@ -11,6 +11,7 @@ use App\Shared\Validation\ValidationErrorEnumInterface;
  */
 class ApiValidationErrorTranslator
 {
+    /** @noinspection PhpUnusedParameterInspection */
     public static function toApiError(ValidationErrorEnumInterface $error): ?ApiErrorCodeInterface
     {
         return null;

@@ -8,6 +8,7 @@ use App\Shared\Core\Http\Api\ApiInterfaceBinding;
 use App\Shared\Core\Http\Api\ApiNamespaceInterface;
 use App\Shared\Core\Http\Api\ApiResponse;
 use App\Shared\Core\Http\Api\Error\ApiErrorCodeInterface;
+use App\Shared\Core\Http\Api\Error\ApiValidationErrorTranslator;
 use App\Shared\Exception\ApiEntrypointException;
 use App\Shared\Exception\ApiResponseFinalizedException;
 use App\Shared\Exception\ApiValidationException;
@@ -187,11 +188,10 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     /**
      * @param ValidationException $exception
      * @return ApiErrorCodeInterface|null
-     * @noinspection PhpUnusedParameterInspection
      */
     protected function handleValidationException(ValidationException $exception): ?ApiErrorCodeInterface
     {
-        return GatewayError::VALIDATION_ERROR;
+        return ApiValidationErrorTranslator::toApiError($exception->errorCode);
     }
 
     /**
