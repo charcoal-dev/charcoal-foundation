@@ -12,6 +12,7 @@ use App\Shared\Core\Http\Policy\Concurrency\ConcurrencyPolicy;
 use App\Shared\Core\Http\Policy\Cors\CorsBinding;
 use App\Shared\Core\Http\Policy\Cors\CorsHeaders;
 use App\Shared\Core\Http\Policy\Cors\CorsPolicy;
+use App\Shared\Core\Http\Policy\DeviceFingerprintRequiredRoute;
 use App\Shared\Core\Http\Response\CacheableResponse;
 use App\Shared\Exception\ApiValidationException;
 use App\Shared\Exception\CacheableResponseSuccessException;
