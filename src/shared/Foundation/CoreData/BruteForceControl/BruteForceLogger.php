@@ -10,7 +10,7 @@ use App\Shared\Security\BruteForce\BruteForcePolicy;
 use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
 
 /**
- * Class BfcHandler
+ * Class BruteForceLogger
  * @package App\Shared\Foundation\CoreData\BruteForceControl
  * @property CoreDataModule $module
  */

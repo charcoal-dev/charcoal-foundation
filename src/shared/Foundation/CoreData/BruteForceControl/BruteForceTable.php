@@ -11,7 +11,7 @@ use Charcoal\Database\ORM\Schema\Constraints;
 use Charcoal\Database\ORM\Schema\TableMigrations;
 
 /**
- * Class BfcTable
+ * Class BruteForceTable
  * @package App\Shared\Foundation\CoreData\BruteForceControl
  */
 class BruteForceTable extends AbstractOrmTable
