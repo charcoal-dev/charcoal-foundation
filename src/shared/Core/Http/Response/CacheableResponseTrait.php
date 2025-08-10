@@ -72,9 +72,6 @@ trait CacheableResponseTrait
             call_user_func($responseGeneratorFn);
         } catch (ResponseFinalizedException) {
             // Add any exception that indicates a response was successfully generated
-        } catch (\Throwable $t) {
-            // Re-throw any caught error, preventing the error itself from being cached
-            throw $t;
         }
 
         try {

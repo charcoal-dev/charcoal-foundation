@@ -37,6 +37,8 @@ enum BuildContext: string implements AppBuildEnum
      */
     public function getBuildPlan(AppBuildPartial $app): BuildPlan
     {
+        /** @noinspection PhpUncoveredEnumCasesInspection */
+        /** @noinspection PhpMatchExpressionWithOnlyDefaultArmInspection */
         return match ($this) {
             default => new BuildPlan(function (BuildPlan $plan) use ($app) {
                 # CoreData Module
