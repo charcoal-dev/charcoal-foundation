@@ -61,12 +61,12 @@ class BruteForceLogger extends AbstractOrmRepository
         }
 
         if ($actor) {
-            $queryStmt .= " AND `caller`=?";
+            $queryStmt .= " AND `actor`=?";
             $queryData[] = $actor->actorId;
         }
 
         if (count($queryData) <= 1) {
-            throw new \LogicException("No action or caller provided to check BFC count");
+            throw new \LogicException("No action or actor ID provided to check BFC count");
         }
 
         $attempts = $this->table->getDb()->fetch($queryStmt, $queryData)->getNext();
