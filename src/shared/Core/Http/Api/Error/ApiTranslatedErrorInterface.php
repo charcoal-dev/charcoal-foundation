@@ -6,10 +6,10 @@ namespace App\Shared\Core\Http\Api\Error;
 use App\Shared\Core\Http\AbstractApiEndpoint;
 
 /**
- * Interface ApiErrorCodeInterface
- * @package App\Shared\Core\Http\Api
+ * Interface ApiTranslatedErrorInterface
+ * @package App\Shared\Core\Http\Api\Error
  */
-interface ApiErrorCodeInterface extends \BackedEnum
+interface ApiTranslatedErrorInterface extends \BackedEnum
 {
     /**
      * @param \Throwable|null $context

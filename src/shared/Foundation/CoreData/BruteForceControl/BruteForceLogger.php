@@ -5,6 +5,8 @@ namespace App\Shared\Foundation\CoreData\BruteForceControl;
 
 use App\Shared\Context\AppDbTables;
 use App\Shared\Foundation\CoreData\CoreDataModule;
+use App\Shared\Security\BruteForce\BruteForceActor;
+use App\Shared\Security\BruteForce\BruteForcePolicy;
 use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
 
 /**
@@ -12,7 +14,7 @@ use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
  * @package App\Shared\Foundation\CoreData\BruteForceControl
  * @property CoreDataModule $module
  */
-class BfcHandler extends AbstractOrmRepository
+class BruteForceLogger extends AbstractOrmRepository
 {
     /**
      * @param CoreDataModule $module
@@ -23,44 +25,44 @@ class BfcHandler extends AbstractOrmRepository
     }
 
     /**
-     * @param BruteForceAction $action
-     * @param string $caller
+     * @param BruteForcePolicy $policy
+     * @param BruteForceActor $actor
      * @return void
      * @throws \Charcoal\Database\Exception\QueryExecuteException
      */
-    public function logEntry(BruteForceAction $action, string $caller): void
+    public function logEntry(BruteForcePolicy $policy, BruteForceActor $actor): void
     {
         $this->table->getDb()->exec(
-            "INSERT INTO `" . $this->table->name . "` (`action`, `caller`, `timestamp`)" .
-            " VALUES (:action, :caller, :timestamp)",
+            "INSERT INTO `" . $this->table->name . "` (`action`, `actor`, `timestamp`)" .
+            " VALUES (:action, :actor, :timestamp)",
             [
-                "action" => strtolower($action->actionStr),
-                "caller" => strtolower($caller),
+                "action" => strtolower($policy->actionStr),
+                "actor" => strtolower($actor->actorId),
                 "timestamp" => time()
             ]
         );
     }
 
     /**
-     * @param BruteForceAction|null $action
-     * @param string|null $caller
+     * @param BruteForcePolicy|null $policy
+     * @param BruteForceActor|null $actor
      * @param int $timePeriod
      * @return int
      * @throws \Charcoal\Database\Exception\QueryExecuteException
      * @throws \Charcoal\Database\Exception\QueryFetchException
      */
-    public function checkCount(BruteForceAction $action = null, string $caller = null, int $timePeriod = 3600): int
+    public function checkCount(BruteForcePolicy $policy = null, BruteForceActor $actor = null, int $timePeriod = 3600): int
     {
         $queryStmt = "SELECT count(*) FROM `" . $this->table->name . "` WHERE `timestamp`>=?";
         $queryData = [(time() - $timePeriod)];
-        if ($action) {
+        if ($policy) {
             $queryStmt .= " AND `action`=?";
-            $queryData[] = $action->actionStr;
+            $queryData[] = $policy->actionStr;
         }
 
-        if (is_string($caller) && !empty($caller)) {
+        if ($actor) {
             $queryStmt .= " AND `caller`=?";
-            $queryData[] = strtolower($caller);
+            $queryData[] = $actor->actorId;
         }
 
         if (count($queryData) <= 1) {

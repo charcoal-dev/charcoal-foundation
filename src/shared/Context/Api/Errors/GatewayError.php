@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Context\Api\Errors;
 
 use App\Shared\Core\Http\AbstractApiEndpoint;
-use App\Shared\Core\Http\Api\Error\ApiErrorCodeInterface;
+use App\Shared\Core\Http\Api\Error\ApiTranslatedErrorInterface;
 use App\Shared\Exception\ApiValidationException;
 use App\Shared\Validation\ValidationException;
 
@@ -12,7 +12,7 @@ use App\Shared\Validation\ValidationException;
  * Class GatewayError
  * @package App\Shared\Context\Api
  */
-enum GatewayError: string implements ApiErrorCodeInterface
+enum GatewayError: string implements ApiTranslatedErrorInterface
 {
     case INTERFACE_DISABLED = 'HTTP Interface "%s" is DISABLED';
     case CONCURRENT_TERMINATE = "Too many requests";

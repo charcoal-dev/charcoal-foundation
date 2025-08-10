@@ -7,8 +7,8 @@ use App\Shared\Context\CacheStore;
 use App\Shared\Context\CipherKey;
 use App\Shared\Core\Orm\ComponentsAwareModule;
 use App\Shared\Core\Orm\ModuleComponentEnum;
-use App\Shared\Foundation\CoreData\BruteForceControl\BfcHandler;
-use App\Shared\Foundation\CoreData\BruteForceControl\BfcTable;
+use App\Shared\Foundation\CoreData\BruteForceControl\BruteForceLogger;
+use App\Shared\Foundation\CoreData\BruteForceControl\BruteForceTable;
 use App\Shared\Foundation\CoreData\Countries\CountriesOrm;
 use App\Shared\Foundation\CoreData\Countries\CountriesTable;
 use App\Shared\Foundation\CoreData\DbBackups\DbBackupsHandler;
@@ -30,7 +30,7 @@ class CoreDataModule extends ComponentsAwareModule
 {
     public ObjectStoreController $objectStore;
     public CountriesOrm $countries;
-    public BfcHandler $bfc;
+    public BruteForceLogger $bruteForce;
     public SystemAlertsController $alerts;
     public DbBackupsHandler $dbBackups;
 
@@ -67,7 +67,7 @@ class CoreDataModule extends ComponentsAwareModule
                 $this->countries = new CountriesOrm($this);
                 return true;
             case CoreData::BFC:
-                $this->bfc = new BfcHandler($this);
+                $this->bruteForce = new BruteForceLogger($this);
                 return true;
             case CoreData::SYSTEM_ALERTS:
                 $this->alerts = new SystemAlertsController($this);
@@ -95,7 +95,7 @@ class CoreDataModule extends ComponentsAwareModule
                 $tables->register(new CountriesTable($this));
                 return true;
             case CoreData::BFC:
-                $tables->register(new BfcTable($this));
+                $tables->register(new BruteForceTable($this));
                 return true;
             case CoreData::SYSTEM_ALERTS:
                 $tables->register(new SystemAlertsTable($this));

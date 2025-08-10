@@ -14,7 +14,7 @@ use Charcoal\Database\ORM\Schema\TableMigrations;
  * Class BfcTable
  * @package App\Shared\Foundation\CoreData\BruteForceControl
  */
-class BfcTable extends AbstractOrmTable
+class BruteForceTable extends AbstractOrmTable
 {
     public function __construct(CoreDataModule $module)
     {
@@ -25,12 +25,12 @@ class BfcTable extends AbstractOrmTable
     {
         $cols->int("id")->bytes(8)->unSigned()->autoIncrement();
         $cols->string("action")->length(64);
-        $cols->string("caller")->length(45);
+        $cols->string("actor")->length(45);
         $cols->int("timestamp")->bytes(4)->unSigned();
         $cols->setPrimaryKey("id");
 
-        $constraints->addIndexComposite("idx_action_caller_timestamp")
-            ->columns("action", "caller", "timestamp");
+        $constraints->addIndexComposite("idx_action_actor_timestamp")
+            ->columns("action", "actor", "timestamp");
     }
 
     protected function migrations(TableMigrations $migrations): void

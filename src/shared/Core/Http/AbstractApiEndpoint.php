@@ -7,8 +7,8 @@ use App\Shared\Context\Api\Errors\GatewayError;
 use App\Shared\Core\Http\Api\ApiInterfaceProfile;
 use App\Shared\Core\Http\Api\ApiNamespaceInterface;
 use App\Shared\Core\Http\Api\ApiResponse;
-use App\Shared\Core\Http\Api\Error\ApiErrorCodeInterface;
-use App\Shared\Core\Http\Api\Error\ApiValidationErrorTranslator;
+use App\Shared\Core\Http\Api\Error\ApiTranslatedErrorInterface;
+use App\Shared\Core\Http\Api\Error\ValidationErrorTranslator;
 use App\Shared\Exception\ApiEntrypointException;
 use App\Shared\Exception\ApiResponseFinalizedException;
 use App\Shared\Exception\ApiValidationException;
@@ -148,9 +148,9 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
 
     /**
      * @param \Throwable $t
-     * @return ApiErrorCodeInterface|null
+     * @return ApiTranslatedErrorInterface|null
      */
-    protected function individualExceptionHandler(\Throwable $t): ?ApiErrorCodeInterface
+    protected function individualExceptionHandler(\Throwable $t): ?ApiTranslatedErrorInterface
     {
         if ($t instanceof ConcurrentHttpRequestException) {
             return GatewayError::CONCURRENT_TERMINATE;
@@ -187,11 +187,11 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
 
     /**
      * @param ValidationException $exception
-     * @return ApiErrorCodeInterface|null
+     * @return ApiTranslatedErrorInterface|null
      */
-    protected function handleValidationException(ValidationException $exception): ?ApiErrorCodeInterface
+    protected function handleValidationException(ValidationException $exception): ?ApiTranslatedErrorInterface
     {
-        return ApiValidationErrorTranslator::toApiError($exception->errorCode);
+        return ValidationErrorTranslator::getTranslated($exception->errorCode);
     }
 
     /**

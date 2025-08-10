@@ -7,10 +7,10 @@ use App\Shared\Core\Http\AbstractApiEndpoint;
 
 /**
  * Trait ApiErrorCodeDefaults
- * @package App\Shared\Context\Api\Errors
- * @mixin ApiErrorCodeInterface
+ * @package App\Shared\Core\Http\Api\Error
+ * @mixin ApiTranslatedErrorInterface
  */
-trait ApiErrorCodeDefaults
+trait ApiTranslatedErrorDefaults
 {
     public function getErrorMessage(\Throwable $context = null, AbstractApiEndpoint $route = null): ?string
     {
