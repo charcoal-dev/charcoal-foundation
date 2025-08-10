@@ -16,9 +16,9 @@ use App\Shared\Exception\CacheableResponseSuccessException;
 use App\Shared\Exception\ConcurrentHttpRequestException;
 use App\Shared\Exception\CorsOriginMismatchException;
 use App\Shared\Exception\HttpOptionsException;
-use App\Shared\Exception\WrappedException;
 use App\Shared\Utility\StringHelper;
 use App\Shared\Validation\ValidationException;
+use Charcoal\Base\Exception\WrappedException;
 use Charcoal\Http\Commons\HttpMethod;
 use Charcoal\Http\Router\Controllers\Response\NoContentResponse;
 

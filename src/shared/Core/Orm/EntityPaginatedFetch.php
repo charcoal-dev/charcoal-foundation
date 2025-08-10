@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Orm;
 
-use App\Shared\Exception\WrappedException;
 use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;
+use Charcoal\Base\Exception\WrappedException;
 use Charcoal\Database\Queries\SortFlag;
 use Charcoal\OOP\OOP;
 
