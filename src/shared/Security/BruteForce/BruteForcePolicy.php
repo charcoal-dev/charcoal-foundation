@@ -12,9 +12,10 @@ readonly class BruteForcePolicy
     public string $actionStr;
 
     public function __construct(
-        string     $actionStr,
-        public int $maxAttempts,
-        public int $withinSeconds,
+        string      $actionStr,
+        public int  $maxAttempts,
+        public int  $withinSeconds,
+        public bool $enforced = true
     )
     {
         if (!preg_match('/^\w{6,64}$/', $actionStr)) {
