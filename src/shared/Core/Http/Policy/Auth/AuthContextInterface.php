@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http\Auth;
+namespace App\Shared\Core\Http\Policy\Auth;
 
 use App\Shared\Foundation\Http\InterfaceLog\RouteLogTraceProvider;
 
 /**
- * Interface AuthContextResolverInterface
- * @package App\Shared\Core\Http\Auth
+ * Interface AuthContextInterface
+ * @package App\Shared\Core\Http\Policy\Auth
  */
-interface AuthContextResolverInterface extends RouteLogTraceProvider
+interface AuthContextInterface extends RouteLogTraceProvider
 {
     /**
      * Primary session or token identifier

@@ -5,8 +5,8 @@ namespace App\Shared\Core\Http;
 
 use App\Shared\CharcoalApp;
 use App\Shared\Context\Api\Errors\GatewayError;
-use App\Shared\Core\Http\Auth\AuthContextResolverInterface;
-use App\Shared\Core\Http\Auth\AuthRouteInterface;
+use App\Shared\Core\Http\Policy\Auth\AuthAwareRouteInterface;
+use App\Shared\Core\Http\Policy\Auth\AuthContextInterface;
 use App\Shared\Core\Http\Policy\Concurrency\ConcurrencyEnforcer;
 use App\Shared\Core\Http\Policy\Concurrency\ConcurrencyPolicy;
 use App\Shared\Core\Http\Policy\Cors\CorsBinding;
@@ -48,7 +48,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     public readonly string $userIpAddress;
     public readonly ?HttpInterfaceProfile $interface;
     public readonly ?AbstractFixedLenBuffer $deviceFp;
-    protected readonly ?AuthContextResolverInterface $authContext;
+    protected readonly ?AuthContextInterface $authContext;
 
     public readonly HttpLogLevel $requestLogLevel;
     protected readonly ?InterfaceLogEntity $requestLog;
@@ -173,7 +173,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         }
 
         // AuthContext
-        $this->authContext = $this instanceof AuthRouteInterface ?
+        $this->authContext = $this instanceof AuthAwareRouteInterface ?
             $this->resolveAuthContext() : null;
 
         // Handle Request Concurrency

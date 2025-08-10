@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Policy\Concurrency;
 
-use App\Shared\Core\Http\Auth\AuthContextResolverInterface;
+use App\Shared\Core\Http\Policy\Auth\AuthContextInterface;
 
 /**
  * Class ConcurrencyPolicy
@@ -21,10 +21,10 @@ readonly class ConcurrencyPolicy
 
     /**
      * @param string $ip
-     * @param AuthContextResolverInterface|null $authContext
+     * @param AuthContextInterface|null $authContext
      * @return string|null
      */
-    public function getScopeLockId(string $ip, ?AuthContextResolverInterface $authContext): ?string
+    public function getScopeLockId(string $ip, ?AuthContextInterface $authContext): ?string
     {
         return match ($this->scope) {
             ConcurrencyScope::NONE => null,
