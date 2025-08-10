@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http\Api;
 
 use App\Shared\Core\Http\AbstractApiEndpoint;
+use App\Shared\Core\Http\Exception\Api\ResponseFinalizedException;
 use App\Shared\Core\Http\Policy\Auth\AuthContextInterface;
-use App\Shared\Exception\ApiResponseFinalizedException;
 use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogEntity;
 use Charcoal\Http\Router\Controllers\Response\PayloadResponse;
 
@@ -23,7 +23,7 @@ class ApiResponse extends PayloadResponse
     /**
      * @param int|null $statusCode
      * @return never
-     * @throws ApiResponseFinalizedException
+     * @throws ResponseFinalizedException
      */
     public function setSuccess(?int $statusCode = 200): never
     {
@@ -33,14 +33,14 @@ class ApiResponse extends PayloadResponse
 
         $this->isSuccess = true;
         $this->setStatusCode($statusCode);
-        throw new ApiResponseFinalizedException();
+        throw new ResponseFinalizedException();
     }
 
     /**
      * @param string|array $error
      * @param int|null $statusCode
      * @return never
-     * @throws ApiResponseFinalizedException
+     * @throws ResponseFinalizedException
      */
     public function setError(string|array $error, ?int $statusCode = 400): never
     {
@@ -51,7 +51,7 @@ class ApiResponse extends PayloadResponse
         $this->isSuccess = false;
         $this->setStatusCode($statusCode);
         $this->set(static::PARAM_ERROR, $error);
-        throw new ApiResponseFinalizedException();
+        throw new ResponseFinalizedException();
     }
 
     /**

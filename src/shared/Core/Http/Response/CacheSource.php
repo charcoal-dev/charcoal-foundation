@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http\Response;
 
 /**
- * Class CacheableStore
+ * Class CacheSource
  * @package App\Shared\Core\Http\Response
  */
 enum CacheSource

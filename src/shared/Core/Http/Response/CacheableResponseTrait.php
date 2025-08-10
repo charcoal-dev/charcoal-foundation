@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http\Response;
 
 use App\Shared\Core\Http\AppAwareEndpoint;
-use App\Shared\Exception\ApiResponseFinalizedException;
+use App\Shared\Core\Http\Exception\Api\ResponseFinalizedException;
+use App\Shared\Core\Http\Exception\Cache\ResponseFromCacheException;
 use App\Shared\Exception\CacheableResponseRedundantException;
-use App\Shared\Exception\CacheableResponseSuccessException;
 use App\Shared\Foundation\Http\HttpInterface;
 use Charcoal\Filesystem\Exception\FilesystemError;
 use Charcoal\Filesystem\Exception\FilesystemException;
@@ -37,7 +37,7 @@ trait CacheableResponseTrait
      * @param callable $responseGeneratorFn
      * @param bool $purgeExpiredResponse
      * @return never
-     * @throws CacheableResponseSuccessException
+     * @throws ResponseFromCacheException
      * @throws \Throwable
      */
     protected function sendCacheableResponse(
@@ -70,7 +70,7 @@ trait CacheableResponseTrait
 
         try {
             call_user_func($responseGeneratorFn);
-        } catch (ApiResponseFinalizedException) {
+        } catch (ResponseFinalizedException) {
             // Add any exception that indicates a response was successfully generated
         } catch (\Throwable $t) {
             // Re-throw any caught error, preventing the error itself from being cached
@@ -85,7 +85,7 @@ trait CacheableResponseTrait
             $this->app->lifecycle->exception(new \RuntimeException($errorMsg, previous: $e));
         }
 
-        throw new CacheableResponseSuccessException();
+        throw new ResponseFromCacheException();
     }
 
     /**

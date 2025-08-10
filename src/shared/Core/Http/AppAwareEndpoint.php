@@ -5,6 +5,7 @@ namespace App\Shared\Core\Http;
 
 use App\Shared\CharcoalApp;
 use App\Shared\Context\Api\Errors\GatewayError;
+use App\Shared\Core\Http\Exception\Cache\ResponseFromCacheException;
 use App\Shared\Core\Http\Policy\Auth\AuthAwareRouteInterface;
 use App\Shared\Core\Http\Policy\Auth\AuthContextInterface;
 use App\Shared\Core\Http\Policy\Concurrency\ConcurrencyEnforcer;
@@ -15,7 +16,6 @@ use App\Shared\Core\Http\Policy\Cors\CorsPolicy;
 use App\Shared\Core\Http\Policy\DeviceFingerprintRequiredRoute;
 use App\Shared\Core\Http\Response\CacheableResponse;
 use App\Shared\Exception\ApiValidationException;
-use App\Shared\Exception\CacheableResponseSuccessException;
 use App\Shared\Exception\ConcurrentHttpRequestException;
 use App\Shared\Exception\CorsOriginMismatchException;
 use App\Shared\Foundation\Http\HttpInterface;
@@ -286,7 +286,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
      * @param AbstractControllerResponse $response
      * @param bool $includeAppCachedResponseHeader
      * @return never
-     * @throws CacheableResponseSuccessException
+     * @throws ResponseFromCacheException
      */
     protected function sendResponseFromCache(
         CacheableResponse          $cacheableResponse,
@@ -310,7 +310,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
             }
         }
 
-        throw new CacheableResponseSuccessException();
+        throw new ResponseFromCacheException();
     }
 
     /**

@@ -9,10 +9,10 @@ use App\Shared\Core\Http\Api\ApiNamespaceInterface;
 use App\Shared\Core\Http\Api\ApiResponse;
 use App\Shared\Core\Http\Api\Error\ApiTranslatedErrorInterface;
 use App\Shared\Core\Http\Api\Error\ValidationErrorTranslator;
-use App\Shared\Exception\ApiEntrypointException;
-use App\Shared\Exception\ApiResponseFinalizedException;
+use App\Shared\Core\Http\Exception\Api\EntrypointException;
+use App\Shared\Core\Http\Exception\Api\ResponseFinalizedException;
+use App\Shared\Core\Http\Exception\Cache\ResponseFromCacheException;
 use App\Shared\Exception\ApiValidationException;
-use App\Shared\Exception\CacheableResponseSuccessException;
 use App\Shared\Exception\ConcurrentHttpRequestException;
 use App\Shared\Exception\CorsOriginMismatchException;
 use App\Shared\Exception\HttpOptionsException;
@@ -79,7 +79,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
 
     /**
      * @return callable
-     * @throws ApiEntrypointException
+     * @throws EntrypointException
      * @throws ApiValidationException
      */
     protected function resolveEntryPointMethod(): callable
@@ -93,14 +93,14 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
 
         $httpMethod = strtolower($this->request->method->name);
         if ($httpMethod === "options" && !$this->allowOptionsCall) {
-            throw new ApiEntrypointException();
+            throw new EntrypointException();
         }
 
         if (method_exists($this, $httpMethod)) {
             return [$this, $httpMethod];
         }
 
-        throw new ApiEntrypointException();
+        throw new EntrypointException();
     }
 
     /**
@@ -109,7 +109,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
      */
     protected function handleException(\Throwable $t): void
     {
-        if ($t instanceof ApiResponseFinalizedException || $t instanceof CacheableResponseSuccessException) {
+        if ($t instanceof ResponseFinalizedException || $t instanceof ResponseFromCacheException) {
             return;
         }
 
@@ -142,7 +142,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
         try {
             $this->response()->setError(count($errorObject) === 1 && isset($errorObject["message"]) ?
                 $errorObject["message"] : $errorObject, $apiError?->getHttpCode());
-        } catch (ApiResponseFinalizedException) {
+        } catch (ResponseFinalizedException) {
         }
     }
 
@@ -170,7 +170,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
             return $this->handleValidationException($t);
         }
 
-        if ($t instanceof ApiEntrypointException) {
+        if ($t instanceof EntrypointException) {
             return GatewayError::METHOD_NOT_ALLOWED;
         }
 
