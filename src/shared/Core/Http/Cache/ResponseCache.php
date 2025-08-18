@@ -1,61 +1,93 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http\Response;
+namespace App\Shared\Core\Http\Cache;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Exception\CacheableResponseRedundantException;
+use App\Shared\Core\Http\Exception\Cache\ResponseInvalidatedException;
+use App\Shared\Core\Http\Response\CacheSource;
 use App\Shared\Foundation\Http\HttpInterface;
+use Charcoal\Base\Exception\WrappedException;
 use Charcoal\Filesystem\Directory;
 use Charcoal\Filesystem\Exception\FilesystemError;
 use Charcoal\Filesystem\Exception\FilesystemException;
 use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 
 /**
- * Class CacheableResponse
- * @package App\Shared\Core\Http\Response
+ * Class ResponseCache
+ * @package App\Shared\Core\Http\Cache
  */
-readonly class CacheableResponse
+readonly class ResponseCache
 {
     /**
      * @param CharcoalApp $app
      * @param HttpInterface $interface
-     * @param CacheableResponseContext $context
+     * @param ResponseCacheContext $context
      */
     public function __construct(
-        private CharcoalApp             $app,
-        private HttpInterface           $interface,
-        public CacheableResponseContext $context,
+        private CharcoalApp         $app,
+        private HttpInterface       $interface,
+        public ResponseCacheContext $context,
     )
     {
     }
 
     /**
      * @return AbstractControllerResponse|null
-     * @throws CacheableResponseRedundantException
-     * @throws FilesystemException
-     * @throws \Charcoal\Cache\Exception\CacheDriverOpException
-     * @throws \Charcoal\Cache\Exception\CachedEntityException
+     * @throws ResponseInvalidatedException
+     * @throws WrappedException
      */
     public function getCached(): ?AbstractControllerResponse
     {
-        if ($this->context->source === CacheSource::NONE) {
-            return null;
+        try {
+            if ($this->context->source === CacheSource::NONE) {
+                return null;
+            }
+
+            $cachedEntity = $this->context->cacheStore ? $this->getFromCacheStore() :
+                $this->getFromFilesystem($this->context->responseUnserializeClasses);
+        } catch (\Exception $e) {
+            throw new WrappedException($e, "Failed to retrieve response from cache");
         }
 
-        return $this->context->cacheStore ?
-            $this->getFromCacheStore() : $this->getFromFilesystem($this->context->responseUnserializeClasses);
+        if (!$cachedEntity instanceof AbstractControllerResponse ||
+            !is_a($cachedEntity, $this->context->responseClassname)) {
+            throw new WrappedException(new \RuntimeException(sprintf(
+                'Expected cached response of type "%s", got "%s"',
+                $this->context->responseClassname,
+                get_class($cachedEntity))),
+                message: "Cached response is not of expected type"
+            );
+        }
+
+        if ($this->context->validity > 0) {
+            if ((time() - $cachedEntity->createdOn) >= $this->context->validity) {
+                throw new ResponseInvalidatedException();
+            }
+        }
+
+        if ($this->context->integrityTag) {
+            if (!$cachedEntity->getIntegrityTag() ||
+                $cachedEntity->getIntegrityTag() !== $this->context->integrityTag) {
+                throw new ResponseInvalidatedException();
+            }
+        }
+
+        return $cachedEntity;
     }
 
     /**
      * @return void
-     * @throws FilesystemException
-     * @throws \Charcoal\Cache\Exception\CacheDriverOpException
+     * @throws WrappedException
      */
     public function deleteCached(): void
     {
-        $this->context->cacheStore ?
-            $this->deleteFromCacheStore() : $this->deleteFromFilesystem();
+        try {
+            $this->context->cacheStore ?
+                $this->deleteFromCacheStore() : $this->deleteFromFilesystem();
+        } catch (\Exception $e) {
+            throw new WrappedException($e, "Failed to delete cached response");
+        }
     }
 
     /**
@@ -75,19 +107,15 @@ readonly class CacheableResponse
     }
 
     /**
-     * @return AbstractControllerResponse|null
-     * @throws CacheableResponseRedundantException
+     * @return mixed
      * @throws \Charcoal\Cache\Exception\CacheDriverOpException
      * @throws \Charcoal\Cache\Exception\CachedEntityException
      */
-    protected function getFromCacheStore(): ?AbstractControllerResponse
+    private function getFromCacheStore(): mixed
     {
         /** @var AbstractControllerResponse $cached */
-        $cached = $this->app->cache->get($this->context->cacheStore)
+        return $this->app->cache->get($this->context->cacheStore)
             ->get($this->cachePrefixedKey($this->context->uniqueRequestId));
-
-        $this->returnCheckInstance($cached);
-        return $cached;
     }
 
     /**
@@ -95,7 +123,7 @@ readonly class CacheableResponse
      * @return void
      * @throws \Charcoal\Cache\Exception\CacheException
      */
-    protected function storeInCacheStore(AbstractControllerResponse $response): void
+    private function storeInCacheStore(AbstractControllerResponse $response): void
     {
         $this->app->cache->get($this->context->cacheStore)
             ->set($this->cachePrefixedKey($this->context->uniqueRequestId), $response);
@@ -105,7 +133,7 @@ readonly class CacheableResponse
      * @return void
      * @throws \Charcoal\Cache\Exception\CacheDriverOpException
      */
-    protected function deleteFromCacheStore(): void
+    private function deleteFromCacheStore(): void
     {
         $this->app->cache->get($this->context->cacheStore)
             ->delete($this->cachePrefixedKey($this->context->uniqueRequestId));
@@ -125,27 +153,24 @@ readonly class CacheableResponse
      * @return void
      * @throws \Charcoal\Filesystem\Exception\FilesystemException
      */
-    protected function storeInFilesystem(AbstractControllerResponse $response): void
+    private function storeInFilesystem(AbstractControllerResponse $response): void
     {
         $tmpDir = $this->getFilesystemDirectory();
         if (!$tmpDir->isWritable()) {
             throw new \RuntimeException("Cannot write to HTTP interface cache directory");
         }
 
-        $tmpDir->writeToFile(
-            $this->context->uniqueRequestId,
-            $this->getSerializedResponse($response),
-            append: false,
-        );
+        $tmpDir->writeToFile($this->context->uniqueRequestId,
+            serialize($response),
+            append: false);
     }
 
     /**
-     * @param class-string[] $allowedClasses
-     * @return AbstractControllerResponse|null
-     * @throws CacheableResponseRedundantException
+     * @param array $allowedClasses
+     * @return mixed
      * @throws FilesystemException
      */
-    protected function getFromFilesystem(array $allowedClasses = []): ?AbstractControllerResponse
+    private function getFromFilesystem(array $allowedClasses = []): mixed
     {
         try {
             $tmpDir = $this->getFilesystemDirectory();
@@ -154,10 +179,7 @@ readonly class CacheableResponse
                 createIfNotExists: false
             );
 
-            $response = unserialize($response->read(), ["allowed_classes" => $allowedClasses]);
-
-            $this->returnCheckInstance($response);
-            return $response;
+            return unserialize($response->read(), ["allowed_classes" => $allowedClasses]);
         } catch (FilesystemException $e) {
             if (in_array($e->error, [FilesystemError::PATH_NOT_EXISTS, FilesystemError::PATH_TYPE_ERR])) {
                 return null;
@@ -171,47 +193,9 @@ readonly class CacheableResponse
      * @return void
      * @throws FilesystemException
      */
-    protected function deleteFromFilesystem(): void
+    private function deleteFromFilesystem(): void
     {
         $this->getFilesystemDirectory()->delete($this->context->uniqueRequestId);
-    }
-
-    /**
-     * @param object $result
-     * @return void
-     * @throws CacheableResponseRedundantException
-     */
-    private function returnCheckInstance(object $result): void
-    {
-        if (!$result instanceof AbstractControllerResponse || !is_a($result, $this->context->responseClassname)) {
-            throw new \RuntimeException(
-                sprintf('Expected cached response of type "%s", got "%s"',
-                    $this->context->responseClassname,
-                    get_class($result)
-                )
-            );
-        }
-
-        if ($this->context->validity > 0) {
-            if ((time() - $result->createdOn) >= $this->context->validity) {
-                throw new CacheableResponseRedundantException();
-            }
-        }
-
-        if ($this->context->integrityTag) {
-            if (!$result->getIntegrityTag() || $result->getIntegrityTag() !== $this->context->integrityTag) {
-                throw new CacheableResponseRedundantException();
-            }
-        }
-    }
-
-    /**
-     * @param AbstractControllerResponse $response
-     * @return string
-     */
-    private function getSerializedResponse(AbstractControllerResponse $response): string
-    {
-        return serialize($response);
     }
 
     /**

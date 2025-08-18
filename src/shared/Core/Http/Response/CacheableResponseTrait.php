@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http\Response;
 
 use App\Shared\Core\Http\AppAwareEndpoint;
+use App\Shared\Core\Http\Cache\ResponseCacheContext;
+use App\Shared\Core\Http\Cache\ResponseCache;
 use App\Shared\Core\Http\Exception\Api\ResponseFinalizedException;
 use App\Shared\Core\Http\Exception\Cache\ResponseFromCacheException;
 use App\Shared\Exception\CacheableResponseRedundantException;
@@ -20,20 +22,20 @@ use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
 trait CacheableResponseTrait
 {
     /**
-     * @param CacheableResponseContext $context
+     * @param ResponseCacheContext $context
      * @param HttpInterface|null $interface
-     * @return CacheableResponse
+     * @return ResponseCache
      */
     protected function getCacheableResponse(
-        CacheableResponseContext $context,
-        ?HttpInterface           $interface = null
-    ): CacheableResponse
+        ResponseCacheContext $context,
+        ?HttpInterface       $interface = null
+    ): ResponseCache
     {
-        return new CacheableResponse($this->app, $interface ?? $this->interface->enum, $context);
+        return new ResponseCache($this->app, $interface ?? $this->interface->enum, $context);
     }
 
     /**
-     * @param CacheableResponse $cacheable
+     * @param ResponseCache $cacheable
      * @param callable $responseGeneratorFn
      * @param bool $purgeExpiredResponse
      * @return never
@@ -41,9 +43,9 @@ trait CacheableResponseTrait
      * @throws \Throwable
      */
     protected function sendCacheableResponse(
-        CacheableResponse $cacheable,
-        callable          $responseGeneratorFn,
-        bool              $purgeExpiredResponse = false
+        ResponseCache $cacheable,
+        callable      $responseGeneratorFn,
+        bool          $purgeExpiredResponse = false
     ): never
     {
         try {
@@ -86,7 +88,7 @@ trait CacheableResponseTrait
     }
 
     /**
-     * @param CacheableResponseContext $context
+     * @param ResponseCacheContext $context
      * @param bool $throwEx
      * @param HttpInterface|null $interface
      * @return void
@@ -94,9 +96,9 @@ trait CacheableResponseTrait
      * @throws \Charcoal\Filesystem\Exception\FilesystemException
      */
     protected function purgeCacheableResponse(
-        CacheableResponseContext $context,
-        bool                     $throwEx,
-        ?HttpInterface           $interface = null
+        ResponseCacheContext $context,
+        bool                 $throwEx,
+        ?HttpInterface       $interface = null
     ): void
     {
         try {
