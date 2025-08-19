@@ -12,25 +12,17 @@ use Charcoal\Database\ORM\Schema\Constraints;
 use Charcoal\Database\ORM\Schema\TableMigrations;
 
 /**
- * Class CountriesTable
- * @package App\Shared\Foundation\CoreData\Countries
+ * Represents the CountriesTable, defining the database structure and migrations
+ * for managing country-related data.
  * @property CoreDataModule $module
  */
 class CountriesTable extends OrmTableBase
 {
-    /**
-     * @param CoreDataModule $module
-     */
     public function __construct(CoreDataModule $module)
     {
         parent::__construct($module, DatabaseTables::Countries, CountryEntity::class);
     }
 
-    /**
-     * @param Columns $cols
-     * @param Constraints $constraints
-     * @return void
-     */
     protected function structure(Columns $cols, Constraints $constraints): void
     {
         $cols->setDefaultCharset(Charset::ASCII);
@@ -43,10 +35,6 @@ class CountriesTable extends OrmTableBase
         $cols->string("dial_code")->length(8);
     }
 
-    /**
-     * @param TableMigrations $migrations
-     * @return void
-     */
     protected function migrations(TableMigrations $migrations): void
     {
     }

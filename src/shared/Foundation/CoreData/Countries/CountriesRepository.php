@@ -10,11 +10,11 @@ use Charcoal\App\Kernel\Orm\Repository\Traits\EntityUpsertTrait;
 use Charcoal\Base\Vectors\StringVector;
 
 /**
- * Class CountriesOrm
- * @package App\Shared\Foundation\CoreData\Countries
+ * Repository class responsible for handling CountryEntity objects in the data storage layer.
+ * Extends functionality from the OrmRepositoryBase class and provides domain-specific logic.
  * @property CoreDataModule $module
  */
-class CountriesOrm extends OrmRepositoryBase
+class CountriesRepository extends OrmRepositoryBase
 {
     use EntityUpsertTrait;
 
