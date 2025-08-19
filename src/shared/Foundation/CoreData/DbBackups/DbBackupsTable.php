@@ -15,6 +15,7 @@ use Charcoal\Database\ORM\Schema\TableMigrations;
  * This class defines the structure, constraints, and primary key for the DB_BACKUPS table.
  * It supports operations for managing metadata about backups, such as whether the backup
  * was automatic, its timestamp, filename, and size.
+ * @property CoreDataModule $module
  */
 class DbBackupsTable extends OrmTableBase
 {

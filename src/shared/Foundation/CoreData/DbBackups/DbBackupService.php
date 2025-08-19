@@ -8,8 +8,7 @@ use App\Shared\Foundation\CoreData\CoreDataModule;
 use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
 
 /**
- * Class DbBackupsHandler
- * @package App\Shared\Foundation\CoreData\DbBackups
+ * Service class for handling database backup operations by using the ORM repository base functionality.
  * @property CoreDataModule $module
  */
 class DbBackupService extends OrmRepositoryBase

@@ -14,6 +14,7 @@ use Charcoal\App\Kernel\Orm\Entity\OrmEntityBase;
 class DbBackupEntity extends OrmEntityBase
 {
     public int $id;
+    /** @api */
     public bool $isAuto;
     public string $database;
     public int $timestamp;
