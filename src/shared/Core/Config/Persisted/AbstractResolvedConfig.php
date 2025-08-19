@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Config;
+namespace App\Shared\Core\Config\Persisted;
 
 use App\Shared\Contracts\Foundation\StoredObjectInterface;
 use Charcoal\App\Kernel\Contracts\Orm\Entity\StorageHooksInterface;
@@ -10,10 +10,10 @@ use Charcoal\Base\Enums\FetchOrigin;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 
 /**
- * Class AbstractComponentConfig
+ * Class AbstractResolvedConfig
  * @package App\Shared\Core\Config
  */
-class AbstractComponentConfig extends AbstractEntity
+class AbstractResolvedConfig extends AbstractEntity
     implements StoredObjectInterface, StorageHooksInterface
 {
     public const bool STORAGE_HOOKS = true;
@@ -63,7 +63,8 @@ class AbstractComponentConfig extends AbstractEntity
     {
         $data = [];
         $reflection = new \ReflectionClass($this);
-        foreach ($reflection->getProperties(\ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED) as $property) {
+        $scope = \ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED;
+        foreach ($reflection->getProperties($scope) as $property) {
             $prop = $property->name;
             if (isset($this->$prop)) {
                 $data[$prop] = $this->$prop;
