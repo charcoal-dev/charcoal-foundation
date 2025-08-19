@@ -15,7 +15,7 @@ use Charcoal\App\Kernel\Enums\CacheDriver;
  */
 trait CacheConfigBuilderTrait
 {
-    final protected function getCacheConfigBuilder(mixed $configData): CacheConfigObjectsBuilder
+    final protected function getCacheConfig(mixed $configData): CacheConfigObjectsBuilder
     {
         $cacheConfig = new CacheConfigObjectsBuilder();
         if (!is_array($configData) || !$configData) {
