@@ -14,8 +14,10 @@ use Charcoal\Database\ORM\Schema\Constraints;
 use Charcoal\Database\ORM\Schema\TableMigrations;
 
 /**
+ * Represents a database table for logging engine execution data.
+ * @property EngineModule $module
  */
-class LogsTable extends OrmTableBase
+final class LogsTable extends OrmTableBase
 {
     public function __construct(EngineModule $module)
     {

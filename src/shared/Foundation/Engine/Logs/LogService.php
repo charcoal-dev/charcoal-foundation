@@ -19,7 +19,7 @@ use Charcoal\Cli\Enums\ExecutionState;
  * Extends functionality from OrmRepositoryBase and uses traits for entity insertion and update operations.
  * @property EngineModule $module
  */
-class LogService extends OrmRepositoryBase
+final class LogService extends OrmRepositoryBase
 {
     use EntityInsertableTrait;
     use EntityUpdatableTrait;
@@ -41,7 +41,7 @@ class LogService extends OrmRepositoryBase
     ): LogEntity
     {
         $execLog = new LogEntity();
-        $execLog->setContextObject(new ExecutionLogContext($scriptAwareContext ? $script : null));
+        $execLog->setContextObject(new LogContext($scriptAwareContext ? $script : null));
         $execLog->script = ObjectHelper::baseClassName($script->scriptClassname);
         $execLog->label = $label;
         $execLog->state = $initialState;

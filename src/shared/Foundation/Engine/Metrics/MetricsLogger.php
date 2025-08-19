@@ -13,7 +13,7 @@ use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
  * Handles logging of execution metrics into the database.
  * @property EngineModule $module
  */
-class MetricsLogger extends OrmRepositoryBase
+final class MetricsLogger extends OrmRepositoryBase
 {
     /**
      * @param EngineModule $module

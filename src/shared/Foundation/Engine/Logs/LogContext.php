@@ -7,10 +7,10 @@ use App\Shared\Core\Cli\DomainScriptBase;
 use Charcoal\App\Kernel\Support\DtoHelper;
 
 /**
- * Class ExecutionLogContext
- * @package App\Shared\Foundation\Engine\ExecutionLog
+ * Represents a logging and context handling mechanism for managing flags,
+ * arguments, dumps, log entries, and exceptions.
  */
-class ExecutionLogContext
+final class LogContext
 {
     private array $flags = [];
     private array $arguments = [];
@@ -19,7 +19,7 @@ class ExecutionLogContext
     private array $exceptions = [];
 
     /**
-     * @param DomainScriptBase|null $script
+     * @internal
      */
     public function __construct(?DomainScriptBase $script)
     {
@@ -67,9 +67,7 @@ class ExecutionLogContext
     }
 
     /**
-     * @param string $name
-     * @param string|int|bool|float|null $value
-     * @return $this
+     * @api
      */
     public function setArgument(string $name, string|int|bool|null|float $value): static
     {
@@ -78,8 +76,7 @@ class ExecutionLogContext
     }
 
     /**
-     * @param string $arg
-     * @return bool
+     * @api
      */
     public function unsetArg(string $arg): bool
     {
@@ -92,8 +89,7 @@ class ExecutionLogContext
     }
 
     /**
-     * @param string $flag
-     * @return bool
+     * @api
      */
     public function unsetFlag(string $flag): bool
     {
@@ -106,7 +102,7 @@ class ExecutionLogContext
     }
 
     /**
-     * @return array
+     * @api
      */
     public function createDto(): array
     {
@@ -117,25 +113,5 @@ class ExecutionLogContext
             "logs" => $this->logs,
             "exceptions" => $this->exceptions
         ];
-    }
-
-    /**
-     * @param string $level
-     * @param string $entry
-     * @param bool|int|string|null $value
-     * @return void
-     */
-    public function entryFromLifecycle(string $level, string $entry, bool|int|string|null $value = null): void
-    {
-        $this->dump(sprintf("%s[%s]", $level, $entry), $value);
-    }
-
-    /**
-     * @param \Throwable $t
-     * @return void
-     */
-    public function exceptionFromLifecycle(\Throwable $t): void
-    {
-        $this->logException($t);
     }
 }

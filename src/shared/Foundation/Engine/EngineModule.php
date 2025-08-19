@@ -19,7 +19,7 @@ use Charcoal\Cache\CacheClient;
  * Represents a module that extends the base ORM functionality.
  * Provides logging and metrics capabilities, while managing database table registration.
  */
-class EngineModule extends OrmModuleBase
+final class EngineModule extends OrmModuleBase
 {
     use PendingModuleComponents;
     use NormalizedStorageKeysTrait;
@@ -27,6 +27,9 @@ class EngineModule extends OrmModuleBase
     public readonly LogService $executionLog;
     public readonly MetricsLogger $logStats;
 
+    /**
+     * @param CharcoalApp $app
+     */
     public function __construct(CharcoalApp $app)
     {
         parent::__construct($app);
@@ -34,6 +37,10 @@ class EngineModule extends OrmModuleBase
         $this->logStats = new MetricsLogger($this);
     }
 
+    /**
+     * @param array $data
+     * @return void
+     */
     public function __unserialize(array $data): void
     {
         $this->executionLog = $data["executionLog"];
@@ -41,12 +48,18 @@ class EngineModule extends OrmModuleBase
         parent::__unserialize($data);
     }
 
+    /**
+     * Registers the necessary database tables for the application.
+     */
     protected function declareDatabaseTables(TableRegistry $tables): void
     {
         $tables->register(new LogsTable($this));
         $tables->register(new MetricsTable($this));
     }
 
+    /**
+     * Retrieves the primary cache store.
+     */
     public function getCacheStore(): ?CacheClient
     {
         return $this->app->cache->getStore(CacheStores::Primary);

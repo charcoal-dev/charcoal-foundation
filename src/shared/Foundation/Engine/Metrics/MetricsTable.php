@@ -16,7 +16,7 @@ use Charcoal\Database\ORM\Schema\TableMigrations;
  * Represents the Metrics table in the database.
  * @property EngineModule $module
  */
-class MetricsTable extends OrmTableBase
+final class MetricsTable extends OrmTableBase
 {
     public function __construct(EngineModule $module)
     {

@@ -8,10 +8,11 @@ use Charcoal\Buffers\Buffer;
 use Charcoal\Cli\Enums\ExecutionState;
 
 /**
- * Class ExecutionLogEntity
- * @package App\Shared\Foundation\Engine\ExecutionLog
+ * This class represents a log entity used to capture and store information
+ * about script executions and their related context. It extends the
+ * functionality provided by the base ORM entity.
  */
-class LogEntity extends OrmEntityBase
+final class LogEntity extends OrmEntityBase
 {
     public int $id;
     public string $script;
@@ -22,7 +23,7 @@ class LogEntity extends OrmEntityBase
     public float $startedOn;
     public ?float $updatedOn;
 
-    private ?ExecutionLogContext $contextObject = null;
+    private ?LogContext $contextObject = null;
 
     /**
      * @return int
@@ -41,10 +42,10 @@ class LogEntity extends OrmEntityBase
     }
 
     /**
-     * @param ExecutionLogContext $context
+     * @param LogContext $context
      * @return void
      */
-    public function setContextObject(ExecutionLogContext $context): void
+    public function setContextObject(LogContext $context): void
     {
         if (isset($this->context) || isset($this->contextObject)) {
             throw new \LogicException("ExecutionLogContext instance cannot be overridden");
@@ -55,16 +56,16 @@ class LogEntity extends OrmEntityBase
     }
 
     /**
-     * @return ExecutionLogContext
+     * @return LogContext
      */
-    public function context(): ExecutionLogContext
+    public function context(): LogContext
     {
         if ($this->contextObject) {
             return $this->contextObject;
         }
 
-        $contextObject = unserialize($this->context->raw(), ["allowed_classes" => [ExecutionLogContext::class]]);
-        if (!$contextObject instanceof ExecutionLogContext) {
+        $contextObject = unserialize($this->context->raw(), ["allowed_classes" => [LogContext::class]]);
+        if (!$contextObject instanceof LogContext) {
             throw new \RuntimeException(
                 sprintf('%s encountered value of type "%s"',
                     __METHOD__,
