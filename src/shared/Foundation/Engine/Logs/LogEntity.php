@@ -1,22 +1,22 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Foundation\Engine\ExecutionLog;
+namespace App\Shared\Foundation\Engine\Logs;
 
-use App\Shared\Core\Cli\CliScriptState;
-use Charcoal\App\Kernel\Orm\Repository\AbstractOrmEntity;
+use Charcoal\App\Kernel\Orm\Entity\OrmEntityBase;
 use Charcoal\Buffers\Buffer;
+use Charcoal\Cli\Enums\ExecutionState;
 
 /**
  * Class ExecutionLogEntity
  * @package App\Shared\Foundation\Engine\ExecutionLog
  */
-class ExecutionLogEntity extends AbstractOrmEntity
+class LogEntity extends OrmEntityBase
 {
     public int $id;
     public string $script;
     public ?string $label;
-    public CliScriptState $state;
+    public ExecutionState $state;
     public Buffer $context;
     public int $pid;
     public float $startedOn;

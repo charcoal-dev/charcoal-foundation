@@ -1,33 +1,32 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Foundation\Engine\ExecutionLog;
+namespace App\Shared\Foundation\Engine\Metrics;
 
-use App\Shared\Context\AppDbTables;
+use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\Engine\EngineModule;
-use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
-use Charcoal\App\Kernel\Orm\Exception\EntityOrmException;
+use App\Shared\Foundation\Engine\Logs\LogEntity;
+use Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException;
+use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
 
 /**
- * Class LogStatsOrm
- * @package App\Shared\Foundation\Engine\ExecutionLog
+ * Handles logging of execution metrics into the database.
+ * @property EngineModule $module
  */
-class LogStatsOrm extends AbstractOrmRepository
+class MetricsLogger extends OrmRepositoryBase
 {
     /**
      * @param EngineModule $module
      */
     public function __construct(EngineModule $module)
     {
-        parent::__construct($module, AppDbTables::ENGINE_EXEC_STATS);
+        parent::__construct($module, DatabaseTables::EngineExecMetrics);
     }
 
     /**
-     * @param ExecutionLogEntity $log
-     * @return void
-     * @throws EntityOrmException
+     * @throws EntityRepositoryException
      */
-    public function upsert(ExecutionLogEntity $log): void
+    public function upsert(LogEntity $log): void
     {
         try {
             $this->table->getDb()->exec(
@@ -35,18 +34,16 @@ class LogStatsOrm extends AbstractOrmRepository
                 [$log->id, $log->state->value]
             );
         } catch (\Exception $e) {
-            throw new EntityOrmException(static::class, $e);
+            throw new EntityRepositoryException($this, $e);
         }
 
         $this->insert($log);
     }
 
     /**
-     * @param ExecutionLogEntity $log
-     * @return void
-     * @throws EntityOrmException
+     * @throws EntityRepositoryException
      */
-    public function insert(ExecutionLogEntity $log): void
+    public function insert(LogEntity $log): void
     {
         try {
             $this->table->queryInsert([
@@ -60,7 +57,7 @@ class LogStatsOrm extends AbstractOrmRepository
                 "timestamp" => microtime(true)
             ]);
         } catch (\Exception $e) {
-            throw new EntityOrmException(static::class, $e);
+            throw new EntityRepositoryException($this, $e);
         }
     }
 }

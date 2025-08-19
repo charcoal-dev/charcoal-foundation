@@ -1,43 +1,35 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Foundation\Engine\ExecutionLog;
+namespace App\Shared\Foundation\Engine\Metrics;
 
-use App\Shared\Context\AppDbTables;
-use App\Shared\Core\Cli\CliScriptState;
+use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\Engine\EngineModule;
-use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;
-use Charcoal\Database\ORM\Schema\Charset;
+use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
+use Charcoal\Base\Enums\Charset;
+use Charcoal\Cli\Enums\ExecutionState;
 use Charcoal\Database\ORM\Schema\Columns;
 use Charcoal\Database\ORM\Schema\Constraints;
 use Charcoal\Database\ORM\Schema\TableMigrations;
 
 /**
- * Class LogStatsTable
- * @package App\Shared\Foundation\Engine\ExecutionLog
+ * Represents the Metrics table in the database.
+ * @property EngineModule $module
  */
-class LogStatsTable extends AbstractOrmTable
+class MetricsTable extends OrmTableBase
 {
-    /**
-     * @param EngineModule $module
-     */
     public function __construct(EngineModule $module)
     {
-        parent::__construct($module, AppDbTables::ENGINE_EXEC_STATS, entityClass: null);
+        parent::__construct($module, DatabaseTables::EngineExecMetrics, entityClass: null);
     }
 
-    /**
-     * @param Columns $cols
-     * @param Constraints $constraints
-     * @return void
-     */
     protected function structure(Columns $cols, Constraints $constraints): void
     {
         $cols->setDefaultCharset(Charset::ASCII);
 
         $cols->int("id")->bytes(8)->unSigned()->autoIncrement();
         $cols->int("log")->bytes(8)->unSigned();
-        $cols->enum("state")->options(...CliScriptState::getOptions());
+        $cols->enum("state")->options(...ExecutionState::getCases());
         $cols->int("cpu_load")->bytes(2)->unSigned();
         $cols->int("memory_usage")->bytes(8)->unSigned();
         $cols->int("memory_usage_real")->bytes(8)->unSigned();
@@ -46,7 +38,7 @@ class LogStatsTable extends AbstractOrmTable
         $cols->double("timestamp")->precision(14, 4)->unSigned();
         $cols->setPrimaryKey("id");
 
-        $constraints->foreignKey("log")->table(AppDbTables::ENGINE_EXEC_LOG->value, "id");
+        $constraints->foreignKey("log")->table(DatabaseTables::EngineExecMetrics->value, "id");
 
         $constraints->addIndex("log");
         $constraints->addIndex("timestamp");

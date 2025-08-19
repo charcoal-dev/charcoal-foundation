@@ -3,61 +3,45 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Engine;
 
-use App\Shared\Context\CacheStore;
-use App\Shared\Context\CipherKey;
-use App\Shared\Core\Orm\AppOrmModule;
-use App\Shared\Foundation\Engine\ExecutionLog\ExecutionLogOrm;
-use App\Shared\Foundation\Engine\ExecutionLog\ExecutionLogTable;
-use App\Shared\Foundation\Engine\ExecutionLog\LogStatsOrm;
-use App\Shared\Foundation\Engine\ExecutionLog\LogStatsTable;
-use Charcoal\App\Kernel\Build\AppBuildPartial;
-use Charcoal\App\Kernel\Module\AbstractModuleComponent;
-use Charcoal\App\Kernel\Orm\Db\DatabaseTableRegistry;
-use Charcoal\Cipher\Cipher;
+use App\Shared\CharcoalApp;
+use App\Shared\Concerns\NormalizedStorageKeysTrait;
+use App\Shared\Concerns\PendingModuleComponents;
+use App\Shared\Enums\CacheStores;
+use App\Shared\Foundation\Engine\Metrics\MetricsLogger;
+use App\Shared\Foundation\Engine\Metrics\MetricsTable;
+use App\Shared\Foundation\Engine\Logs\LogService;
+use App\Shared\Foundation\Engine\Logs\LogsTable;
+use Charcoal\App\Kernel\Orm\Db\TableRegistry;
+use Charcoal\App\Kernel\Orm\Module\OrmModuleBase;
+use Charcoal\Cache\CacheClient;
 
 /**
  * Class EngineModule
  * @package App\Shared\Foundation\Engine
  */
-class EngineModule extends AppOrmModule
+class EngineModule extends OrmModuleBase
 {
-    public ExecutionLogOrm $executionLog;
-    public LogStatsOrm $logStats;
+    use PendingModuleComponents;
+    use NormalizedStorageKeysTrait;
 
-    /**
-     * @param AppBuildPartial $app
-     */
-    public function __construct(AppBuildPartial $app)
+    public LogService $executionLog;
+    public MetricsLogger $logStats;
+
+    public function __construct(CharcoalApp $app)
     {
-        parent::__construct($app, CacheStore::PRIMARY);
+        parent::__construct($app);
+        $this->executionLog = new LogService($this);
+        $this->logStats = new MetricsLogger($this);
     }
 
-    /**
-     * @param AbstractModuleComponent $resolveFor
-     * @return Cipher
-     */
-    public function getCipher(AbstractModuleComponent $resolveFor): Cipher
+    protected function declareDatabaseTables(TableRegistry $tables): void
     {
-        return $this->app->cipher->get(CipherKey::PRIMARY);
+        $tables->register(new LogsTable($this));
+        $tables->register(new MetricsTable($this));
     }
 
-    /**
-     * @param AppBuildPartial $app
-     * @return void
-     */
-    protected function declareChildren(AppBuildPartial $app): void
+    public function getCacheStore(): ?CacheClient
     {
-        $this->executionLog = new ExecutionLogOrm($this);
-        $this->logStats = new LogStatsOrm($this);
-    }
-
-    /**
-     * @param DatabaseTableRegistry $tables
-     * @return void
-     */
-    protected function declareDatabaseTables(DatabaseTableRegistry $tables): void
-    {
-        $tables->register(new ExecutionLogTable($this));
-        $tables->register(new LogStatsTable($this));
+        return $this->app->cache->getStore(CacheStores::Primary);
     }
 }

@@ -1,17 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Foundation\Engine\ExecutionLog;
+namespace App\Shared\Foundation\Engine\Logs;
 
-use App\Shared\Core\Cli\AppAwareCliScript;
-use Charcoal\App\Kernel\Contracts\LifecycleBoundContextInterface;
-use Charcoal\App\Kernel\Errors;
+use App\Shared\Core\Cli\DomainScriptBase;
+use Charcoal\App\Kernel\Support\DtoHelper;
 
 /**
  * Class ExecutionLogContext
  * @package App\Shared\Foundation\Engine\ExecutionLog
  */
-class ExecutionLogContext implements LifecycleBoundContextInterface
+class ExecutionLogContext
 {
     private array $flags = [];
     private array $arguments = [];
@@ -20,9 +19,9 @@ class ExecutionLogContext implements LifecycleBoundContextInterface
     private array $exceptions = [];
 
     /**
-     * @param AppAwareCliScript|null $script
+     * @param DomainScriptBase|null $script
      */
-    public function __construct(?AppAwareCliScript $script)
+    public function __construct(?DomainScriptBase $script)
     {
         if ($script) {
             $this->flags = [
@@ -43,7 +42,7 @@ class ExecutionLogContext implements LifecycleBoundContextInterface
      */
     public function logException(\Throwable $t): void
     {
-        $this->exceptions[] = Errors::Exception2Array($t);
+        $this->exceptions[] = DtoHelper::getExceptionObject($t);
     }
 
     /**
@@ -109,7 +108,7 @@ class ExecutionLogContext implements LifecycleBoundContextInterface
     /**
      * @return array
      */
-    public function toArray(): array
+    public function createDto(): array
     {
         return [
             "flags" => $this->flags,
