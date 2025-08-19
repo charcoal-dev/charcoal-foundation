@@ -15,29 +15,24 @@ use Charcoal\Http\Commons\Enums\Http;
  * It provides a method to create a customized `ClientPolicy` instance based
  * on the initialized default configuration.
  */
-final readonly class ClientConfig
+final readonly class ClientConfig extends ClientPolicy
 {
-    private ?ClientPolicy $defaultPolicy;
-
     public function __construct()
     {
-        $this->defaultPolicy = new ClientPolicy();
-        $this->defaultPolicy->version = Http::Version3;
-        $this->defaultPolicy->tlsContext = new TlsContext();
-        $this->defaultPolicy->authContext = null;
-        $this->defaultPolicy->proxyServer = null;
-        $this->defaultPolicy->userAgent = "Charcoal/Foundation-App";
-        $this->defaultPolicy->timeout = 3;
-        $this->defaultPolicy->connectTimeout = 3;
-        $this->defaultPolicy->responseContentType = ContentType::Json;
-        $this->defaultPolicy->requestHeaders = Request::headersConfig();
-        $this->defaultPolicy->requestPayload = Request::payloadConfig();
-        $this->defaultPolicy->responseHeaders = Response::headersConfig();
-        $this->defaultPolicy->responsePayload = Response::payloadConfig();
-    }
-
-    public function createClientConfig(): ClientPolicy
-    {
-        return new ClientPolicy($this->defaultPolicy);
+        parent::__construct(
+            null,
+            version: Http::Version3,
+            tlsContext: new TlsContext(),
+            authContext: null,
+            proxyServer: null,
+            userAgent: "Charcoal/Foundation-App",
+            timeout: 3,
+            connectTimeout: 3,
+            responseContentType: ContentType::Json,
+            requestHeaders: Request::headersConfig(),
+            responseHeaders: Response::headersConfig(),
+            requestPayload: Request::payloadConfig(),
+            responsePayload: Response::payloadConfig(),
+        );
     }
 }

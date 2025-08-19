@@ -1,14 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Config\Http;
+namespace App\Shared\Core\Config\Persisted;
 
-use App\Shared\Core\Config\Persisted\AbstractResolvedConfig;
 use App\Shared\Enums\Http\HttpLogLevel;
 
 /**
- * Class AbstractHttpInterfaceConfig
- * @package App\Shared\Foundation\Http\Config
+ * Represents the configuration of an HTTP interface, providing options to control logging,
+ * tracing, and caching behavior.
  */
 class HttpInterfaceConfig extends AbstractResolvedConfig
 {
