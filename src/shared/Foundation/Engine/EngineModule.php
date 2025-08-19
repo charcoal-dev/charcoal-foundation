@@ -16,22 +16,29 @@ use Charcoal\App\Kernel\Orm\Module\OrmModuleBase;
 use Charcoal\Cache\CacheClient;
 
 /**
- * Class EngineModule
- * @package App\Shared\Foundation\Engine
+ * Represents a module that extends the base ORM functionality.
+ * Provides logging and metrics capabilities, while managing database table registration.
  */
 class EngineModule extends OrmModuleBase
 {
     use PendingModuleComponents;
     use NormalizedStorageKeysTrait;
 
-    public LogService $executionLog;
-    public MetricsLogger $logStats;
+    public readonly LogService $executionLog;
+    public readonly MetricsLogger $logStats;
 
     public function __construct(CharcoalApp $app)
     {
         parent::__construct($app);
         $this->executionLog = new LogService($this);
         $this->logStats = new MetricsLogger($this);
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->executionLog = $data["executionLog"];
+        $this->logStats = $data["logStats"];
+        parent::__unserialize($data);
     }
 
     protected function declareDatabaseTables(TableRegistry $tables): void

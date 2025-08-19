@@ -3,108 +3,65 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\CoreData;
 
-use App\Shared\Context\CacheStore;
-use App\Shared\Context\CipherKey;
-use App\Shared\Core\Orm\ComponentsAwareModule;
-use App\Shared\Core\Orm\ModuleComponentEnum;
+use App\Shared\CharcoalApp;
+use App\Shared\Concerns\NormalizedStorageKeysTrait;
+use App\Shared\Concerns\PendingModuleComponents;
+use App\Shared\Enums\CacheStores;
 use App\Shared\Foundation\CoreData\BruteForceControl\BruteForceLogger;
 use App\Shared\Foundation\CoreData\BruteForceControl\BruteForceTable;
-use App\Shared\Foundation\CoreData\Countries\CountriesOrm;
+use App\Shared\Foundation\CoreData\Countries\CountriesRepository;
 use App\Shared\Foundation\CoreData\Countries\CountriesTable;
-use App\Shared\Foundation\CoreData\DbBackups\DbBackupsHandler;
+use App\Shared\Foundation\CoreData\DbBackups\DbBackupService;
 use App\Shared\Foundation\CoreData\DbBackups\DbBackupsTable;
-use App\Shared\Foundation\CoreData\ObjectStore\ObjectStoreController;
+use App\Shared\Foundation\CoreData\ObjectStore\ObjectStoreService;
 use App\Shared\Foundation\CoreData\ObjectStore\ObjectStoreTable;
-use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertsController;
-use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertsTable;
-use Charcoal\App\Kernel\Build\AppBuildPartial;
-use Charcoal\App\Kernel\Module\AbstractModuleComponent;
-use Charcoal\App\Kernel\Orm\Db\DatabaseTableRegistry;
-use Charcoal\Cipher\Cipher;
+use Charcoal\App\Kernel\Orm\Db\TableRegistry;
+use Charcoal\App\Kernel\Orm\Module\OrmModuleBase;
+use Charcoal\Cache\CacheClient;
 
 /**
- * Class CoreDataModule
- * @package App\Shared\Foundation\CoreData
+ * This class provides access to various data and storage components,
+ * such as object store handling, country management, brute force logging,
+ * and database backup operations.
  */
-class CoreDataModule extends ComponentsAwareModule
+final class CoreDataModule extends OrmModuleBase
 {
-    public ObjectStoreController $objectStore;
-    public CountriesOrm $countries;
-    public BruteForceLogger $bruteForce;
-    public SystemAlertsController $alerts;
-    public DbBackupsHandler $dbBackups;
+    use PendingModuleComponents;
+    use NormalizedStorageKeysTrait;
 
-    /**
-     * @param AppBuildPartial $app
-     * @param CoreData[] $components
-     */
-    public function __construct(AppBuildPartial $app, array $components)
+    public readonly ObjectStoreService $objectStore;
+    public readonly CountriesRepository $countries;
+    public readonly BruteForceLogger $bruteForce;
+    public readonly DbBackupService $dbBackups;
+
+    public function __construct(CharcoalApp $app)
     {
-        parent::__construct($app, CacheStore::PRIMARY, $components);
+        parent::__construct($app);
+        $this->objectStore = new ObjectStoreService($this);
+        $this->countries = new CountriesRepository($this);
+        $this->bruteForce = new BruteForceLogger($this);
+        $this->dbBackups = new DbBackupService($this);
     }
 
-    /**
-     * @param AbstractModuleComponent $resolveFor
-     * @return Cipher
-     */
-    public function getCipher(AbstractModuleComponent $resolveFor): Cipher
+    public function __unserialize(array $data): void
     {
-        return $this->app->cipher->get(CipherKey::PRIMARY);
+        $this->objectStore = $data["objectStore"];
+        $this->countries = $data["countries"];
+        $this->bruteForce = $data["bruteForce"];
+        $this->dbBackups = $data["dbBackups"];
+        parent::__unserialize($data);
     }
 
-    /**
-     * @param CoreData|ModuleComponentEnum $component
-     * @param AppBuildPartial $app
-     * @return bool
-     */
-    protected function includeComponent(CoreData|ModuleComponentEnum $component, AppBuildPartial $app): bool
+    public function getCacheStore(): ?CacheClient
     {
-        switch ($component) {
-            case CoreData::OBJECT_STORE:
-                $this->objectStore = new ObjectStoreController($this);
-                return true;
-            case CoreData::COUNTRIES:
-                $this->countries = new CountriesOrm($this);
-                return true;
-            case CoreData::BFC:
-                $this->bruteForce = new BruteForceLogger($this);
-                return true;
-            case CoreData::SYSTEM_ALERTS:
-                $this->alerts = new SystemAlertsController($this);
-                return true;
-            case CoreData::DB_BACKUPS:
-                $this->dbBackups = new DbBackupsHandler($this);
-                return true;
-            default:
-                return false;
-        }
+        return $this->app->cache->getStore(CacheStores::Primary);
     }
 
-    /**
-     * @param CoreData|ModuleComponentEnum $component
-     * @param DatabaseTableRegistry $tables
-     * @return bool
-     */
-    protected function createDbTables(CoreData|ModuleComponentEnum $component, DatabaseTableRegistry $tables): bool
+    protected function declareDatabaseTables(TableRegistry $tables): void
     {
-        switch ($component) {
-            case CoreData::OBJECT_STORE:
-                $tables->register(new ObjectStoreTable($this));
-                return true;
-            case CoreData::COUNTRIES:
-                $tables->register(new CountriesTable($this));
-                return true;
-            case CoreData::BFC:
-                $tables->register(new BruteForceTable($this));
-                return true;
-            case CoreData::SYSTEM_ALERTS:
-                $tables->register(new SystemAlertsTable($this));
-                return true;
-            case CoreData::DB_BACKUPS:
-                $tables->register(new DbBackupsTable($this));
-                return true;
-            default:
-                return false;
-        }
+        $tables->register(new BruteForceTable($this));
+        $tables->register(new CountriesTable($this));
+        $tables->register(new DbBackupsTable($this));
+        $tables->register(new ObjectStoreTable($this));
     }
 }
