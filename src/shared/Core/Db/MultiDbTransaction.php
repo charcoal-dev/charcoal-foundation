@@ -4,12 +4,14 @@ declare(strict_types=1);
 namespace App\Shared\Core\Db;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Context\AppDatabase;
-use Charcoal\Database\Database;
+use App\Shared\Enums\Databases;
+use Charcoal\App\Kernel\Diagnostics\Diagnostics;
+use Charcoal\Database\DatabaseClient;
 
 /**
  * Class MultiDbTransaction
  * @package App\Shared\Core\Db
+ * @api
  */
 class MultiDbTransaction
 {
@@ -18,18 +20,19 @@ class MultiDbTransaction
 
     /**
      * @param CharcoalApp $app
-     * @param AppDatabase ...$database
+     * @param Databases ...$database
      */
-    public function __construct(private readonly CharcoalApp $app, AppDatabase ...$database)
+    public function __construct(private readonly CharcoalApp $app, Databases ...$database)
     {
         foreach ($database as $db) {
-            $this->databases[$db->value] = $app->databases->getDb($db);
+            $this->databases[$db->value] = $this->app->database->getDb($db);
         }
     }
 
     /**
      * @return void
      * @throws \Exception
+     * @api
      */
     public function commitOrRollback(): void
     {
@@ -47,7 +50,7 @@ class MultiDbTransaction
     private function attemptRollback(): void
     {
         try {
-            $this->forEveryDb(function (Database $db) {
+            $this->forEveryDb(function (DatabaseClient $db) {
                 if ($db->inTransaction()) {
                     $db->rollBack();
                 }
@@ -60,10 +63,11 @@ class MultiDbTransaction
     /**
      * @return void
      * @throws \Exception
+     * @api
      */
     public function beginTransaction(): void
     {
-        $this->forEveryDb(function (Database $db) {
+        $this->forEveryDb(function (DatabaseClient $db) {
             $db->beginTransaction();
         }, 'Begin transaction on "%s" DB', throwOnFirst: true);
     }
@@ -71,10 +75,11 @@ class MultiDbTransaction
     /**
      * @return void
      * @throws \Exception
+     * @api
      */
     public function commit(): void
     {
-        $this->forEveryDb(function (Database $db) {
+        $this->forEveryDb(function (DatabaseClient $db) {
             $db->commit();
         }, 'Commiting transaction on "%s" DB', throwOnFirst: true);
     }
@@ -82,10 +87,11 @@ class MultiDbTransaction
     /**
      * @return void
      * @throws \Exception
+     * @api
      */
     public function rollBack(): void
     {
-        $this->forEveryDb(function (Database $db) {
+        $this->forEveryDb(function (DatabaseClient $db) {
             $db->rollBack();
         }, 'Rolling back transaction on "%s" DB', throwOnFirst: false);
     }
@@ -98,7 +104,7 @@ class MultiDbTransaction
     private function addLogEntry(string $message, bool $success): void
     {
         if ($this->logging) {
-            $this->app->lifecycle->log($message, $success);
+            Diagnostics::app()->verbose($message, context: ["success" => $success]);
         }
     }
 
