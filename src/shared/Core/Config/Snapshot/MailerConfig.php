@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Config\Snapshot;
 
-use App\Shared\Foundation\Mailer\Config\MailDispatchMode;
-use App\Shared\Foundation\Mailer\Config\MailProvider;
+use App\Shared\Enums\Mailer\MailDispatchMode;
+use App\Shared\Enums\Mailer\MailProvider;
 use App\Shared\Utility\ContactHelper;
 use Charcoal\App\Kernel\Internal\Config\ConfigSnapshotInterface;
 use Charcoal\Base\Charsets\Ascii;
@@ -19,7 +19,7 @@ final readonly class MailerConfig implements ConfigSnapshotInterface
 {
     public function __construct(
         public MailProvider     $service,
-        public MailDispatchMode $policy,
+        public MailDispatchMode $mode,
         public string           $senderName,
         public string           $senderEmail,
         public bool             $queueProcessing,

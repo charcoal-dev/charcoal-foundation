@@ -18,6 +18,7 @@ trait HttpFileConfigTrait
     /**
      * @param array $configData
      * @return void
+     * @api
      */
     protected function httpInterfacesFromFileConfig(mixed $configData): void
     {
@@ -33,6 +34,7 @@ trait HttpFileConfigTrait
 
     /**
      * @return array<array<, HttpInterfaceConfig>>
+     * @api
      */
     protected function getHttpInterfacesConfig(mixed $interfaces): array
     {
