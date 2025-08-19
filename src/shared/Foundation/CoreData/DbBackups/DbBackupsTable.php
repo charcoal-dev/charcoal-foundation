@@ -3,24 +3,24 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\CoreData\DbBackups;
 
-use App\Shared\Context\AppDbTables;
+use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\CoreData\CoreDataModule;
-use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;
-use Charcoal\Database\ORM\Schema\Charset;
+use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
+use Charcoal\Base\Enums\Charset;
 use Charcoal\Database\ORM\Schema\Columns;
 use Charcoal\Database\ORM\Schema\Constraints;
 use Charcoal\Database\ORM\Schema\TableMigrations;
 
 /**
- * Class DbBackupsTable
- * @package App\Shared\Foundation\CoreData\DbBackups
- * @property CoreDataModule $module
+ * This class defines the structure, constraints, and primary key for the DB_BACKUPS table.
+ * It supports operations for managing metadata about backups, such as whether the backup
+ * was automatic, its timestamp, filename, and size.
  */
-class DbBackupsTable extends AbstractOrmTable
+class DbBackupsTable extends OrmTableBase
 {
     public function __construct(CoreDataModule $module)
     {
-        parent::__construct($module, AppDbTables::DB_BACKUPS, entityClass: DbBackupEntity::class);
+        parent::__construct($module, DatabaseTables::DatabaseBackups, entityClass: DbBackupEntity::class);
     }
 
     protected function structure(Columns $cols, Constraints $constraints): void

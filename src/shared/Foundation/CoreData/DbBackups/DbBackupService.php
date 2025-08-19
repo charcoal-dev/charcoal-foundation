@@ -3,19 +3,19 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\CoreData\DbBackups;
 
-use App\Shared\Context\AppDbTables;
+use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\CoreData\CoreDataModule;
-use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
+use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
 
 /**
  * Class DbBackupsHandler
  * @package App\Shared\Foundation\CoreData\DbBackups
  * @property CoreDataModule $module
  */
-class DbBackupsHandler extends AbstractOrmRepository
+class DbBackupService extends OrmRepositoryBase
 {
     public function __construct(CoreDataModule $module)
     {
-        parent::__construct($module, AppDbTables::DB_BACKUPS);
+        parent::__construct($module, DatabaseTables::DatabaseBackups);
     }
 }

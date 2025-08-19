@@ -3,13 +3,15 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\CoreData\DbBackups;
 
-use Charcoal\App\Kernel\Orm\Repository\AbstractOrmEntity;
+use Charcoal\App\Kernel\Orm\Entity\OrmEntityBase;
 
 /**
- * Class DbBackupEntity
- * @package App\Shared\Foundation\CoreData\DbBackups
+ * This entity is used to store and manage information about a specific
+ * database backup, including metadata such as backup ID, whether it was
+ * created automatically, the associated database, timestamp, filename,
+ * and size of the backup.
  */
-class DbBackupEntity extends AbstractOrmEntity
+class DbBackupEntity extends OrmEntityBase
 {
     public int $id;
     public bool $isAuto;
