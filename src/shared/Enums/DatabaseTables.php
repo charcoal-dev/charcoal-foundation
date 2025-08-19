@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Enums;
 
+use Charcoal\App\Kernel\Contracts\Enums\DatabaseEnumInterface;
 use Charcoal\App\Kernel\Contracts\Enums\TableRegistryEnumInterface;
 
 /**
@@ -11,44 +12,29 @@ use Charcoal\App\Kernel\Contracts\Enums\TableRegistryEnumInterface;
  */
 enum DatabaseTables: string implements TableRegistryEnumInterface
 {
-    # CoreData Module
+    /** Foundation Modules */
     case BruteForceControl = "bfc_index";
     case Countries = "countries";
     case DatabaseBackups = "db_backups";
     case ObjectStore = "object_store";
-
-    # Mailer Module
     case MailerQueue = "mails_queue";
-
-    # HTTP Module
     case HttpInterfaceLog = "http_if_log";
     case HttpCallLog = "http_call_log";
     case HttpProxies = "http_proxies";
-
-    # Engine Module
     case EngineExecLog = "engine_exec_log";
-    case EngineExecMetric = "engine_exec_stats";
-    case EngineQueue;
+    case EngineExecMetrics = "engine_exec_stats";
+    case EngineQueue = "engine_queue";
 
-    /**
-     * @return string
-     */
     public function getTableName(): string
     {
         return $this->value;
     }
 
-    /**
-     * @return DatabaseEnum
-     */
-    public function getDatabase(): DatabaseEnum
+    public function getDatabase(): DatabaseEnumInterface
     {
-        return Databases::PRIMARY;
+        return Databases::Primary;
     }
 
-    /**
-     * @return int
-     */
     public function getPriority(): int
     {
         return 1;
