@@ -20,9 +20,16 @@ final class ErrorManager extends \Charcoal\App\Kernel\Errors\ErrorManager
     private readonly string $crashHtmlTemplate;
 
     /**
+     * @param AppEnv $env
+     * @param PathRegistry $paths
+     * @param ErrorLoggers|null $loggers
      * @throws \Charcoal\Filesystem\Exceptions\InvalidPathException
      */
-    public function __construct(AppEnv $env, PathRegistry $paths, ?ErrorLoggers $loggers = null)
+    public function __construct(
+        AppEnv $env,
+        \Charcoal\App\Kernel\Internal\PathRegistry $paths,
+        ?ErrorLoggers $loggers = null
+    )
     {
         parent::__construct($env, $paths, $loggers);
         $crashHtmlFile = new FilePath($paths->storage->absolute . "/crash.phtml");
