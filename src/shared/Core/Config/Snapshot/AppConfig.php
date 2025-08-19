@@ -20,6 +20,7 @@ final readonly class AppConfig extends \Charcoal\App\Kernel\Config\Snapshot\AppC
         ?CacheManagerConfig    $cache,
         ?DatabaseManagerConfig $database,
         public HttpConfig      $http,
+        public ?MailerConfig   $mailer,
     )
     {
         parent::__construct($env, $timezone, $cache, $database);
