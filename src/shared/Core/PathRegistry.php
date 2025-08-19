@@ -10,7 +10,7 @@ use Charcoal\Filesystem\Path\DirectoryPath;
  * (e.g., configuration, emails, logging, temporary files, semaphores, and storage)
  * are properly initialized and validated.
  */
-readonly class PathRegistry extends \Charcoal\App\Kernel\Internal\PathRegistry
+final readonly class PathRegistry extends \Charcoal\App\Kernel\Internal\PathRegistry
 {
     public DirectoryPath $config;
     public DirectoryPath $emails;
