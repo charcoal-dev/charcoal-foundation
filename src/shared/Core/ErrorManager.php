@@ -20,9 +20,6 @@ final class ErrorManager extends \Charcoal\App\Kernel\Errors\ErrorManager
     private readonly string $crashHtmlTemplate;
 
     /**
-     * @param AppEnv $env
-     * @param PathRegistry $paths
-     * @param ErrorLoggers|null $loggers
      * @throws \Charcoal\Filesystem\Exceptions\InvalidPathException
      */
     public function __construct(AppEnv $env, PathRegistry $paths, ?ErrorLoggers $loggers = null)
@@ -52,6 +49,9 @@ final class ErrorManager extends \Charcoal\App\Kernel\Errors\ErrorManager
         $this->crashHtmlTemplate = $data["crashHtmlTemplate"];
     }
 
+    /**
+     * Handles termination of the application by rendering output in the appropriate format and exiting.
+     */
     protected function onTerminate(array $exceptionDto): never
     {
         $isCli = php_sapi_name() === "cli";
