@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Exception;
+namespace App\Shared\Exceptions;
 
-use App\Shared\Core\Http\Policy\Concurrency\ConcurrencyScope;
+use App\Shared\Core\Http\Request\Policy\Concurrency\ConcurrencyScope;
 
 /**
  * Class ConcurrentHttpRequestException

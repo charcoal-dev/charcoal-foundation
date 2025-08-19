@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Exception;
+namespace App\Shared\Exceptions;
 
 /**
  * Class HttpOptionsException
