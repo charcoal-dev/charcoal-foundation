@@ -29,7 +29,7 @@ trait DatabaseConfigBuilderTrait
                     throw new \OutOfBoundsException("Invalid database driver for: " . $key->name);
                 }
 
-                $connection = match (strtolower(strval($dbConfig["driver"]))) {
+                $connection = match (strtolower(strval($dbConfig["connection"]))) {
                     "lazy", "ondemand" => DbConnectionStrategy::Lazy,
                     "default", "normal", "" => DbConnectionStrategy::Normal,
                     default => throw new \UnexpectedValueException(

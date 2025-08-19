@@ -6,10 +6,10 @@ namespace App\Shared\Core\Config\Http\Client;
 use App\Shared\Contracts\Config\HttpPolicyFactoryInterface;
 use Charcoal\Base\Enums\Charset;
 use Charcoal\Base\Enums\ValidationState;
-use Charcoal\Http\Commons\Enums\HeaderKeyPolicy;
-use Charcoal\Http\Commons\Enums\ParamKeyPolicy;
 use Charcoal\Http\Client\Policy\HeadersPolicy;
 use Charcoal\Http\Client\Policy\PayloadPolicy;
+use Charcoal\Http\Commons\Enums\HeaderKeyPolicy;
+use Charcoal\Http\Commons\Enums\ParamKeyPolicy;
 
 /**
  * Represents an outgoing request and defines configuration policies for handling
