@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Config;
 
-use App\Shared\Foundation\CoreData\ObjectStore\StoredObjectInterface;
-use Charcoal\App\Kernel\Contracts\StorageHooks\StorageHooksInterface;
+use App\Shared\Contracts\Foundation\StoredObjectInterface;
+use Charcoal\App\Kernel\Contracts\Orm\Entity\StorageHooksInterface;
 use Charcoal\App\Kernel\Entity\AbstractEntity;
-use Charcoal\App\Kernel\Entity\EntitySource;
-use Charcoal\OOP\OOP;
+use Charcoal\Base\Enums\FetchOrigin;
+use Charcoal\Base\Support\Helpers\ObjectHelper;
 
 /**
  * Class AbstractComponentConfig
@@ -76,7 +76,7 @@ class AbstractComponentConfig extends AbstractEntity
     /**
      * @return \class-string[]
      */
-    public static function childClasses(): array
+    public static function unserializeDependencies(): array
     {
         return [static::class];
     }
@@ -114,17 +114,17 @@ class AbstractComponentConfig extends AbstractEntity
     }
 
     /**
-     * @param EntitySource $source
+     * @param FetchOrigin $origin
      * @return string|null
      */
-    public function onRetrieve(EntitySource $source): ?string
+    public function onRetrieve(FetchOrigin $origin): ?string
     {
         if (!static::STORAGE_HOOKS) {
             return null;
         }
 
-        if (in_array($source, [EntitySource::DATABASE, EntitySource::CACHE])) {
-            return sprintf('%s retrieved from %s', OOP::baseClassName(static::class), $source->name);
+        if (in_array($origin, [FetchOrigin::Database, FetchOrigin::Cache])) {
+            return sprintf('%s retrieved from %s', ObjectHelper::baseClassName(static::class), $origin->name);
         }
 
         return null;
@@ -139,6 +139,6 @@ class AbstractComponentConfig extends AbstractEntity
             return null;
         }
 
-        return OOP::baseClassName(static::class) . " stored in CACHE";
+        return ObjectHelper::baseClassName(static::class) . " stored in CACHE";
     }
 }
