@@ -16,7 +16,7 @@ use Charcoal\Database\ORM\Schema\TableMigrations;
  * for managing country-related data.
  * @property CoreDataModule $module
  */
-class CountriesTable extends OrmTableBase
+final class CountriesTable extends OrmTableBase
 {
     public function __construct(CoreDataModule $module)
     {

@@ -14,7 +14,7 @@ use Charcoal\Database\ORM\Schema\TableMigrations;
  * Represents the table structure and properties for managing brute force tracking data.
  * @property CoreDataModule $module
  */
-class BruteForceTable extends OrmTableBase
+final class BruteForceTable extends OrmTableBase
 {
     public function __construct(CoreDataModule $module)
     {

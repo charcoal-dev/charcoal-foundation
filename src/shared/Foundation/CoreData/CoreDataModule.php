@@ -34,6 +34,9 @@ final class CoreDataModule extends OrmModuleBase
     public readonly BruteForceLogger $bruteForce;
     public readonly DbBackupService $dbBackups;
 
+    /**
+     * @param CharcoalApp $app
+     */
     public function __construct(CharcoalApp $app)
     {
         parent::__construct($app);
@@ -43,6 +46,10 @@ final class CoreDataModule extends OrmModuleBase
         $this->dbBackups = new DbBackupService($this);
     }
 
+    /**
+     * @param array $data
+     * @return void
+     */
     public function __unserialize(array $data): void
     {
         $this->objectStore = $data["objectStore"];
@@ -52,16 +59,22 @@ final class CoreDataModule extends OrmModuleBase
         parent::__unserialize($data);
     }
 
-    public function getCacheStore(): ?CacheClient
-    {
-        return $this->app->cache->getStore(CacheStores::Primary);
-    }
-
+    /**
+     * Registers the required database tables with the table registry.
+     */
     protected function declareDatabaseTables(TableRegistry $tables): void
     {
         $tables->register(new BruteForceTable($this));
         $tables->register(new CountriesTable($this));
         $tables->register(new DbBackupsTable($this));
         $tables->register(new ObjectStoreTable($this));
+    }
+
+    /**
+     * Retrieves the primary cache store instance.
+     */
+    public function getCacheStore(): ?CacheClient
+    {
+        return $this->app->cache->getStore(CacheStores::Primary);
     }
 }

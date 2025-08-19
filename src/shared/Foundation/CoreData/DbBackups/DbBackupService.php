@@ -11,7 +11,7 @@ use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
  * Service class for handling database backup operations by using the ORM repository base functionality.
  * @property CoreDataModule $module
  */
-class DbBackupService extends OrmRepositoryBase
+final class DbBackupService extends OrmRepositoryBase
 {
     public function __construct(CoreDataModule $module)
     {

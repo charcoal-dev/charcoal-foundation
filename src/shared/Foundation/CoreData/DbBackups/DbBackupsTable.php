@@ -17,7 +17,7 @@ use Charcoal\Database\ORM\Schema\TableMigrations;
  * was automatic, its timestamp, filename, and size.
  * @property CoreDataModule $module
  */
-class DbBackupsTable extends OrmTableBase
+final class DbBackupsTable extends OrmTableBase
 {
     public function __construct(CoreDataModule $module)
     {

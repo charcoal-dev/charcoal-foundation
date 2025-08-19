@@ -11,7 +11,7 @@ use Charcoal\App\Kernel\Orm\Entity\OrmEntityBase;
  * created automatically, the associated database, timestamp, filename,
  * and size of the backup.
  */
-class DbBackupEntity extends OrmEntityBase
+final class DbBackupEntity extends OrmEntityBase
 {
     public int $id;
     /** @api */

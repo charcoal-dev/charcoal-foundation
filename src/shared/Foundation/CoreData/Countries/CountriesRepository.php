@@ -14,7 +14,7 @@ use Charcoal\Base\Vectors\StringVector;
  * Extends functionality from the OrmRepositoryBase class and provides domain-specific logic.
  * @property CoreDataModule $module
  */
-class CountriesRepository extends OrmRepositoryBase
+final class CountriesRepository extends OrmRepositoryBase
 {
     use EntityUpsertTrait;
 

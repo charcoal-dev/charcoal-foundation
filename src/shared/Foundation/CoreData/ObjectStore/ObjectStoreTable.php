@@ -15,7 +15,7 @@ use Charcoal\Database\ORM\Schema\TableMigrations;
  * Represents the database table for storing objects in the application.
  * @property CoreDataModule $module
  */
-class ObjectStoreTable extends OrmTableBase
+final class ObjectStoreTable extends OrmTableBase
 {
     public function __construct(CoreDataModule $module)
     {

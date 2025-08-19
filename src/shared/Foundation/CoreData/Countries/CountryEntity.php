@@ -12,7 +12,7 @@ use Charcoal\App\Kernel\Orm\Entity\OrmEntityBase;
  * It implements the CacheableEntityInterface to allow caching capabilities.
  * The trait CacheableEntityTrait is included for additional functionality.
  */
-class CountryEntity extends OrmEntityBase implements CacheableEntityInterface
+final class CountryEntity extends OrmEntityBase implements CacheableEntityInterface
 {
     public bool $status;
     public string $name;

@@ -13,7 +13,7 @@ use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
  * Handles logging and querying brute force attempts to a database table.
  * @property CoreDataModule $module
  */
-class BruteForceLogger extends OrmRepositoryBase
+final class BruteForceLogger extends OrmRepositoryBase
 {
     public function __construct(CoreDataModule $module)
     {

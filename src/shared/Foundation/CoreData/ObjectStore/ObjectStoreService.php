@@ -24,7 +24,7 @@ use Charcoal\Cipher\Exceptions\CipherException;
  * while adhering to security standards for encryption and caching.
  * @property CoreDataModule $module
  */
-class ObjectStoreService extends OrmRepositoryBase
+final class ObjectStoreService extends OrmRepositoryBase
 {
     /**
      * @param CoreDataModule $module
@@ -97,7 +97,7 @@ class ObjectStoreService extends OrmRepositoryBase
                 if ($this->onCacheException === ExceptionAction::Throw) {
                     throw new EntityRepositoryException($this, $e);
                 } elseif ($this->onCacheException === ExceptionAction::Log) {
-                    Diagnostics::app()->warning(static::class . ' caught CacheException', exception: $e);
+                    Diagnostics::app()->warning(self::class . ' caught CacheException', exception: $e);
                 }
             }
         }
@@ -143,7 +143,7 @@ class ObjectStoreService extends OrmRepositoryBase
                 if ($this->onCacheException === ExceptionAction::Throw) {
                     throw new EntityRepositoryException($this, $e);
                 } elseif ($this->onCacheException === ExceptionAction::Log) {
-                    Diagnostics::app()->warning(static::class . ' caught CacheException', exception: $e);
+                    Diagnostics::app()->warning(self::class . ' caught CacheException', exception: $e);
                 }
             }
         }
