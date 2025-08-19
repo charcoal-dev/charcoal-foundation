@@ -13,11 +13,11 @@ use Charcoal\Http\Router\Policy\RouterPolicy;
  * for inbound and outbound headers and payload handling, using the
  * RouterLogger for logging purposes.
  */
-final readonly class RouterConfig
+final readonly class RouterConfig extends RouterPolicy
 {
-    public static function getRouterPolicy(): RouterPolicy
+    public function __construct()
     {
-        return new RouterPolicy(
+        parent::__construct(
             Inbound::headersConfig(),
             Inbound::payloadConfig(),
             Outbound::headersConfig(),

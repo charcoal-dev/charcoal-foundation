@@ -25,7 +25,7 @@ final readonly class ClientConfig extends ClientPolicy
             tlsContext: new TlsContext(),
             authContext: null,
             proxyServer: null,
-            userAgent: "Charcoal/Foundation-App",
+            userAgent: "Charcoal/Foundation/0.2 (PHP; Linux x86_64)",
             timeout: 3,
             connectTimeout: 3,
             responseContentType: ContentType::Json,
