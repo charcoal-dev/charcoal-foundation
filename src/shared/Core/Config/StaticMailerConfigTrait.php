@@ -8,11 +8,11 @@ use App\Shared\Foundation\Mailer\Config\MailerConfig;
 use App\Shared\Foundation\Mailer\Config\MailProvider;
 use App\Shared\Utility\NetworkValidator;
 use App\Shared\Utility\StringHelper;
-use Charcoal\Charsets\ASCII;
 
 /**
  * Trait StaticMailerConfigTrait
  * @package App\Shared\Core\Config
+ * @deprecated
  */
 trait StaticMailerConfigTrait
 {

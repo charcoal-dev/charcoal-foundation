@@ -11,11 +11,35 @@ use App\Shared\Enums\Http\HttpLogLevel;
  * Provides logic for building and configuring HTTP interface configurations.
  * Designed to validate and construct instances of HttpInterfaceConfig
  * based on an array of interface definitions.
+ * @api
  */
-trait HttpConfigBuilderTrait
+trait HttpFileConfigTrait
 {
-    protected function getHttpInterfacesConfig(array $interfaces): array
+    /**
+     * @param array $configData
+     * @return void
+     */
+    protected function httpInterfacesFromFileConfig(mixed $configData): void
     {
+        if (!is_array($configData) || !$configData) {
+            return;
+        }
+
+        /** @var array<HttpInterface, HttpInterfaceConfig> $ifConfig */
+        foreach ($this->getHttpInterfacesConfig($configData["interfaces"] ?? null) as $ifConfig) {
+            $this->http->set($ifConfig[0], $ifConfig[1]);
+        }
+    }
+
+    /**
+     * @return array<array<, HttpInterfaceConfig>>
+     */
+    protected function getHttpInterfacesConfig(mixed $interfaces): array
+    {
+        if (!is_array($interfaces) || !$interfaces) {
+            return [];
+        }
+
         $result = [];
         foreach ($interfaces as $ifId => $ifConfig) {
             $ifId = HttpInterface::tryFrom(strval($ifId));
@@ -46,7 +70,7 @@ trait HttpConfigBuilderTrait
             $ifConfig->traceHeader = is_string($ifConfig["traceHeader"]) ? $ifConfig["traceHeader"] : null;
             $ifConfig->cachedResponseHeader = is_string($ifConfig["cachedResponseHeader"]) ?
                 $ifConfig["cachedResponseHeader"] : null;
-            $result[$ifId->value] = $ifConfig;
+            $result[] = [$ifId, $ifConfig];
         }
 
         return $result;

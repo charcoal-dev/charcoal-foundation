@@ -15,29 +15,34 @@ use Charcoal\App\Kernel\Enums\CacheDriver;
  */
 trait CacheConfigBuilderTrait
 {
-    final protected function getCacheConfigBuilder(array|null $configData): ?CacheConfigObjectsBuilder
+    final protected function getCacheConfigBuilder(mixed $configData): CacheConfigObjectsBuilder
     {
         $cacheConfig = new CacheConfigObjectsBuilder();
+        if (!is_array($configData) || !$configData) {
+            return $cacheConfig;
+        }
+
         $cacheStores = $configData["stores"] ?? null;
+        if (!is_array($cacheStores) || !$cacheStores) {
+            return $cacheConfig;
+        }
 
-        if (is_array($cacheStores)) {
-            foreach ($cacheStores as $storeId => $cacheServer) {
-                $storeId = CacheStores::tryFrom(strval($storeId));
-                if (!$storeId) {
-                    throw new \OutOfBoundsException("No matching cache store found between Enum and config ");
-                }
-
-                // Cache Driver
-                $driver = CacheDriver::tryFrom(strval($cacheServer["driver"]));
-                if (!$driver) {
-                    throw new \OutOfBoundsException("Invalid cache driver in configuration");
-                }
-
-                $host = $cacheServer["host"] ?? "";
-                $port = $cacheServer["port"] ?? 0;
-                $timeout = $cacheServer["timeout"] ?? 0;
-                $cacheConfig->set($storeId, new CacheStoreConfig($driver, $host, $port, $timeout));
+        foreach ($cacheStores as $storeId => $cacheServer) {
+            $storeId = CacheStores::tryFrom(strval($storeId));
+            if (!$storeId) {
+                throw new \OutOfBoundsException("No matching cache store found between Enum and config ");
             }
+
+            // Cache Driver
+            $driver = CacheDriver::tryFrom(strval($cacheServer["driver"]));
+            if (!$driver) {
+                throw new \OutOfBoundsException("Invalid cache driver in configuration");
+            }
+
+            $host = $cacheServer["host"] ?? "";
+            $port = $cacheServer["port"] ?? 0;
+            $timeout = $cacheServer["timeout"] ?? 0;
+            $cacheConfig->set($storeId, new CacheStoreConfig($driver, $host, $port, $timeout));
         }
 
         return $cacheConfig;

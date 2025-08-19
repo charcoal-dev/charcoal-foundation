@@ -13,6 +13,7 @@ use Charcoal\Cipher\CipherMode;
 /**
  * Class CiphersConfig
  * @package App\Shared\Core\Config
+ * @deprecated
  */
 readonly class CiphersConfig
 {
