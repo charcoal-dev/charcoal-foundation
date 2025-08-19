@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Foundation\Http\Config;
+namespace App\Shared\Core\Config\Http;
 
-use App\Shared\Core\Config\AbstractComponentConfig;
-use App\Shared\Foundation\Http\HttpLogLevel;
+use App\Shared\Core\Config\Persisted\AbstractResolvedConfig;
+use App\Shared\Enums\Http\HttpLogLevel;
 
 /**
  * Class AbstractHttpInterfaceConfig
  * @package App\Shared\Foundation\Http\Config
  */
-class HttpInterfaceConfig extends AbstractComponentConfig
+class HttpInterfaceConfig extends AbstractResolvedConfig
 {
     public bool $status;
     public HttpLogLevel $logData;
