@@ -3,33 +3,25 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\CoreData\ObjectStore;
 
-use App\Shared\Context\AppDbTables;
+use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\CoreData\CoreDataModule;
-use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;
-use Charcoal\Database\ORM\Schema\Charset;
+use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
+use Charcoal\Base\Enums\Charset;
 use Charcoal\Database\ORM\Schema\Columns;
 use Charcoal\Database\ORM\Schema\Constraints;
 use Charcoal\Database\ORM\Schema\TableMigrations;
 
 /**
- * Class ObjectStoreTable
- * @package App\Shared\Foundation\CoreData\ObjectStore
+ * Represents the database table for storing objects in the application.
+ * @property CoreDataModule $module
  */
-class ObjectStoreTable extends AbstractOrmTable
+class ObjectStoreTable extends OrmTableBase
 {
-    /**
-     * @param CoreDataModule $module
-     */
     public function __construct(CoreDataModule $module)
     {
-        parent::__construct($module, AppDbTables::OBJECT_STORE, entityClass: null);
+        parent::__construct($module, DatabaseTables::ObjectStore, entityClass: null);
     }
 
-    /**
-     * @param Columns $cols
-     * @param Constraints $constraints
-     * @return void
-     */
     protected function structure(Columns $cols, Constraints $constraints): void
     {
         $cols->setDefaultCharset(Charset::ASCII);
@@ -40,10 +32,6 @@ class ObjectStoreTable extends AbstractOrmTable
         $cols->int("timestamp")->bytes(4)->unSigned();
     }
 
-    /**
-     * @param TableMigrations $migrations
-     * @return void
-     */
     protected function migrations(TableMigrations $migrations): void
     {
     }
