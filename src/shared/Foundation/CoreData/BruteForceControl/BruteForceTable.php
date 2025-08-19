@@ -3,22 +3,22 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\CoreData\BruteForceControl;
 
-use App\Shared\Context\AppDbTables;
+use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\CoreData\CoreDataModule;
-use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;
+use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
 use Charcoal\Database\ORM\Schema\Columns;
 use Charcoal\Database\ORM\Schema\Constraints;
 use Charcoal\Database\ORM\Schema\TableMigrations;
 
 /**
- * Class BruteForceTable
- * @package App\Shared\Foundation\CoreData\BruteForceControl
+ * Represents the table structure and properties for managing brute force tracking data.
+ * @property CoreDataModule $module
  */
-class BruteForceTable extends AbstractOrmTable
+class BruteForceTable extends OrmTableBase
 {
     public function __construct(CoreDataModule $module)
     {
-        parent::__construct($module, AppDbTables::BFC, entityClass: null);
+        parent::__construct($module, DatabaseTables::BruteForceControl, entityClass: null);
     }
 
     protected function structure(Columns $cols, Constraints $constraints): void
