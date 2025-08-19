@@ -6,9 +6,9 @@ namespace App\Shared\Core\Config;
 use App\Shared\Context\CipherKey;
 use App\Shared\Utility\StringHelper;
 use Charcoal\Buffers\Frames\Bytes32;
-use Charcoal\Cipher\CipherMethod;
-use Charcoal\OOP\Traits\NoDumpTrait;
-use Charcoal\OOP\Traits\NotCloneableTrait;
+use Charcoal\Base\Traits\NoDumpTrait;
+use Charcoal\Base\Traits\NotCloneableTrait;
+use Charcoal\Cipher\CipherMode;
 
 /**
  * Class CiphersConfig
@@ -60,8 +60,8 @@ readonly class CiphersConfig
                     }
 
                     $mode = match (strtoupper($mode)) {
-                        "GCM" => CipherMethod::GCM,
-                        default => CipherMethod::CBC,
+                        "GCM" => CipherMode::GCM,
+                        default => CipherMode::CBC,
                     };
 
                     $keychain[$cipherEnum->value] = ["entropy" => $entropy, "mode" => $mode];
