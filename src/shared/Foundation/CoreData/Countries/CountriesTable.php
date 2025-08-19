@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\CoreData\Countries;
 
-use App\Shared\Context\AppDbTables;
+use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\CoreData\CoreDataModule;
-use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;
-use Charcoal\Database\ORM\Schema\Charset;
+use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
+use Charcoal\Base\Enums\Charset;
 use Charcoal\Database\ORM\Schema\Columns;
 use Charcoal\Database\ORM\Schema\Constraints;
 use Charcoal\Database\ORM\Schema\TableMigrations;
@@ -16,14 +16,14 @@ use Charcoal\Database\ORM\Schema\TableMigrations;
  * @package App\Shared\Foundation\CoreData\Countries
  * @property CoreDataModule $module
  */
-class CountriesTable extends AbstractOrmTable
+class CountriesTable extends OrmTableBase
 {
     /**
      * @param CoreDataModule $module
      */
     public function __construct(CoreDataModule $module)
     {
-        parent::__construct($module, AppDbTables::COUNTRIES, CountryEntity::class);
+        parent::__construct($module, DatabaseTables::Countries, CountryEntity::class);
     }
 
     /**

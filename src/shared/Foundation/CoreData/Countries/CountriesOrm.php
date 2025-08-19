@@ -3,32 +3,29 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\CoreData\Countries;
 
-use App\Shared\Context\AppDbTables;
+use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\CoreData\CoreDataModule;
-use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
-use Charcoal\App\Kernel\Orm\Repository\EntityUpsertTrait;
-use Charcoal\OOP\Vectors\StringVector;
+use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
+use Charcoal\App\Kernel\Orm\Repository\Traits\EntityUpsertTrait;
+use Charcoal\Base\Vectors\StringVector;
 
 /**
  * Class CountriesOrm
  * @package App\Shared\Foundation\CoreData\Countries
  * @property CoreDataModule $module
  */
-class CountriesOrm extends AbstractOrmRepository
+class CountriesOrm extends OrmRepositoryBase
 {
     use EntityUpsertTrait;
 
     public function __construct(CoreDataModule $module)
     {
-        parent::__construct($module, AppDbTables::COUNTRIES);
+        parent::__construct($module, DatabaseTables::Countries);
     }
 
     /**
-     * @param string $code2
-     * @param bool $useCache
-     * @return CountryEntity
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityNotFoundException
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
      */
     public function get(string $code2, bool $useCache): CountryEntity
     {
@@ -37,23 +34,12 @@ class CountriesOrm extends AbstractOrmRepository
     }
 
     /**
-     * @param CountryEntity $country
-     * @return int
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
+     * @api
      */
     public function upsert(CountryEntity $country): int
     {
         return $this->dbUpsertEntity($country,
             new StringVector("status", "name", "region", "code3", "code2", "dialCode"));
-    }
-
-    /**
-     * @param CountryEntity|string $code2OrEntity
-     * @return void
-     * @throws \Charcoal\Cache\Exception\CacheException
-     */
-    public function deleteFromCache(CountryEntity|string $code2OrEntity): void
-    {
-        $this->cacheDeleteEntity($code2OrEntity);
     }
 }
