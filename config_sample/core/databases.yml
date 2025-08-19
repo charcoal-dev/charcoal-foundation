@@ -8,3 +8,6 @@ databases:
         database: primary
         username: root
         password: ~
+        # Connection Strategy
+        # Possible values are ("lazy", "default")
+        connection: onDemand

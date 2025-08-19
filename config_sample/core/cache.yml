@@ -1,7 +1,7 @@
 # Cache Engine Configuration
 cache:
     # Configure cache servers below
-    pool:
+    stores:
         # Primary cache server (bundled within docker configuration)
         primary:
             driver: redis
