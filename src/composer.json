@@ -5,6 +5,7 @@
     "charcoal-dev/http-client": "^0.2.7",
     "charcoal-dev/yaml": "^0.2.0",
     "charcoal-dev/mailer": "^0.2.1",
+    "charcoal-dev/events": "^0.1.9",
     "ext-pdo": "*",
     "ext-curl": "*",
     "ext-sockets": "*"

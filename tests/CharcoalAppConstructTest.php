@@ -7,8 +7,12 @@ use App\Shared\CharcoalApp;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
 use Charcoal\App\Kernel\Enums\AppEnv;
+use Charcoal\Base\Support\Helpers\ObjectHelper;
+use Charcoal\Events\AbstractEvent;
+use Charcoal\Events\BehaviorEvent;
 use Charcoal\Filesystem\Path\DirectoryPath;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 /**
  * Class CharcoalAppConstructTest
@@ -46,7 +50,15 @@ class CharcoalAppConstructTest extends TestCase
         $startupTime = $charcoal->diagnostics->startupTime / 1e6;
         fwrite(STDERR, "\033[33mStartup Time: \033[32m" . $startupTime . "ms\033[0m\n");
 
-        // Check Diagnostics Cleanup of BuildStageEvents
-        fwrite(STDERR, "\033[33mDiagnostics Snapshot: \033[32mOK\033[0m\n");
+        // Verify that event subscriptions were dropped for BuiltStageEvents after bootstrap
+        $eventInspect = $charcoal->diagnostics->eventInspection(false);
+        $this->assertEquals(0, count($eventInspect->current[BuildStageEvents::class]), "No subscribers held for "
+            . ObjectHelper::baseClassName(BuildStageEvents::class));
+
+        // 2 Subscribers = One for this test, closure passed to constructor is bound to the event subscription,
+        // and the other one is the ErrorManager from Foundation app waiting for PathRegistry to resolve so it can
+        // load template.
+        $this->assertEquals(2, count($eventInspect->history[BuildStageEvents::class]),
+            "Total 2 overall subscribers");
     }
 }
