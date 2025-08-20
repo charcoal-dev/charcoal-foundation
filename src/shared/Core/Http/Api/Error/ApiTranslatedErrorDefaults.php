@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Api\Error;
 
-use App\Shared\Core\Http\AbstractApiEndpoint;
+use App\Shared\Core\Http\AbstractApiEndpointAbstract;
 
 /**
  * Trait ApiErrorCodeDefaults
@@ -12,12 +12,12 @@ use App\Shared\Core\Http\AbstractApiEndpoint;
  */
 trait ApiTranslatedErrorDefaults
 {
-    public function getErrorMessage(\Throwable $context = null, AbstractApiEndpoint $route = null): ?string
+    public function getErrorMessage(\Throwable $context = null, AbstractApiEndpointAbstract $route = null): ?string
     {
         return $this->value;
     }
 
-    public function getErrorCode(\Throwable $context = null, AbstractApiEndpoint $route = null): null|int|string
+    public function getErrorCode(\Throwable $context = null, AbstractApiEndpointAbstract $route = null): null|int|string
     {
         return null;
     }

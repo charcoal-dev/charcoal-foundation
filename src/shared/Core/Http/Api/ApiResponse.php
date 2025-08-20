@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Api;
 
-use App\Shared\Core\Http\AbstractApiEndpoint;
+use App\Shared\Core\Http\AbstractApiEndpointAbstract;
 use App\Shared\Core\Http\Exception\Api\ResponseFinalizedException;
-use App\Shared\Core\Http\Policy\Auth\AuthContextInterface;
-use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogEntity;
-use Charcoal\Http\Router\Controllers\Response\PayloadResponse;
+use App\Shared\Core\Http\Request\Policy\Auth\AuthContextInterface;
+use App\Shared\Foundation\Http\InterfaceLog\LogEntity;
+use Charcoal\Http\Router\Response\PayloadResponse;
 
 /**
  * Class ApiResponse
@@ -24,6 +24,7 @@ class ApiResponse extends PayloadResponse
      * @param int|null $statusCode
      * @return never
      * @throws ResponseFinalizedException
+     * @api
      */
     public function setSuccess(?int $statusCode = 200): never
     {
@@ -55,26 +56,27 @@ class ApiResponse extends PayloadResponse
     }
 
     /**
-     * @param AbstractApiEndpoint $route
+     * @param AbstractApiEndpointAbstract $route
      * @param AuthContextInterface|null $authContext
-     * @param InterfaceLogEntity|null $logEntity
+     * @param LogEntity|null $logEntity
      * @return void
      */
     public function prepareResponseCallback(
-        AbstractApiEndpoint   $route,
-        ?AuthContextInterface $authContext,
-        ?InterfaceLogEntity   $logEntity,
+        AbstractApiEndpointAbstract $route,
+        ?AuthContextInterface       $authContext,
+        ?LogEntity                  $logEntity,
     ): void
     {
     }
 
     /**
-     * @return array
+     * @return string
      */
-    protected function getBodyArray(): array
+    protected function getBody(): string
     {
-        $body = parent::getBodyArray();
-        return [static::PARAM_SUCCESS => $this->isSuccess, ...$body];
+        $payload = $this->payload->getArray();
+        $payload = [static::PARAM_SUCCESS => $this->isSuccess, ...$payload];
+        return json_encode($payload);
     }
 
     /**

@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http\Api;
 
 use App\Shared\CharcoalApp;
+use App\Shared\Core\Config\Persisted\HttpInterfaceConfig;
 use App\Shared\Core\Http\HttpInterfaceProfile;
-use App\Shared\Foundation\Http\Config\HttpInterfaceConfig;
-use App\Shared\Foundation\Http\HttpInterface;
+use App\Shared\Enums\Http\HttpInterface;
 
 /**
  * Class ApiInterfaceProfile
