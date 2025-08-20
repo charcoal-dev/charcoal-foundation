@@ -13,6 +13,7 @@ readonly class BruteForceActor
      * @param string $actorIp
      * @param bool $hash
      * @return static
+     * @api
      */
     public static function fromIpAddress(string $actorIp, bool $hash = true): static
     {
