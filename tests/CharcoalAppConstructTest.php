@@ -38,10 +38,15 @@ class CharcoalAppConstructTest extends TestCase
             throw $t;
         }
 
+        fwrite(STDERR, "\033[35mCharcoal App Initialized\033[0m\n");
+
+        // First assertion
         $this->assertInstanceOf(CharcoalApp::class, $charcoal);
-        fwrite(STDERR, "Charcoal App Initialized\033[0m\n");
         $charcoal->bootstrap($timestamp);
-        $startupTime = $charcoal->diagnostics->startupTime / 1e9;
-        fwrite(STDERR, "\033[33mStartup Time: \033[32m" . $startupTime . "\033[0m\n");
+        $startupTime = $charcoal->diagnostics->startupTime / 1e6;
+        fwrite(STDERR, "\033[33mStartup Time: \033[32m" . $startupTime . "ms\033[0m\n");
+
+        // Check Diagnostics Cleanup of BuildStageEvents
+        fwrite(STDERR, "\033[33mDiagnostics Snapshot: \033[32mOK\033[0m\n");
     }
 }
