@@ -1,14 +1,10 @@
 {
   "require": {
     "php": "^8.3",
-    "charcoal-dev/base": "dev-main",
     "charcoal-dev/app-kernel": "dev-main",
-    "charcoal-dev/db-orm": "^0.1.9",
-    "charcoal-dev/oop-base": "^0.1.5",
-    "charcoal-dev/yaml": "^0.1.0",
-    "charcoal-dev/mailer": "dev-main",
-    "charcoal-dev/http-router": "^0.1.7",
-    "charcoal-dev/http-client": "^0.1.1",
+    "charcoal-dev/http-client": "^0.2.7",
+    "charcoal-dev/yaml": "^0.2.0",
+    "charcoal-dev/mailer": "^0.2.1",
     "ext-pdo": "*",
     "ext-curl": "*",
     "ext-sockets": "*"
