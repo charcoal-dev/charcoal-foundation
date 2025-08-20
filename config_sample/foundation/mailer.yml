@@ -8,7 +8,7 @@ mailer:
     # - "queue_only": Emails are only queued, not sent immediately.
     # - "send_and_queue": Emails are sent immediately and also added to the queue for tracking.
     # - "send_only": Emails are sent immediately without queuing.
-    policy: "send_only"
+    mode: "send_only"
     # Sender Information
     sender:
         # The name that appears as the sender of the emails.

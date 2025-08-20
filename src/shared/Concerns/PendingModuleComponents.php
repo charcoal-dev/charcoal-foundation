@@ -13,18 +13,18 @@ use Charcoal\Semaphore\Filesystem\FilesystemSemaphore;
 trait PendingModuleComponents
 {
     /**
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     public function getCipherFor(OrmRepositoryBase $resolveFor): ?Cipher
     {
-        throw new \Exception("Not implemented");
+        throw new \RuntimeException("Not implemented");
     }
 
     /**
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     public function getSemaphore(): FilesystemSemaphore
     {
-        throw new \Exception("Not implemented");
+        throw new \RuntimeException("Not implemented");
     }
 }
