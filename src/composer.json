@@ -17,5 +17,10 @@
       "App\\Interfaces\\Engine\\": "interfaces/engine",
       "App\\Interfaces\\Web\\": "interfaces/web"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Charcoal\\Tests\\Foundation\\": "../tests/"
+    }
   }
 }

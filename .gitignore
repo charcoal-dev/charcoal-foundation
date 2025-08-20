@@ -3,6 +3,7 @@ vendor/
 workspace/
 composer.lock
 composer.phar
+tests/build/*
 
 .env
 /deployment/

@@ -4,7 +4,10 @@ declare(strict_types=1);
 namespace App\Shared\Core;
 
 use App\Shared\Core\Http\Html\RenderHtmlTemplateTrait;
+use Charcoal\App\Kernel\Diagnostics\Diagnostics;
+use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
 use Charcoal\App\Kernel\Enums\AppEnv;
+use Charcoal\App\Kernel\Enums\DiagnosticsEvent;
 use Charcoal\App\Kernel\Errors\ErrorLoggers;
 
 /**
@@ -25,7 +28,11 @@ final class ErrorManager extends \Charcoal\App\Kernel\Errors\ErrorManager
     public function __construct(AppEnv $env, PathRegistry $paths, ?ErrorLoggers $loggers = null)
     {
         parent::__construct($env, $paths, $loggers);
-        $this->crashHtmlTemplate = $paths->storage->join("./crash.phtml")->path;
+        Diagnostics::app()->subscribe(DiagnosticsEvent::BuildStage, function (BuildStageEvents $event) use ($paths) {
+            if ($event === BuildStageEvents::PathRegistryOn) {
+                $this->crashHtmlTemplate = $paths->storage->join("./crash.phtml")->path;
+            }
+        });
     }
 
     /**

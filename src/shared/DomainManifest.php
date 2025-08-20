@@ -45,7 +45,7 @@ final class DomainManifest extends AppManifest
     public static function provideAppConfig(AppEnv $env, PathRegistry $paths): AppConfig
     {
         $appConfig = new AppConfigBuilder($env, $paths);
-        $appConfig->security->setSemaphoreDirectory($paths->tmp->join("./semaphore")->path);
+        $appConfig->security->setSemaphoreDirectory("./tmp/semaphore");
         return $appConfig->build();
     }
 

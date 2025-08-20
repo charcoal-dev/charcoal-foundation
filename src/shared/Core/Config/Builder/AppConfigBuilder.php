@@ -56,7 +56,10 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
      */
     protected function includeMailerConfig(mixed $mailerConfig): void
     {
-        $this->mailer = $this->getMailerConfig($mailerConfig);
+        $mailerConfig = $this->getMailerConfig($mailerConfig);
+        if ($mailerConfig) {
+            $this->mailer = $mailerConfig;
+        }
     }
 
     /**
