@@ -3,13 +3,12 @@ declare(strict_types=1);
 
 namespace App\Shared\Context;
 
-use Charcoal\App\Kernel\Cipher\CipherEnum;
-
 /**
  * Class CipherKey
  * @package App\Shared\Context
+ * @deprecated
  */
-enum CipherKey: string implements CipherEnum
+enum CipherKey: string
 {
     case PRIMARY = "primary";
     case DOMAIN = "domain";

@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Context\Api\Errors;
 
-use App\Shared\Core\Http\AbstractApiEndpoint;
+use App\Shared\Core\Http\AbstractApiEndpointAbstract;
 use App\Shared\Core\Http\Api\Error\ApiTranslatedErrorInterface;
-use App\Shared\Exception\ApiValidationException;
+use App\Shared\Exceptions\ApiValidationException;
 use App\Shared\Validation\ValidationException;
 
 /**
@@ -26,10 +26,10 @@ enum GatewayError: string implements ApiTranslatedErrorInterface
 
     /**
      * @param \Throwable|null $context
-     * @param AbstractApiEndpoint|null $route
+     * @param AbstractApiEndpointAbstract|null $route
      * @return string
      */
-    public function getErrorMessage(\Throwable $context = null, AbstractApiEndpoint $route = null): string
+    public function getErrorMessage(\Throwable $context = null, AbstractApiEndpointAbstract $route = null): string
     {
         if ($this === self::VALIDATION_ERROR && $context instanceof ValidationException) {
             return sprintf($this->value, $context->getMessage());
@@ -49,10 +49,10 @@ enum GatewayError: string implements ApiTranslatedErrorInterface
 
     /**
      * @param \Throwable|null $context
-     * @param AbstractApiEndpoint|null $route
+     * @param AbstractApiEndpointAbstract|null $route
      * @return int|string|null
      */
-    public function getErrorCode(\Throwable $context = null, AbstractApiEndpoint $route = null): null|int|string
+    public function getErrorCode(\Throwable $context = null, AbstractApiEndpointAbstract $route = null): null|int|string
     {
         return $context->getCode() ?: null;
     }
