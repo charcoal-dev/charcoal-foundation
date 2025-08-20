@@ -3,24 +3,27 @@ declare(strict_types=1);
 
 namespace App\Interfaces\Engine\Scripts;
 
-use App\Shared\Core\Cli\AppAwareCliScript;
-use App\Shared\Core\Cli\ScriptExecutionLogBinding;
-use Charcoal\App\Kernel\Orm\Exception\EntityNotFoundException;
+use App\Shared\Core\Cli\DomainScriptBase;
+use App\Shared\Core\Cli\LogPolicy;
+use App\Shared\Enums\Databases;
+use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
+use Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException;
+use Charcoal\Base\Support\Helpers\ObjectHelper;
 use Charcoal\Database\ORM\Migrations;
-use Charcoal\OOP\OOP;
 
 /**
  * Class Install
  * @package App\Interfaces\Engine\Scripts
+ * @api
  */
-class Install extends AppAwareCliScript
+class Install extends DomainScriptBase
 {
     /**
-     * @return ScriptExecutionLogBinding
+     * @return LogPolicy
      */
-    protected function declareExecutionLogging(): ScriptExecutionLogBinding
+    protected function declareExecutionLogging(): LogPolicy
     {
-        return new ScriptExecutionLogBinding(false);
+        return new LogPolicy(false);
     }
 
     /**
@@ -58,9 +61,10 @@ class Install extends AppAwareCliScript
      * @param string $objectClassname
      * @param \Closure $newInstance
      * @return void
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
-     * @throws \Charcoal\Cipher\Exception\CipherException
-     * @throws \Charcoal\Database\ORM\Exception\OrmQueryException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
+     * @throws \Charcoal\Cipher\Exceptions\CipherException
+     * @throws \Charcoal\Database\Orm\Exceptions\OrmQueryException
+     * @api
      */
     protected function handleRequiredStoredObject(
         string   $objectClassname,
@@ -72,7 +76,7 @@ class Install extends AppAwareCliScript
             throw new \LogicException("Bad stored object classname");
         }
 
-        $this->inline("\t{grey}Checking {yellow}" . OOP::baseClassName($objectClassname) . "{/}{grey} ... ");
+        $this->inline("\t{grey}Checking {yellow}" . ObjectHelper::baseClassName($objectClassname) . "{/}{grey} ... ");
 
         try {
             $objectStore->get($objectClassname, useCache: false);
@@ -96,12 +100,13 @@ class Install extends AppAwareCliScript
     private function createDbTables(): void
     {
         $app = $this->getAppBuild();
-        $dbDeclaredTables = $app->databases->orm->getCollection();
+        $dbDeclaredTables = $app->database->tables->getCollection();
 
         $installSequence = [];
         foreach ($dbDeclaredTables as $dbTag => $dbTables) {
-            $this->inline("Getting {invert}{yellow} " . $dbTag . " {/} database ... ");
-            $dbInstance = $app->databases->getDb($dbTag);
+            $dbTag = Databases::from($dbTag);
+            $this->inline("Getting {invert}{yellow} " . $dbTag->name . " {/} database ... ");
+            $dbInstance = $app->database->getDb($dbTag);
             $this->print("{grey}[{green}OK{grey}]{/}");
 
             $this->inline("{grey}Tables registered: {/}");
@@ -109,6 +114,7 @@ class Install extends AppAwareCliScript
             $this->print("{yellow}" . $tablesCount . "{/}");
 
             $highestPriority = 0;
+            /** @var OrmTableBase $tableInstance */
             foreach ($dbTables as $tableInstance) {
                 if ($tableInstance->enum->getPriority() > $highestPriority) {
                     $highestPriority = $tableInstance->enum->getPriority();

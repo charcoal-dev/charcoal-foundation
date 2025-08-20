@@ -6,6 +6,7 @@ namespace App\Interfaces\Engine\Core\Cleanup;
 /**
  * Class EngineLogCleanup
  * @package App\Interfaces\Engine\Core\Cleanup
+ * @api
  */
 class EngineLogCleanup
 {

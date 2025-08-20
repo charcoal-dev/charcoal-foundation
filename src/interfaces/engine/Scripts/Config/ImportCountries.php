@@ -3,23 +3,26 @@ declare(strict_types=1);
 
 namespace App\Interfaces\Engine\Scripts\Config;
 
-use App\Shared\Core\Cli\AppAwareCliScript;
-use App\Shared\Core\Cli\ScriptExecutionLogBinding;
-use App\Shared\Exception\CliScriptException;
-use Charcoal\Database\Exception\QueryExecuteException;
+use App\Shared\Core\Cli\DomainScriptBase;
+use App\Shared\Core\Cli\LogPolicy;
+use App\Shared\Exceptions\CliScriptException;
+use Charcoal\Base\Support\Helpers\ObjectHelper;
+use Charcoal\Database\Exceptions\QueryExecuteException;
+use Charcoal\Filesystem\Exceptions\FilesystemException;
 
 /**
  * Class ImportCountries
  * @package App\Interfaces\Engine\Scripts\Config
+ * @api
  */
-class ImportCountries extends AppAwareCliScript
+class ImportCountries extends DomainScriptBase
 {
     /**
-     * @return ScriptExecutionLogBinding
+     * @return LogPolicy
      */
-    protected function declareExecutionLogging(): ScriptExecutionLogBinding
+    protected function declareExecutionLogging(): LogPolicy
     {
-        return new ScriptExecutionLogBinding(false);
+        return new LogPolicy(false);
     }
 
     /**
@@ -39,30 +42,22 @@ class ImportCountries extends AppAwareCliScript
     {
         // Read Data File
         $this->print('Looking for {yellow}{b}countries.csv{/} file...');
-        $earthCsvPath = $this->getAppBuild()->directories->storage->pathToChild("countries.csv");
-        $this->inline(sprintf('Path: {cyan}%s{/} ... ', $earthCsvPath));
-        if (!@is_file($earthCsvPath)) {
-            $this->print('{red}Not Found{/}');
-            throw new CliScriptException('Countries CSV files not found in path');
-        }
 
-        if (!@is_readable($earthCsvPath)) {
-            $this->print('{red}Not Readable{/}');
-            throw new CliScriptException('Countries CSV file is not readable');
-        }
-
-        $this->print("{green}OK{/}");
-
-        $countriesCsv = file_get_contents($earthCsvPath);
-        if (!$countriesCsv) {
-            throw new CliScriptException('Failed to read countries CSV file');
+        try {
+            $earthCsvPath = $this->getAppBuild()->paths->storage->join("./countries.csv");
+            $this->inline(sprintf('Path: {cyan}%s{/} ... ', $earthCsvPath->path));
+            $earthCsvPath = $earthCsvPath->isFile()->node();
+            $this->print("{green}OK{/}");
+            $countriesCsv = $earthCsvPath->read();
+        } catch (FilesystemException $e) {
+            $this->print("{red}" . ObjectHelper::baseClassName($e) . "{/}");
+            throw new CliScriptException($e->getMessage(), previous: $e);
         }
 
         $countriesCsv = preg_split('(\r\n|\n|\r)', trim($countriesCsv));
         $countriesCount = count($countriesCsv);
         $this->print("");
         $this->print(sprintf("Total Countries Found: {green}{invert}%s{/}", $countriesCount));
-        // Todo: dump value to execution log
 
         $countriesOrm = $this->getAppBuild()->coreData->countries;
         $db = $countriesOrm->table->getDb();
@@ -87,10 +82,8 @@ class ImportCountries extends AppAwareCliScript
             $this->inline(sprintf('%s {cyan}%s{/} ... ', $saveCountryData["name"], $saveCountryData["code2"]));
             try {
                 $saveCountryQuery = $db->exec(sprintf($saveCountryQuery, $countriesOrm->table->name), $saveCountryData);
-                // Todo: dump value to execution log
                 $this->print("{green}SUCCESS{/}");
             } catch (QueryExecuteException) {
-                // Todo: dump value to execution log
                 $this->print("{red}FAIL{/}");
             }
 

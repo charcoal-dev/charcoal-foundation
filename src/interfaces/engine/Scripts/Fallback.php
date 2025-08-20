@@ -3,23 +3,24 @@ declare(strict_types=1);
 
 namespace App\Interfaces\Engine\Scripts;
 
-use App\Shared\Core\Cli\AppAwareCliScript;
-use App\Shared\Core\Cli\ScriptExecutionLogBinding;
+use App\Shared\Core\Cli\DomainScriptBase;
+use App\Shared\Core\Cli\LogPolicy;
 
 /**
  * Class Fallback
  * @package App\Interfaces\Engine\Scripts
+ * @api
  */
-class Fallback extends AppAwareCliScript
+class Fallback extends DomainScriptBase
 {
     private array $scripts = [];
 
     /**
-     * @return ScriptExecutionLogBinding
+     * @return LogPolicy
      */
-    protected function declareExecutionLogging(): ScriptExecutionLogBinding
+    protected function declareExecutionLogging(): LogPolicy
     {
-        return new ScriptExecutionLogBinding(false);
+        return new LogPolicy(false);
     }
 
     /**
