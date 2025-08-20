@@ -3,14 +3,17 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Mailer\Backlog;
 
-use Charcoal\App\Kernel\Orm\Repository\AbstractOrmEntity;
+use App\Shared\Enums\Mailer\QueuedEmailStatus;
+use Charcoal\App\Kernel\Orm\Entity\OrmEntityBase;
 use Charcoal\Buffers\Buffer;
 
 /**
- * Class QueuedEmail
- * @package App\Shared\Foundation\Mailer\Backlog
+ * Represents an email queued for processing.
+ * Holds information about the email and its status
+ * in the queue, such as recipient, sender, subject,
+ * attempts, and error information.
  */
-class QueuedEmail extends AbstractOrmEntity
+final class QueuedEmail extends OrmEntityBase
 {
     public int $id;
     public QueuedEmailStatus $status;
@@ -36,6 +39,6 @@ class QueuedEmail extends AbstractOrmEntity
      */
     protected function collectSerializableData(): array
     {
-        throw new \LogicException(static::class . " does not need to be serialized");
+        throw new \LogicException(self::class . " does not need to be serialized");
     }
 }

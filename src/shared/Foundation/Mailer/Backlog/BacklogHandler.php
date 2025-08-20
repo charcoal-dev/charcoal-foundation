@@ -3,36 +3,30 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Mailer\Backlog;
 
-use App\Shared\Context\AppDbTables;
+use App\Shared\Enums\DatabaseTables;
+use App\Shared\Enums\Mailer\QueuedEmailStatus;
 use App\Shared\Foundation\Mailer\MailerModule;
-use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
-use Charcoal\App\Kernel\Orm\Repository\EntityInsertableTrait;
+use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
+use Charcoal\App\Kernel\Orm\Repository\Traits\EntityInsertableTrait;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Mailer\Message\CompiledMimeMessage;
 
 /**
- * Class BacklogHandler
- * @package App\Shared\Foundation\Mailer\Backlog
+ * Class BacklogHandler handles operations related to the email backlog.
+ * It extends the OrmRepositoryBase to leverage ORM functionalities for database operations.
  * @property MailerModule $module
  */
-class BacklogHandler extends AbstractOrmRepository
+class BacklogHandler extends OrmRepositoryBase
 {
     use EntityInsertableTrait;
 
     public function __construct(MailerModule $module)
     {
-        parent::__construct($module, AppDbTables::MAILER_BACKLOG);
+        parent::__construct($module, DatabaseTables::MailerQueue);
     }
 
     /**
-     * @param string $sender
-     * @param string $recipient
-     * @param string $subject
-     * @param CompiledMimeMessage|null $message
-     * @param QueuedEmailStatus $status
-     * @param string|null $errorMsg
-     * @return QueuedEmail
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
      */
     public function createQueuedEmail(
         string               $sender,
