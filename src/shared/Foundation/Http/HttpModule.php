@@ -3,137 +3,98 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Http;
 
-use App\Shared\Context\CacheStore;
-use App\Shared\Context\CipherKey;
-use App\Shared\Core\Orm\ComponentsAwareModule;
-use App\Shared\Core\Orm\ModuleComponentEnum;
+use App\Shared\CharcoalApp;
+use App\Shared\Concerns\NormalizedStorageKeysTrait;
+use App\Shared\Concerns\PendingModuleComponents;
+use App\Shared\Enums\CacheStores;
 use App\Shared\Foundation\Http\CallLog\CallLogHandler;
 use App\Shared\Foundation\Http\CallLog\CallLogTable;
-use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogHandler;
-use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogTable;
-use App\Shared\Foundation\Http\ProxyServers\HttpProxy;
-use App\Shared\Foundation\Http\ProxyServers\ProxyServersOrm;
-use App\Shared\Foundation\Http\ProxyServers\ProxyServersTable;
-use Charcoal\App\Kernel\Build\AppBuildPartial;
-use Charcoal\App\Kernel\Module\AbstractModuleComponent;
-use Charcoal\App\Kernel\Orm\Db\DatabaseTableRegistry;
-use Charcoal\Cipher\Cipher;
-use Charcoal\Http\Client\Request;
-use Charcoal\Http\Client\Response;
-use Charcoal\OOP\Vectors\DsvString;
+use App\Shared\Foundation\Http\InterfaceLog\LogHandler;
+use App\Shared\Foundation\Http\InterfaceLog\LogTable;
+use App\Shared\Foundation\Http\ProxyServers\ProxiesHandler;
+use App\Shared\Foundation\Http\ProxyServers\ProxiesTable;
+use Charcoal\App\Kernel\Orm\Db\TableRegistry;
+use Charcoal\App\Kernel\Orm\Module\OrmModuleBase;
+use Charcoal\Cache\CacheClient;
 
 /**
  * Class HttpModule
- * @package App\Shared\Foundation\Http
+ * Represents an HTTP module handling various HTTP-related operations and components.
+ * @property-read CharcoalApp $app
  */
-class HttpModule extends ComponentsAwareModule
+final class HttpModule extends OrmModuleBase
 {
-    public CallLogHandler $callLog;
-    public InterfaceLogHandler $interfaceLog;
-    public ProxyServersOrm $proxyServers;
-    public HttpClient $client;
+    use PendingModuleComponents;
+    use NormalizedStorageKeysTrait;
+
+    public readonly CallLogHandler $callLog;
+    public readonly LogHandler $interfaceLog;
+    public readonly ProxiesHandler $proxies;
+
+    protected ?HttpService $service = null;
 
     /**
-     * @param AppBuildPartial $app
-     * @param Http[] $components
+     * @param CharcoalApp $app
      */
-    public function __construct(AppBuildPartial $app, array $components)
+    public function __construct(CharcoalApp $app)
     {
-        parent::__construct($app, CacheStore::PRIMARY, $components);
+        parent::__construct($app);
     }
 
     /**
-     * @param AppBuildPartial $app
+     * @param TableRegistry $tables
      * @return void
      */
-    protected function declareChildren(AppBuildPartial $app): void
+    protected function declareDatabaseTables(TableRegistry $tables): void
     {
-        parent::declareChildren($app);
-        $this->client = new HttpClient($this);
+        $tables->register(new CallLogTable($this));
+        $tables->register(new LogTable($this));
+        $tables->register(new ProxiesTable($this));
     }
 
     /**
-     * @param Request $request
-     * @param HttpLogLevel $logLevel
-     * @param DsvString|null $flags
-     * @param HttpProxy|null $proxyServer
-     * @param bool $useTimeouts
-     * @param bool $useCertAuthFile
-     * @param bool $useUserAgent
-     * @return Response
-     * @throws \Throwable
+     * @return array
      */
-    public function sendRequest(
-        Request      $request,
-        HttpLogLevel $logLevel = HttpLogLevel::NONE,
-        ?DsvString   $flags = null,
-        ?HttpProxy   $proxyServer = null,
-        bool         $useTimeouts = true,
-        bool         $useCertAuthFile = true,
-        bool         $useUserAgent = true,
-    ): Response
+    public function collectSerializableData(): array
     {
-        return $this->client->send(
-            $request,
-            $logLevel,
-            $flags,
-            $proxyServer,
-            $useTimeouts,
-            $useCertAuthFile,
-            $useUserAgent
-        );
+        $data = parent::collectSerializableData();
+        $data["callLog"] = $this->callLog;
+        $data["interfaceLog"] = $this->interfaceLog;
+        $data["proxies"] = $this->proxies;
+        $data["service"] = null;
+        return $data;
     }
 
     /**
-     * @param AbstractModuleComponent $resolveFor
-     * @return Cipher
+     * @param array $data
+     * @return void
      */
-    public function getCipher(AbstractModuleComponent $resolveFor): Cipher
+    public function __unserialize(array $data): void
     {
-        return $this->app->cipher->get(CipherKey::PRIMARY);
+        $this->callLog = $data["callLog"];
+        $this->interfaceLog = $data["interfaceLog"];
+        $this->proxies = $data["proxies"];
+        $this->service = null;
+        parent::__unserialize($data);
     }
 
     /**
-     * @param Http|ModuleComponentEnum $component
-     * @param AppBuildPartial $app
-     * @return bool
+     * @return HttpService
      */
-    protected function includeComponent(Http|ModuleComponentEnum $component, AppBuildPartial $app): bool
+    public function client(): HttpService
     {
-        switch ($component) {
-            case Http::CALL_LOG:
-                $this->callLog = new CallLogHandler($this);
-                return true;
-            case Http::INTERFACE_LOG:
-                $this->interfaceLog = new InterfaceLogHandler($this);
-                return true;
-            case Http::PROXY_SERVERS:
-                $this->proxyServers = new ProxyServersOrm($this);
-                return true;
-            default:
-                return false;
+        if (!$this->service) {
+            $this->service = new HttpService($this->app);
         }
+
+        return $this->service;
     }
 
     /**
-     * @param Http|ModuleComponentEnum $component
-     * @param DatabaseTableRegistry $tables
-     * @return bool
+     * @return CacheClient|null
      */
-    protected function createDbTables(Http|ModuleComponentEnum $component, DatabaseTableRegistry $tables): bool
+    public function getCacheStore(): ?CacheClient
     {
-        switch ($component) {
-            case Http::CALL_LOG:
-                $tables->register(new CallLogTable($this));
-                return true;
-            case Http::INTERFACE_LOG:
-                $tables->register(new InterfaceLogTable($this));
-                return true;
-            case Http::PROXY_SERVERS:
-                $tables->register(new ProxyServersTable($this));
-                return true;
-            default:
-                return false;
-        }
+        return $this->app->cache->getStore(CacheStores::Primary);
     }
 }

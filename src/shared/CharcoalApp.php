@@ -3,151 +3,78 @@ declare(strict_types=1);
 
 namespace App\Shared;
 
-use App\Shared\Context\BuildContext;
-use App\Shared\Core\Cache\CachePool;
-use App\Shared\Core\Config;
-use App\Shared\Core\Db\Databases;
-use App\Shared\Core\Directories;
-use App\Shared\Core\ErrorHandler;
-use App\Shared\Core\Events;
+use App\Domain\Core\AppBindings;
+use App\Domain\DomainManifest;
+use App\Shared\Core\Config\Builder\AppConfigBuilder;
+use App\Shared\Core\Config\Snapshot\AppConfig;
+use App\Shared\Core\ErrorManager;
+use App\Shared\Core\PathRegistry;
 use App\Shared\Foundation\CoreData\CoreDataModule;
-use App\Shared\Foundation\CoreData\SystemAlerts\SystemAlertEntity;
 use App\Shared\Foundation\Engine\EngineModule;
 use App\Shared\Foundation\Http\HttpModule;
 use App\Shared\Foundation\Mailer\MailerModule;
-use Charcoal\App\Kernel\AppBuild;
-use Charcoal\App\Kernel\Errors\FileErrorLogger;
-use Charcoal\Cipher\Cipher;
-use Charcoal\Filesystem\Directory;
-use Charcoal\Semaphore\FilesystemSemaphore;
+use Charcoal\App\Kernel\AbstractApp;
+use Charcoal\App\Kernel\Enums\AppEnv;
+use Charcoal\Filesystem\Path\DirectoryPath;
 
 /**
  * Class CharcoalApp
  * @package App\Shared
- * @property CachePool $cache
- * @property Databases $databases
- * @property Directories $directories
- * @property Events $events
- * @property Config $config
- * @property ErrorHandler $errors
+ * @property PathRegistry $paths
+ * @property AppConfig $config
+ * @property ErrorManager $errors
  */
-class CharcoalApp extends AppBuild implements AppConfigConstants
+class CharcoalApp extends AbstractApp
 {
-    public readonly FilesystemSemaphore $semaphore;
+    //use InstanceOnStaticScopeTrait;
 
-    public CoreDataModule $coreData;
-    public HttpModule $http;
-    public MailerModule $mailer;
-    public EngineModule $engine;
-
-    // Todo: Update Buffers
-    // Todo: Update Cache
-    // Todo: Update Cache Redis Client
-    // Todo: Update Cipher
-    // Todo: Update Cli
-    // Todo: Update Database
-    // Todo: Update Database ORM
-    // Todo: Update Events
-    // Todo: Update Filesystem
-    // Todo: Update GMP Adapter
-    // Todo: Update Http Commons
-    // Todo: Update Http Route
-    // Todo: Update Http Client
-    // Todo: Update Semaphore
-    // Todo: Update Yaml
-
-    /**
-     * @param BuildContext $context
-     * @param Directory $rootDirectory
-     * @param string $errorLogFilepath
-     * @param string $configClass
-     * @throws \Charcoal\Filesystem\Exception\FilesystemException
-     * @throws \Charcoal\Semaphore\Exception\SemaphoreException
-     */
-    public function __construct(
-        BuildContext     $context,
-        Directory        $rootDirectory,
-        string           $errorLogFilepath = "./log/error.log",
-        protected string $configClass = \App\Shared\Core\Config::class,
-    )
-    {
-        parent::__construct(
-            $context,
-            $rootDirectory,
-            new FileErrorLogger($rootDirectory->getFile($errorLogFilepath, true), useAnsiEscapeSeq: true),
-            CachePool::class,
-            Directories::class,
-            Events::class,
-            Databases::class,
-            errorHandlerClass: ErrorHandler::class
-        );
-
-        $this->semaphore = new FilesystemSemaphore($this->directories->semaphore);
-    }
-
-    /**
-     * @return void
-     */
-    public function bootstrap(): void
-    {
-        parent::bootstrap();
-        $this->errors->exceptionHandlerShowTrace = true;
-    }
-
-    /**
-     * @return Config
-     */
-    protected function renderConfig(): Config
-    {
-        /** @var Config $config */
-        $config = new ($this->configClass)($this->directories);
-
-        // Create Ciphers from Configuration
-        foreach ($config->ciphers->keychain as $cipherId => $cipherObj) {
-            $this->cipher->set($cipherId, new Cipher($cipherObj["entropy"], $cipherObj["mode"]));
-        }
-
-        return $config;
-    }
-
-    /**
-     * @return string
-     */
-    public static function getAppClassname(): string
-    {
-        $appClassname = "\\App\\Shared\\" . getenv("APP_CLASSNAME");
-        if (!class_exists($appClassname)) {
-            throw new \LogicException(sprintf('No such Charcoal app with name "%s" defined', getenv("APP_CLASSNAME")));
-        }
-
-        return $appClassname;
-    }
+    public readonly CoreDataModule $coreData;
+    public readonly HttpModule $http;
+    public readonly MailerModule $mailer;
+    public readonly EngineModule $engine;
 
     /**
      * @return array
      */
-    public function __serialize(): array
+    public function collectSerializableData(): array
     {
-        $data = parent::__serialize();
-        $data["semaphore"] = $this->semaphore;
+        $data = parent::collectSerializableData();
+        $data["coreData"] = $this->coreData;
+        $data["http"] = $this->http;
+        $data["mailer"] = $this->mailer;
+        $data["engine"] = $this->engine;
         return $data;
     }
 
     /**
-     * @param array $data
      * @return void
+     * @noinspection PhpFieldAssignmentTypeMismatchInspection
+     * @internal
      */
-    public function __unserialize(array $data): void
+    protected function onReadyCallback(): void
     {
-        parent::__unserialize($data);
-        $this->semaphore = $data["semaphore"];
+        $this->coreData = $this->domain->get(AppBindings::coreData);
+        $this->http = $this->domain->get(AppBindings::http);
+        $this->mailer = $this->domain->get(AppBindings::mailer);
+        $this->engine = $this->domain->get(AppBindings::engine);
+
+        //Initialize app on static scope
+        //static::initializeStatic($this);
     }
 
     /**
-     * @param SystemAlertEntity $alert
-     * @return void
+     * @throws \Charcoal\Yaml\Exception\YamlParseException
      */
-    public function onSystemAlert(SystemAlertEntity $alert): void
+    protected function resolveAppConfig(AppEnv $env, DirectoryPath $root): AppConfig
     {
+        return (new AppConfigBuilder($env, $root, $this->paths))->build();
+    }
+
+    /**
+     * @return DomainManifest
+     */
+    protected function resolveAppManifest(): DomainManifest
+    {
+        return new DomainManifest();
     }
 }
