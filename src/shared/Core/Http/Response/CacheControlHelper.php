@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Response;
 
-use Charcoal\Http\Router\Controllers\CacheControl;
-use Charcoal\Http\Router\Controllers\CacheStoreDirective;
+use Charcoal\Http\Router\Enums\CacheStoreDirective;
+use Charcoal\Http\Router\Response\Headers\CacheControl;
 
 /**
  * Class CacheControlHelper
@@ -14,6 +14,7 @@ class CacheControlHelper
 {
     /**
      * @return CacheControl
+     * @api
      */
     public static function serverCacheOnly(): CacheControl
     {
@@ -24,6 +25,7 @@ class CacheControlHelper
      * @param int $maxAge
      * @param int $cdnMaxAge
      * @return CacheControl
+     * @api
      */
     public static function publicCdnCache(int $maxAge, int $cdnMaxAge): CacheControl
     {
@@ -33,6 +35,7 @@ class CacheControlHelper
     /**
      * @param int $maxAge
      * @return CacheControl
+     * @api
      */
     public static function privateBrowserOnly(int $maxAge): CacheControl
     {

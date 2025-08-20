@@ -7,30 +7,31 @@ use App\Shared\CharcoalApp;
 use App\Shared\Context\Api\Errors\GatewayError;
 use App\Shared\Core\Http\Cache\ResponseCache;
 use App\Shared\Core\Http\Exception\Cache\ResponseFromCacheException;
-use App\Shared\Core\Http\Policy\Auth\AuthAwareRouteInterface;
-use App\Shared\Core\Http\Policy\Auth\AuthContextInterface;
-use App\Shared\Core\Http\Policy\Concurrency\ConcurrencyEnforcer;
-use App\Shared\Core\Http\Policy\Concurrency\ConcurrencyPolicy;
-use App\Shared\Core\Http\Policy\Cors\CorsBinding;
-use App\Shared\Core\Http\Policy\Cors\CorsHeaders;
-use App\Shared\Core\Http\Policy\Cors\CorsPolicy;
-use App\Shared\Core\Http\Policy\DeviceFingerprintRequiredRoute;
-use App\Shared\Exception\ApiValidationException;
-use App\Shared\Exception\ConcurrentHttpRequestException;
-use App\Shared\Exception\CorsOriginMismatchException;
-use App\Shared\Foundation\Http\HttpInterface;
-use App\Shared\Foundation\Http\HttpLogLevel;
-use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogEntity;
-use App\Shared\Foundation\Http\InterfaceLog\InterfaceLogSnapshot;
-use App\Shared\Utility\NetworkValidator;
+use App\Shared\Core\Http\Request\Policy\Auth\AuthAwareRouteInterface;
+use App\Shared\Core\Http\Request\Policy\Auth\AuthContextInterface;
+use App\Shared\Core\Http\Request\Policy\Concurrency\ConcurrencyEnforcer;
+use App\Shared\Core\Http\Request\Policy\Concurrency\ConcurrencyPolicy;
+use App\Shared\Core\Http\Request\Policy\Cors\CorsBinding;
+use App\Shared\Core\Http\Request\Policy\Cors\CorsHeaders;
+use App\Shared\Core\Http\Request\Policy\DeviceFingerprintRequiredRoute;
+use App\Shared\Enums\Http\CorsPolicy;
+use App\Shared\Enums\Http\HttpLogLevel;
+use App\Shared\Enums\SemaphoreScopes;
+use App\Shared\Exceptions\ApiValidationException;
+use App\Shared\Exceptions\Http\ConcurrentHttpRequestException;
+use App\Shared\Exceptions\Http\CorsOriginMismatchException;
+use App\Shared\Foundation\Http\InterfaceLog\LogEntity;
+use App\Shared\Foundation\Http\InterfaceLog\RequestSnapshot;
+use App\Shared\Utility\NetworkHelper;
 use App\Shared\Utility\StringHelper;
+use Charcoal\App\Kernel\Diagnostics\Diagnostics;
+use Charcoal\App\Kernel\EntryPoint\Http\AbstractRouteController;
 use Charcoal\App\Kernel\Errors;
-use Charcoal\App\Kernel\Interfaces\Http\AbstractRouteController;
 use Charcoal\Buffers\AbstractFixedLenBuffer;
-use Charcoal\Http\Commons\HttpMethod;
-use Charcoal\Http\Router\Controllers\CacheStoreDirective;
-use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
-use Charcoal\OOP\OOP;
+use Charcoal\Http\Commons\Enums\HttpMethod;
+use Charcoal\Http\Router\Contracts\Response\ResponseResolvedInterface;
+use Charcoal\Http\Router\Enums\CacheStoreDirective;
+use Charcoal\Http\Router\Response\AbstractResponse;
 use Charcoal\Semaphore\Filesystem\FileLock;
 
 /**
@@ -38,12 +39,12 @@ use Charcoal\Semaphore\Filesystem\FileLock;
  * @package App\Shared\Core\Http
  * @property CharcoalApp $app
  */
-abstract class AppAwareEndpoint extends AbstractRouteController
+abstract class AbstractAppEndpoint extends AbstractRouteController
 {
-    protected const array LOG_IGNORE_REQUEST_HEADERS = [];
-    protected const array LOG_IGNORE_RESPONSE_HEADERS = [];
-    protected const array LOG_IGNORE_REQUEST_PARAMS = [];
-    protected const array LOG_IGNORE_RESPONSE_PARAMS = [];
+    protected const array LOG_EXCLUDE_REQUEST_HEADERS = [];
+    protected const array LOG_EXCLUDE_RESPONSE_HEADERS = [];
+    protected const array LOG_EXCLUDE_REQUEST_PARAMS = [];
+    protected const array LOG_EXCLUDE_RESPONSE_PARAMS = [];
 
     public readonly string $userIpAddress;
     public readonly ?HttpInterfaceProfile $interface;
@@ -51,10 +52,10 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     protected readonly ?AuthContextInterface $authContext;
 
     public readonly HttpLogLevel $requestLogLevel;
-    protected readonly ?InterfaceLogEntity $requestLog;
-    protected readonly ?InterfaceLogSnapshot $requestLogSnapshot;
+    protected readonly ?LogEntity $requestLog;
+    protected readonly ?RequestSnapshot $requestLogSnapshot;
 
-    protected readonly CorsBinding $corsBinding;
+    protected readonly ?CorsBinding $corsBinding;
     protected readonly ?ConcurrencyPolicy $concurrencyPolicy;
     private ?FileLock $concurrencyLock = null;
 
@@ -63,16 +64,17 @@ abstract class AppAwareEndpoint extends AbstractRouteController
     protected bool $exceptionIncludePrevious = false;
 
     /**
-     * @return void
+     * @throws ApiValidationException
+     * @throws CorsOriginMismatchException
      */
-    final protected function dispatchEntrypoint(): void
+    final protected function delegateResolveEntrypoint(): callable
     {
         // User IP Address
         $this->userIpAddress = $this->userClient->cfConnectingIP ??
             $this->userClient->xForwardedFor ??
             $this->userClient->ipAddress;
 
-        if (!NetworkValidator::isValidIpAddress($this->userIpAddress, true, true)) {
+        if (!NetworkHelper::isValidIpAddress($this->userIpAddress, true, true)) {
             throw new \UnexpectedValueException("Invalid remote IP address");
         }
 
@@ -82,46 +84,29 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         $this->corsBinding = $this->declareCorsBinding();
         $this->concurrencyPolicy = $this->declareconcurrencyPolicy();
 
-        // Proceed to entrypoint
-        parent::dispatchEntrypoint();
-    }
-
-    /**
-     * @return callable
-     * @throws ApiValidationException
-     * @throws CorsOriginMismatchException
-     */
-    final protected function resolveEntrypoint(): callable
-    {
         // CORS Binding
         $this->corsBinding->validateOrigin($this);
 
         // Interface Status
-        if ($this->interface && $this->interface->config->status) {
-            return $this->resolveEntryPointMethod();
+        if (!$this->interface->config->status) {
+            $this->handleInterfaceIsDisabled();
         }
 
         // Terminate
-        $this->handleInterfaceIsDisabled();
+        return $this->resolveEntryPointMethod();
     }
 
-    /**
-     * @return never
-     * @throws ApiValidationException
-     */
-    protected function handleInterfaceIsDisabled(): never
-    {
-        throw new ApiValidationException(GatewayError::INTERFACE_DISABLED);
-    }
-
-    /**
-     * @return callable
-     */
     abstract protected function resolveEntryPointMethod(): callable;
 
-    /**
-     * @return ConcurrencyPolicy|null
-     */
+    abstract protected function appEndpointCallback(): void;
+
+    abstract protected function declareHttpInterface(): HttpInterfaceProfile;
+
+    protected function declareLogLevel(): HttpLogLevel
+    {
+        return HttpLogLevel::None;
+    }
+
     protected function declareConcurrencyPolicy(): ?ConcurrencyPolicy
     {
         return null;
@@ -129,42 +114,17 @@ abstract class AppAwareEndpoint extends AbstractRouteController
 
     /**
      * @return CorsBinding
+     * @api
      */
-    protected function declareCorsBinding(): CorsBinding
+    protected function declareCorsPolicy(): CorsBinding
     {
         return new CorsBinding(CorsPolicy::ALLOW_ALL, CorsHeaders::getDefaultCors());
     }
 
     /**
-     * @return AbstractControllerResponse
-     */
-    public function response(): AbstractControllerResponse
-    {
-        return $this->getResponseObject();
-    }
-
-    /**
-     * @return void
-     */
-    abstract protected function appAwareCallback(): void;
-
-    /**
-     * @return HttpInterface|null
-     */
-    abstract protected function declareHttpInterface(): ?HttpInterfaceProfile;
-
-    /**
-     * @return HttpLogLevel
-     */
-    protected function declareLogLevel(): HttpLogLevel
-    {
-        return HttpLogLevel::NONE;
-    }
-
-    /**
      * @return void
      * @throws ConcurrentHttpRequestException
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
      */
     final protected function beforeEntrypointCallback(): void
     {
@@ -184,7 +144,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         // InterfaceLog
         $routeLogLevel = $this->declareLogLevel();
         $configLogLevel = $this->interface ?
-            $this->interface->config->logData : HttpLogLevel::NONE;
+            $this->interface->config->logData : HttpLogLevel::None;
 
         $this->requestLogLevel = HttpLogLevel::from(max($routeLogLevel->value, $configLogLevel->value));
         if ($this->requestLogLevel->value === 0) {
@@ -199,11 +159,11 @@ abstract class AppAwareEndpoint extends AbstractRouteController
                 throw new \RuntimeException("HTTP module does not have InterfaceLog component built");
             }
 
-            $this->requestLogSnapshot = new InterfaceLogSnapshot(
+            $this->requestLogSnapshot = new RequestSnapshot(
                 $this->requestLogLevel,
                 $this->request,
-                static::LOG_IGNORE_REQUEST_HEADERS,
-                static::LOG_IGNORE_REQUEST_PARAMS,
+                static::LOG_EXCLUDE_REQUEST_HEADERS,
+                static::LOG_EXCLUDE_REQUEST_PARAMS,
             );
 
             $this->requestLog = $this->app->http->interfaceLog->createLog(
@@ -214,7 +174,7 @@ abstract class AppAwareEndpoint extends AbstractRouteController
         }
 
         // Callback
-        $this->appAwareCallback();
+        $this->appEndpointCallback();
     }
 
     /**
@@ -229,27 +189,34 @@ abstract class AppAwareEndpoint extends AbstractRouteController
             return;
         }
 
-        $this->concurrencyLock = (new ConcurrencyEnforcer($this->concurrencyPolicy, $concurrencyScopeLockId))
-            ->acquireFileLock($this->interface, $this->app->directories->semaphore, true);
+        $this->concurrencyLock = (new ConcurrencyEnforcer(
+            $this->concurrencyPolicy,
+            SemaphoreScopes::Http,
+            $this->interface->enum->value . "_" . $concurrencyScopeLockId
+        ))->acquireFileLock($this->app->security->semaphore, true);
     }
 
-    /**
-     * @return void
-     */
-    abstract protected function prepareResponseCallback(): void;
 
     /**
      * @return never
-     * @throws \Charcoal\Filesystem\Exception\FilesystemException
-     * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
+     * @throws ApiValidationException
      */
-    final public function sendResponse(): never
+    protected function handleInterfaceIsDisabled(): never
+    {
+        throw new ApiValidationException(GatewayError::INTERFACE_DISABLED);
+    }
+
+    /**
+     * @param ResponseResolvedInterface|null $response
+     * @return void
+     */
+    protected function responseDispatcherHook(?ResponseResolvedInterface $response): void
     {
         if (isset($this->concurrencyLock)) {
             try {
                 $this->concurrencyLock->releaseLock();
             } catch (\Throwable $t) {
-                $this->app->lifecycle->exception($t);
+                Diagnostics::app()->error("Failed to release concurrency lock", exception: $t);
             }
         }
 
@@ -257,18 +224,19 @@ abstract class AppAwareEndpoint extends AbstractRouteController
             try {
                 $this->authContext->onSendResponseCallback();
             } catch (\Throwable $t) {
-                $this->app->lifecycle->exception($t);
+                Diagnostics::app()->error("AuthContext callback triggered an exception", exception: $t);
             }
         }
 
         if (isset($this->requestLog)) {
             try {
-                $this->requestLogSnapshot?->finalise(
+                $this->requestLogSnapshot?->finalize(
                     $this->app,
                     $this->requestLogLevel,
                     $this->getResponseObject(),
-                    static::LOG_IGNORE_RESPONSE_HEADERS,
-                    static::LOG_IGNORE_RESPONSE_PARAMS
+                    $response,
+                    static::LOG_EXCLUDE_RESPONSE_HEADERS,
+                    static::LOG_EXCLUDE_RESPONSE_PARAMS
                 );
 
                 $this->app->http->interfaceLog->updateLog($this, $this->requestLog, $this->requestLogSnapshot);
@@ -276,27 +244,24 @@ abstract class AppAwareEndpoint extends AbstractRouteController
                 $this->writeLogDumpToFile($t);
             }
         }
-
-        $this->prepareResponseCallback();
-        parent::sendResponse();
     }
 
     /**
      * @param ResponseCache $cacheableResponse
-     * @param AbstractControllerResponse $response
+     * @param AbstractResponse $response
      * @param bool $includeAppCachedResponseHeader
      * @return never
      * @throws ResponseFromCacheException
      */
     protected function sendResponseFromCache(
-        ResponseCache              $cacheableResponse,
-        AbstractControllerResponse $response,
-        bool                       $includeAppCachedResponseHeader = true
+        ResponseCache    $cacheableResponse,
+        AbstractResponse $response,
+        bool             $includeAppCachedResponseHeader = true
     ): never
     {
         $this->swapResponseObject($response);
         if ($cacheableResponse->context->cacheControlHeader) {
-            $this->useCacheControl($cacheableResponse->context->cacheControlHeader);
+            $this->setCacheControl($cacheableResponse->context->cacheControlHeader);
             if ($cacheableResponse->context->cacheControlHeader->store === CacheStoreDirective::PUBLIC ||
                 $cacheableResponse->context->cacheControlHeader->store === CacheStoreDirective::PRIVATE) {
                 $response->headers->set("Last-Modified", gmdate("D, d M Y H:i:s", $response->createdOn) . " GMT");

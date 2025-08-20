@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Core\Config\AbstractComponentConfig;
-use App\Shared\Core\Config\ComponentConfigResolverTrait;
-use App\Shared\Foundation\Http\Config\HttpInterfaceConfig;
-use App\Shared\Foundation\Http\HttpInterface;
+use App\Shared\Core\Config\Persisted\AbstractResolvedConfig;
+use App\Shared\Core\Config\Persisted\HttpInterfaceConfig;
+use App\Shared\Core\Config\Traits\PersistedConfigResolverTrait;
+use App\Shared\Enums\Http\HttpInterface;
 
 /**
  * Class HttpInterfaceProfile
@@ -17,14 +17,17 @@ class HttpInterfaceProfile
 {
     public HttpInterfaceConfig $config;
 
-    use ComponentConfigResolverTrait;
+    use PersistedConfigResolverTrait;
 
     /**
      * @param CharcoalApp $app
      * @param HttpInterface $enum
      * @param bool $useStaticConfig
      * @param bool $useObjectStoreConfig
-     * @param class-string $configClass
+     * @param string $configClass
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
+     * @throws \Charcoal\Cipher\Exceptions\CipherException
      */
     public function __construct(
         CharcoalApp          $app,
@@ -40,9 +43,9 @@ class HttpInterfaceProfile
 
     /**
      * @param CharcoalApp $app
-     * @return AbstractComponentConfig|null
+     * @return AbstractResolvedConfig|null
      */
-    protected function resolveStaticConfig(CharcoalApp $app): ?AbstractComponentConfig
+    protected function resolveStaticConfig(CharcoalApp $app): ?AbstractResolvedConfig
     {
         if (isset($app->config->http->interfaces[$this->enum->value])) {
             return $app->config->http->interfaces[$this->enum->value];
