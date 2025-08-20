@@ -15,6 +15,7 @@ use App\Shared\Foundation\CoreData\DbBackups\DbBackupService;
 use App\Shared\Foundation\CoreData\DbBackups\DbBackupsTable;
 use App\Shared\Foundation\CoreData\ObjectStore\ObjectStoreService;
 use App\Shared\Foundation\CoreData\ObjectStore\ObjectStoreTable;
+use Charcoal\App\Kernel\Contracts\Domain\AppBindableInterface;
 use Charcoal\App\Kernel\Orm\Db\TableRegistry;
 use Charcoal\App\Kernel\Orm\Module\OrmModuleBase;
 use Charcoal\Cache\CacheClient;
@@ -25,7 +26,7 @@ use Charcoal\Cache\CacheClient;
  * and database backup operations.
  * @property-read CharcoalApp $app
  */
-final class CoreDataModule extends OrmModuleBase
+final class CoreDataModule extends OrmModuleBase implements AppBindableInterface
 {
     use PendingModuleComponents;
     use NormalizedStorageKeysTrait;
