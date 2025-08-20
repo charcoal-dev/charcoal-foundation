@@ -36,7 +36,7 @@ final class BacklogTable extends OrmTableBase
 
         $cols->int("id")->bytes(8)->unSigned()->autoIncrement();
         $cols->enumObject("status", QueuedEmailStatus::class)
-            ->options(...QueuedEmailStatus::getCases())
+            ->options(...QueuedEmailStatus::getCaseValues())
             ->default("pending");
 
         $cols->string("recipient")->length(80);
