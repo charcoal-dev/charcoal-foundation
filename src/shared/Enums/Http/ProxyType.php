@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Foundation\Http\ProxyServers;
+namespace App\Shared\Enums\Http;
 
+use Charcoal\Base\Traits\EnumMappingTrait;
 use Charcoal\Http\Client\Response;
-use Charcoal\OOP\Traits\EnumOptionsTrait;
 
 /**
- * Class ProxyType
- * @package App\Shared\Foundation\Http\ProxyServers
+ * This enum includes different proxy types (e.g., SQUID, SQUID5, SQUID6),
+ * and provides functionality for connection verification and server validation.
  */
 enum ProxyType: string
 {
@@ -16,7 +16,7 @@ enum ProxyType: string
     case SQUID5 = "squid5";
     case SQUID6 = "squid6";
 
-    use EnumOptionsTrait;
+    use EnumMappingTrait;
 
     /**
      * @param Response $response

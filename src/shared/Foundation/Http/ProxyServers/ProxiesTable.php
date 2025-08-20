@@ -3,40 +3,34 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Http\ProxyServers;
 
-use App\Shared\Context\AppDbTables;
+use App\Shared\Enums\DatabaseTables;
+use App\Shared\Enums\Http\ProxyType;
 use App\Shared\Foundation\Http\HttpModule;
-use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;
-use Charcoal\Database\ORM\Schema\Charset;
+use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
+use Charcoal\Base\Enums\Charset;
 use Charcoal\Database\ORM\Schema\Columns;
 use Charcoal\Database\ORM\Schema\Constraints;
 use Charcoal\Database\ORM\Schema\TableMigrations;
 
 /**
- * Class ProxyServersTable
- * @package App\Shared\Foundation\Http\ProxyServers
+ * Represents a database table for proxy server configurations with defined structure and constraints.
+ * Extends the OrmTableBase for database table manipulation functionality.
+ * @property HttpModule $module
  */
-class ProxyServersTable extends AbstractOrmTable
+final class ProxiesTable extends OrmTableBase
 {
-    /**
-     * @param HttpModule $module
-     */
     public function __construct(HttpModule $module)
     {
-        parent::__construct($module, AppDbTables::HTTP_PROXIES, entityClass: HttpProxy::class);
+        parent::__construct($module, DatabaseTables::HttpProxies, entityClass: ProxyServer::class);
     }
 
-    /**
-     * @param Columns $cols
-     * @param Constraints $constraints
-     * @return void
-     */
     protected function structure(Columns $cols, Constraints $constraints): void
     {
         $cols->setDefaultCharset(Charset::ASCII);
 
         $cols->string("uniq_id")->length(12)->unique();
         $cols->bool("status")->default(false);
-        $cols->enumObject("type", ProxyType::class)->options(...ProxyType::getOptions());
+        $cols->enumObject("type", ProxyType::class)->options(...ProxyType::getCases());
         $cols->string("hostname")->length(45);
         $cols->int("port")->bytes(2)->unSigned()->nullable();
         $cols->bool("ssl")->default(false);
@@ -50,10 +44,6 @@ class ProxyServersTable extends AbstractOrmTable
         $constraints->uniqueKey("uniq_host")->columns("hostname", "port");
     }
 
-    /**
-     * @param TableMigrations $migrations
-     * @return void
-     */
     protected function migrations(TableMigrations $migrations): void
     {
     }

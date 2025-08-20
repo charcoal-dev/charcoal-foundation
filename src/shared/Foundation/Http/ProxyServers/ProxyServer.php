@@ -3,15 +3,18 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Http\ProxyServers;
 
-use Charcoal\App\Kernel\Contracts\StorageHooks\StorageHooksInterface;
-use Charcoal\App\Kernel\Entity\EntitySource;
-use Charcoal\App\Kernel\Orm\Repository\AbstractOrmEntity;
+use App\Shared\Enums\Http\ProxyType;
+use Charcoal\App\Kernel\Contracts\Orm\Entity\StorageHooksInterface;
+use Charcoal\App\Kernel\Orm\Entity\OrmEntityBase;
+use Charcoal\Base\Enums\FetchOrigin;
 
 /**
- * Class HttpProxy
- * @package App\Shared\Foundation\Http\ProxyServers
+ * Represents a proxy server configuration entity with methods for managing
+ * storage interactions and retrieving data properties. This class extends
+ * OrmEntityBase and implements StorageHooksInterface to support database
+ * and cache operations.
  */
-class HttpProxy extends AbstractOrmEntity implements StorageHooksInterface
+final class ProxyServer extends OrmEntityBase implements StorageHooksInterface
 {
     public string $uniqId;
     public bool $status;
@@ -56,13 +59,13 @@ class HttpProxy extends AbstractOrmEntity implements StorageHooksInterface
     }
 
     /**
-     * @param EntitySource $source
+     * @param FetchOrigin $origin
      * @return string|null
      */
-    public function onRetrieve(EntitySource $source): ?string
+    public function onRetrieve(FetchOrigin $origin): ?string
     {
-        if (in_array($source, [EntitySource::DATABASE, EntitySource::CACHE])) {
-            return sprintf('HttpProxy (%s) config retrieved from %s', $this->uniqId, $source->name);
+        if (in_array($origin, [FetchOrigin::Database, FetchOrigin::Cache])) {
+            return sprintf('ProxyServer (%s) config retrieved from %s', $this->uniqId, $origin->name);
         }
 
         return null;
@@ -73,6 +76,6 @@ class HttpProxy extends AbstractOrmEntity implements StorageHooksInterface
      */
     public function onCacheStore(): ?string
     {
-        return sprintf('HttpProxy (%s) config STORED in CACHE', $this->uniqId);
+        return sprintf('ProxyServer (%s) config STORED in CACHE', $this->uniqId);
     }
 }
