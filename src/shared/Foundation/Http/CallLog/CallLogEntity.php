@@ -3,16 +3,16 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Http\CallLog;
 
-use Charcoal\App\Kernel\Orm\Repository\AbstractOrmEntity;
+use Charcoal\App\Kernel\Orm\Entity\OrmEntityBase;
+use Charcoal\Base\Support\DsvString;
 use Charcoal\Buffers\Buffer;
-use Charcoal\Http\Commons\HttpMethod;
-use Charcoal\OOP\Vectors\DsvString;
+use Charcoal\Http\Commons\Enums\HttpMethod;
 
 /**
  * Class CallLogEntity
  * @package App\Shared\Foundation\Http\CallLog
  */
-class CallLogEntity extends AbstractOrmEntity
+final class CallLogEntity extends OrmEntityBase
 {
     public int $id;
     public ?string $proxyId;
@@ -39,6 +39,6 @@ class CallLogEntity extends AbstractOrmEntity
      */
     protected function collectSerializableData(): array
     {
-        throw new \LogicException(static::class . " does not need to be serialized");
+        throw new \LogicException(self::class . " does not need to be serialized");
     }
 }

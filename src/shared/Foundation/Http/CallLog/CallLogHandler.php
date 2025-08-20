@@ -3,24 +3,24 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Http\CallLog;
 
-use App\Shared\Context\AppDbTables;
-use App\Shared\Foundation\Http\HttpLogLevel;
+use App\Shared\Enums\DatabaseTables;
+use App\Shared\Enums\Http\HttpLogLevel;
 use App\Shared\Foundation\Http\HttpModule;
-use App\Shared\Foundation\Http\ProxyServers\HttpProxy;
-use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
-use Charcoal\App\Kernel\Orm\Repository\EntityInsertableTrait;
-use Charcoal\App\Kernel\Orm\Repository\EntityUpdatableTrait;
+use App\Shared\Foundation\Http\ProxyServers\ProxyServer;
+use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
+use Charcoal\App\Kernel\Orm\Repository\Traits\EntityInsertableTrait;
+use Charcoal\App\Kernel\Orm\Repository\Traits\EntityUpdatableTrait;
+use Charcoal\Base\Support\DsvString;
+use Charcoal\Base\Vectors\StringVector;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Http\Client\Request;
 use Charcoal\Http\Client\Response;
-use Charcoal\OOP\Vectors\DsvString;
-use Charcoal\OOP\Vectors\StringVector;
 
 /**
- * Class CallLogHandler
- * @package App\Shared\Foundation\Http\CallLog
+ * Handles the lifecycle of HTTP call logs, including their creation, updates, and persistence.
+ * @property HttpModule $module
  */
-class CallLogHandler extends AbstractOrmRepository
+final class CallLogHandler extends OrmRepositoryBase
 {
     use EntityInsertableTrait;
     use EntityUpdatableTrait;
@@ -30,20 +30,16 @@ class CallLogHandler extends AbstractOrmRepository
      */
     public function __construct(HttpModule $module)
     {
-        parent::__construct($module, AppDbTables::HTTP_CALL_LOG);
+        parent::__construct($module, DatabaseTables::HttpCallLog);
     }
 
     /**
-     * @param Request $request
-     * @param HttpProxy|null $proxyServer
-     * @param DsvString|null $flags
-     * @return CallLogEntity
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
      */
     public function createLog(
-        Request    $request,
-        ?HttpProxy $proxyServer,
-        ?DsvString $flags,
+        Request      $request,
+        ?ProxyServer $proxyServer,
+        ?DsvString   $flags,
     ): CallLogEntity
     {
         $callLog = new CallLogEntity();
@@ -67,15 +63,9 @@ class CallLogHandler extends AbstractOrmRepository
     }
 
     /**
-     * @param CallLogEntity $callLog
-     * @param CallLogSnapshot $snapshot
-     * @param Response|null $response
-     * @param float $timestamp
-     * @param HttpLogLevel $logLevel
-     * @return void
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
      */
-    public function finaliseCallLog(
+    public function finalizeCallLog(
         CallLogEntity   $callLog,
         CallLogSnapshot $snapshot,
         ?Response       $response,
@@ -87,17 +77,17 @@ class CallLogHandler extends AbstractOrmRepository
         if ($response) {
             $callLog->responseCode = $response->statusCode;
             $callLog->responseLength = $response->body->len();
-            $snapshot->responseHeaders = $response->headers->toArray();
-            if ($logLevel === HttpLogLevel::COMPLETE) {
+            $snapshot->responseHeaders = $response->headers->getArray();
+            if ($logLevel === HttpLogLevel::Complete) {
                 if ($response->payload->count()) {
-                    $snapshot->responsePayload = $response->payload->toArray();
+                    $snapshot->responsePayload = $response->payload->getArray();
                 } else {
                     $snapshot->responseBody = $response->body?->raw();
                 }
             }
         }
 
-        if ($snapshot->exception || $logLevel->value >= HttpLogLevel::HEADERS->value) {
+        if ($snapshot->exception || $logLevel->value >= HttpLogLevel::Headers->value) {
             $callLog->snapshot = new Buffer(serialize($snapshot));
         }
 

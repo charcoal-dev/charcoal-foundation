@@ -3,25 +3,26 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Http\CallLog;
 
-use App\Shared\Context\AppDbTables;
+use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\Http\HttpModule;
-use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;
-use Charcoal\Database\ORM\Schema\Charset;
+use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
+use Charcoal\Base\Enums\Charset;
+use Charcoal\Database\Orm\Concerns\LobSize;
 use Charcoal\Database\ORM\Schema\Columns;
 use Charcoal\Database\ORM\Schema\Constraints;
 use Charcoal\Database\ORM\Schema\TableMigrations;
-use Charcoal\Http\Commons\HttpMethod;
+use Charcoal\Http\Commons\Enums\HttpMethod;
 
 /**
- * Class CallLogTable
- * @package App\Shared\Foundation\Http\CallLog
+ * This class defines the schema, constraints, foreign key relationships, and
+ * other table-related configurations for storing HTTP call log entries.
  * @property HttpModule $module
  */
-class CallLogTable extends AbstractOrmTable
+final class CallLogTable extends OrmTableBase
 {
     public function __construct(HttpModule $module)
     {
-        parent::__construct($module, AppDbTables::HTTP_CALL_LOG, CallLogEntity::class);
+        parent::__construct($module, DatabaseTables::HttpCallLog, CallLogEntity::class);
     }
 
     protected function structure(Columns $cols, Constraints $constraints): void
@@ -30,7 +31,7 @@ class CallLogTable extends AbstractOrmTable
 
         $cols->int("id")->bytes(8)->unSigned()->autoIncrement();
         $cols->string("proxy_id")->length(12)->nullable();
-        $cols->dsvString("flags", ",")->limit(6)->length(255)->nullable();
+        $cols->dsvString("flags", ",")->length(255)->nullable();
         $cols->enumObject("method", HttpMethod::class)->options("GET", "POST", "PUT", "DELETE", "OPTIONS");
         $cols->string("url_server")->length(255);
         $cols->string("url_path")->length(255)->default("/");
@@ -38,11 +39,11 @@ class CallLogTable extends AbstractOrmTable
         $cols->double("end_on")->precision(14, 4)->unSigned()->nullable();
         $cols->int("response_code")->bytes(2)->unSigned()->nullable();
         $cols->int("response_length")->bytes(4)->unSigned()->nullable();
-        $cols->blobBuffer("snapshot")->size("medium")->nullable();
+        $cols->blobBuffer("snapshot")->size(LobSize::MEDIUM)->nullable();
         $cols->setPrimaryKey("id");
 
-        $constraints->foreignKey("proxy_id")->database(AppDbTables::HTTP_PROXIES->getDatabase()->getDatabaseKey())
-            ->table(AppDbTables::HTTP_PROXIES->value, "uniq_id");
+        $constraints->foreignKey("proxy_id")->database(DatabaseTables::HttpProxies->getDatabase()->getConfigKey())
+            ->table(DatabaseTables::HttpProxies->value, "uniq_id");
 
         $constraints->addIndex("proxy_id");
         $constraints->addIndex("method");
