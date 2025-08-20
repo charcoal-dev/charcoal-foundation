@@ -3,28 +3,28 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Mailer;
 
-use Charcoal\Filesystem\Directory;
+use Charcoal\Filesystem\Path\DirectoryPath;
 use Charcoal\Mailer\TemplatingEngine;
 
 /**
  * Class MailerTemplatingSetup
  * @package App\Shared\Foundation\Mailer
  */
-class MailerTemplatingSetup
+final class MailerTemplatingSetup
 {
     /**
-     * @param Directory $emailsDirectory
+     * @param DirectoryPath $emailsDirectory
      * @return string
      */
-    public static function declareMessagesDirectory(Directory $emailsDirectory): string
+    public static function declareMessagesDirectory(DirectoryPath $emailsDirectory): string
     {
-        return $emailsDirectory->pathToChild("./messages", validations: false);
+        return $emailsDirectory->absolute . "/messages";
     }
 
     /**
      * @param TemplatingEngine $templatingEngine
      * @return void
-     * @throws \Charcoal\Mailer\Exception\DataBindException
+     * @throws \Charcoal\Mailer\Exceptions\DataBindException
      */
     public static function templatingSetup(TemplatingEngine $templatingEngine): void
     {

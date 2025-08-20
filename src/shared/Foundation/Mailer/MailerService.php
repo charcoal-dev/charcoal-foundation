@@ -4,15 +4,15 @@ declare(strict_types=1);
 namespace App\Shared\Foundation\Mailer;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Core\Config\AbstractComponentConfig;
-use App\Shared\Core\Config\ComponentConfigResolverTrait;
-use App\Shared\Foundation\Mailer\Backlog\QueuedEmailStatus;
-use App\Shared\Foundation\Mailer\Config\MailDispatchMode;
-use App\Shared\Foundation\Mailer\Config\MailerConfig;
-use App\Shared\Foundation\Mailer\Exception\EmailDeliveryException;
-use App\Shared\Foundation\Mailer\Exception\EmailServiceException;
-use Charcoal\App\Kernel\Errors;
-use Charcoal\App\Kernel\Module\AbstractModuleComponent;
+use App\Shared\Core\Config\Persisted\MailerConfig;
+use App\Shared\Core\Config\Traits\PersistedConfigResolverTrait;
+use App\Shared\Enums\Mailer\EmailTemplate;
+use App\Shared\Enums\Mailer\MailDispatchMode;
+use App\Shared\Enums\Mailer\QueuedEmailStatus;
+use App\Shared\Exceptions\Mailer\EmailDeliveryException;
+use App\Shared\Exceptions\Mailer\EmailServiceException;
+use Charcoal\App\Kernel\Contracts\Domain\ModuleBindableInterface;
+use Charcoal\App\Kernel\Support\ErrorHelper;
 use Charcoal\Mailer\Mailer as CharcoalMailer;
 use Charcoal\Mailer\Message;
 use Charcoal\Mailer\Message\CompiledMimeMessage;
@@ -21,35 +21,24 @@ use Charcoal\Mailer\Templating\RawTemplatedEmail;
 use Charcoal\Mailer\TemplatingEngine;
 
 /**
- * Class MailerService
- * @package App\Shared\Foundation\Mailer
+ * Service class for handling mail operations including email creation, dispatching, and queuing.
+ * Implements functionality to create templated emails, send emails via a mailer
+ * agent, and manage email dispatching and queuing.
  * @property MailerModule $module
  */
-class MailerService extends AbstractModuleComponent
+final class MailerService implements ModuleBindableInterface
 {
-    public readonly bool $hasBacklog;
+    use PersistedConfigResolverTrait;
+
     private ?MailerConfig $config = null;
     private ?CharcoalMailer $client = null;
     private ?TemplatingEngine $templating = null;
-
-    use ComponentConfigResolverTrait;
-
-    /**
-     * @param MailerModule $module
-     */
-    public function __construct(MailerModule $module)
-    {
-        parent::__construct($module);
-        $this->hasBacklog = isset($module->backlog);
-    }
 
     /**
      * @return array
      */
     public function collectSerializableData(): array
     {
-        $data = parent::collectSerializableData();
-        $data["hasBacklog"] = $this->hasBacklog;
         $data["config"] = null;
         $data["client"] = null;
         $data["templating"] = null;
@@ -60,25 +49,19 @@ class MailerService extends AbstractModuleComponent
      * @param array $data
      * @return void
      */
-    public function onUnserialize(array $data): void
+    public function __unserialize(array $data): void
     {
-        parent::onUnserialize($data);
-        /** @noinspection PhpSecondWriteToReadonlyPropertyInspection */
-        $this->hasBacklog = $data["hasBacklog"];
         $this->config = null;
         $this->client = null;
         $this->templating = null;
     }
 
     /**
-     * @param string $messageFilepath
-     * @param string $subject
-     * @param string|null $preHeader
-     * @param EmailTemplate $template
-     * @param bool $keepMessageBodyInMemory
-     * @return RawTemplatedEmail
-     * @throws \Charcoal\Mailer\Exception\DataBindException
-     * @throws \Charcoal\Mailer\Exception\TemplatingException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException
+     * @throws \Charcoal\Base\Exceptions\WrappedException
+     * @throws \Charcoal\Cipher\Exceptions\CipherException
+     * @throws \Charcoal\Mailer\Exceptions\MailerException
+     * @api
      */
     public function createTemplatedEmail(
         string        $messageFilepath,
@@ -105,8 +88,12 @@ class MailerService extends AbstractModuleComponent
      * @return void
      * @throws EmailDeliveryException
      * @throws EmailServiceException
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
-     * @throws \Charcoal\Mailer\Exception\EmailComposeException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
+     * @throws \Charcoal\Base\Exceptions\WrappedException
+     * @throws \Charcoal\Cipher\Exceptions\CipherException
+     * @throws \Charcoal\Mailer\Exceptions\EmailComposeException
+     * @api
      */
     public function send(
         Message           $message,
@@ -118,22 +105,20 @@ class MailerService extends AbstractModuleComponent
     }
 
     /**
-     * @param CompiledMimeMessage $message
-     * @param string $subject
-     * @param string $recipient
-     * @param Sender $sender
-     * @param MailDispatchMode|null $policy
-     * @return void
      * @throws EmailDeliveryException
      * @throws EmailServiceException
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
+     * @throws \Charcoal\Base\Exceptions\WrappedException
+     * @throws \Charcoal\Cipher\Exceptions\CipherException
+     * @api
      */
     public function sendCompiled(
         CompiledMimeMessage $message,
         string              $subject,
         string              $recipient,
         Sender              $sender,
-        ?MailDispatchMode   $policy = null,
+        ?MailDispatchMode   $mode = null,
     ): void
     {
         $this->resolveClient();
@@ -142,24 +127,21 @@ class MailerService extends AbstractModuleComponent
             throw new EmailServiceException("Compiled MIME length exceeds hard-limit of 5MB");
         }
 
-        $policy = $policy ?? $this->config->policy;
-        if ($policy === MailDispatchMode::SEND_ONLY) {
+        $mode = $mode ?? $this->config->mode;
+        if ($mode === MailDispatchMode::SEND_ONLY) {
             $this->dispatchCompiled($message, $recipient);
             return;
         }
 
-        if (!$this->hasBacklog) {
-            throw new EmailServiceException("Application build does not have mailer backlog");
-        }
-
         $mailStatus = QueuedEmailStatus::PENDING;
-        if ($policy === MailDispatchMode::SEND_AND_QUEUE) {
+        if ($mode === MailDispatchMode::SEND_AND_QUEUE) {
             try {
                 $this->dispatchCompiled($message, $recipient);
                 $mailStatus = QueuedEmailStatus::SENT;
             } catch (EmailDeliveryException $e) {
                 $mailStatus = QueuedEmailStatus::RETRYING;
-                $dispatchError = $e->getPrevious() ? Errors::Exception2String($e->getPrevious()) : $e->getMessage();
+                $dispatchError = $e->getPrevious() ?
+                    ErrorHelper::Exception2String($e->getPrevious()) : $e->getMessage();
             }
         }
 
@@ -178,6 +160,7 @@ class MailerService extends AbstractModuleComponent
      * @param string $recipient
      * @return void
      * @throws EmailDeliveryException
+     * @api
      */
     private function dispatchCompiled(CompiledMimeMessage $message, string $recipient): void
     {
@@ -190,8 +173,11 @@ class MailerService extends AbstractModuleComponent
 
     /**
      * @return void
-     * @throws \Charcoal\Mailer\Exception\DataBindException
-     * @throws \Charcoal\Mailer\Exception\TemplatingException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
+     * @throws \Charcoal\Base\Exceptions\WrappedException
+     * @throws \Charcoal\Cipher\Exceptions\CipherException
+     * @throws \Charcoal\Mailer\Exceptions\TemplatingException
      */
     protected function resolveTemplating(): void
     {
@@ -200,7 +186,7 @@ class MailerService extends AbstractModuleComponent
         }
 
         $this->resolveClient();
-        $emailsDirectory = $this->module->app->directories->emails;
+        $emailsDirectory = $this->module->app->paths->emails;
         $this->templating = new TemplatingEngine($this->client,
             MailerTemplatingSetup::declareMessagesDirectory($emailsDirectory));
 
@@ -214,6 +200,10 @@ class MailerService extends AbstractModuleComponent
 
     /**
      * @return void
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
+     * @throws \Charcoal\Base\Exceptions\WrappedException
+     * @throws \Charcoal\Cipher\Exceptions\CipherException
      */
     protected function resolveClient(): void
     {
@@ -223,11 +213,14 @@ class MailerService extends AbstractModuleComponent
 
         $this->resolveConfig();
         $this->client = new CharcoalMailer(new Sender($this->config->senderEmail, $this->config->senderName));
-        $this->client->agent = MailerAgentResolver::resolveProvider($this->config);
+        $this->client->agent = MailerAgentResolver::resolveProvider($this->module->app, $this->config);
     }
 
     /**
      * @return void
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
+     * @throws \Charcoal\Cipher\Exceptions\CipherException
      */
     protected function resolveConfig(): void
     {
@@ -239,21 +232,17 @@ class MailerService extends AbstractModuleComponent
         $this->config = $this->resolveConfigObject(
             $this->module->app,
             MailerConfig::class,
-            useStatic: true,
-            useObjectStore: false
+            useStatic: false,
+            useObjectStore: true
         );
     }
 
     /**
      * @param CharcoalApp $app
-     * @return AbstractComponentConfig|null
+     * @return MailerConfig|null
      */
-    protected function resolveStaticConfig(CharcoalApp $app): ?AbstractComponentConfig
+    protected function resolveStaticConfig(CharcoalApp $app): ?MailerConfig
     {
-        if (isset($app->config->mailer)) {
-            return $app->config->mailer;
-        }
-
-        return null;
+        throw new \RuntimeException("Static config is not supported for MailerService");
     }
 }

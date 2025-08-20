@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Foundation\Mailer\Exception;
+namespace App\Shared\Exceptions\Mailer;
 
 use Charcoal\Mailer\Agents\MailerAgentInterface;
 
 /**
  * Class EmailDeliveryException
- * @package App\Shared\Foundation\Mailer\Exception
+ * @package App\Shared\Exceptions\Mailer
  */
 class EmailDeliveryException extends EmailServiceException
 {

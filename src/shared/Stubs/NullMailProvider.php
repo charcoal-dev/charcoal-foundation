@@ -1,16 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Foundation\Mailer\Polyfill;
+namespace App\Shared\Stubs;
 
-use App\Shared\Foundation\Mailer\Exception\EmailDeliveryException;
+use App\Shared\Exceptions\Mailer\EmailDeliveryException;
 use Charcoal\Mailer\Agents\MailerAgentInterface;
 use Charcoal\Mailer\Message;
 use Charcoal\Mailer\Message\CompiledMimeMessage;
 
 /**
- * Class NullMailProvider
- * @package App\Shared\Foundation\Mailer\Polyfill
+ * A mail provider implementation that does not send emails.
+ * This class is intended to be used as a placeholder for cases where
+ * no mailer agent is configured or email sending is intentionally disabled.
  */
 class NullMailProvider implements MailerAgentInterface
 {

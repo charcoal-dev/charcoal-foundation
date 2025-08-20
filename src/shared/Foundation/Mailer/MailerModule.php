@@ -3,81 +3,51 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Mailer;
 
-use App\Shared\Context\CacheStore;
-use App\Shared\Context\CipherKey;
-use App\Shared\Core\Orm\ComponentsAwareModule;
-use App\Shared\Core\Orm\ModuleComponentEnum;
+use App\Shared\CharcoalApp;
+use App\Shared\Concerns\NormalizedStorageKeysTrait;
+use App\Shared\Concerns\PendingModuleComponents;
+use App\Shared\Enums\CacheStores;
 use App\Shared\Foundation\Mailer\Backlog\BacklogHandler;
 use App\Shared\Foundation\Mailer\Backlog\BacklogTable;
-use Charcoal\App\Kernel\Build\AppBuildPartial;
-use Charcoal\App\Kernel\Module\AbstractModuleComponent;
-use Charcoal\App\Kernel\Orm\Db\DatabaseTableRegistry;
-use Charcoal\Cipher\Cipher;
+use Charcoal\App\Kernel\Orm\Db\TableRegistry;
+use Charcoal\App\Kernel\Orm\Module\OrmModuleBase;
+use Charcoal\Cache\CacheClient;
 
 /**
- * Class MailerModule
- * @package App\Shared\Foundation\Mailer
+ * Represents the Mailer module within the application, providing functionality
+ * for managing email-related services, backlogs, and database table declarations.
+ * @property-read CharcoalApp $app
  */
-class MailerModule extends ComponentsAwareModule
+final class MailerModule extends OrmModuleBase
 {
-    public BacklogHandler $backlog;
-    public MailerService $service;
+    use NormalizedStorageKeysTrait;
+    use PendingModuleComponents;
+
+    public readonly BacklogHandler $backlog;
+    public readonly MailerService $service;
 
     /**
-     * @param AppBuildPartial $app
-     * @param Mailer[] $components
+     * @param CharcoalApp $app
      */
-    public function __construct(AppBuildPartial $app, array $components)
+    public function __construct(CharcoalApp $app)
     {
-        parent::__construct($app, CacheStore::PRIMARY, $components);
+        parent::__construct($app);
     }
 
     /**
-     * @param AppBuildPartial $app
+     * @param TableRegistry $tables
      * @return void
      */
-    protected function declareChildren(AppBuildPartial $app): void
+    protected function declareDatabaseTables(TableRegistry $tables): void
     {
-        parent::declareChildren($app);
-        $this->service = new MailerService($this);
+        $tables->register(new BacklogTable($this));
     }
 
     /**
-     * @param AbstractModuleComponent $resolveFor
-     * @return Cipher
+     * @return CacheClient|null
      */
-    public function getCipher(AbstractModuleComponent $resolveFor): Cipher
+    public function getCacheStore(): ?CacheClient
     {
-        return $this->app->cipher->get(CipherKey::PRIMARY);
-    }
-
-    /**
-     * @param Mailer|ModuleComponentEnum $component
-     * @param AppBuildPartial $app
-     * @return bool
-     */
-    protected function includeComponent(Mailer|ModuleComponentEnum $component, AppBuildPartial $app): bool
-    {
-        if ($component === Mailer::BACKLOG) {
-            $this->backlog = new BacklogHandler($this);
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @param Mailer|ModuleComponentEnum $component
-     * @param DatabaseTableRegistry $tables
-     * @return bool
-     */
-    protected function createDbTables(Mailer|ModuleComponentEnum $component, DatabaseTableRegistry $tables): bool
-    {
-        if ($component === Mailer::BACKLOG) {
-            $tables->register(new BacklogTable($this));
-            return true;
-        }
-
-        return false;
+        return $this->app->cache->getStore(CacheStores::Primary);
     }
 }

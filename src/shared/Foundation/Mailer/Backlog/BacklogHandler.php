@@ -16,7 +16,7 @@ use Charcoal\Mailer\Message\CompiledMimeMessage;
  * It extends the OrmRepositoryBase to leverage ORM functionalities for database operations.
  * @property MailerModule $module
  */
-class BacklogHandler extends OrmRepositoryBase
+final class BacklogHandler extends OrmRepositoryBase
 {
     use EntityInsertableTrait;
 
