@@ -15,7 +15,10 @@ use PHPUnit\Framework\TestCase;
  */
 class CharcoalAppConstructTest extends TestCase
 {
-    /** @noinspection PhpExceptionImmediatelyRethrownInspection */
+    /**
+     * @noinspection PhpExceptionImmediatelyRethrownInspection
+     * @noinspection PhpUnhandledExceptionInspection
+     */
     public function testCharcoalInitializerWithMonitor()
     {
         fwrite(STDERR, "\033[33mCharcoal App \033[0m\n");
@@ -30,7 +33,6 @@ class CharcoalAppConstructTest extends TestCase
                 }
             );
         } catch (\Throwable $t) {
-            /** @noinspection PhpUnhandledExceptionInspection */
             throw $t;
         }
     }
