@@ -1,11 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Foundation\Mailer\Config;
+namespace App\Shared\Enums\Mailer;
 
 /**
- * Class MailProvider
- * @package App\Shared\Foundation\Mailer\Config
+ * Defines the available mail delivery providers.
  */
 enum MailProvider: string
 {

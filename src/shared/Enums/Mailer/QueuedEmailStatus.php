@@ -1,13 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Foundation\Mailer\Backlog;
+namespace App\Shared\Enums\Mailer;
 
-use Charcoal\OOP\Traits\EnumOptionsTrait;
+use Charcoal\Base\Traits\EnumMappingTrait;
 
 /**
- * Class QueuedEmailStatus
- * @package App\Shared\Foundation\Mailer\Backlog
+ * Represents the various statuses an email can have during its lifecycle in the queue.
  */
 enum QueuedEmailStatus: string
 {
@@ -17,5 +16,5 @@ enum QueuedEmailStatus: string
     case FAILED = "failed";
     case CANCELLED = "cancelled";
 
-    use EnumOptionsTrait;
+    use EnumMappingTrait;
 }
