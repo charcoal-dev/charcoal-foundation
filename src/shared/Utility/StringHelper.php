@@ -7,7 +7,7 @@ namespace App\Shared\Utility;
  * Class StringHelper
  * @package App\Shared\Utility
  */
-class StringHelper
+final class StringHelper
 {
     /**
      * @param mixed $input

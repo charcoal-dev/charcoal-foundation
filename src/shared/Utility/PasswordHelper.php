@@ -8,8 +8,9 @@ use Charcoal\Buffers\AbstractByteArray;
 /**
  * Class PasswordHelper
  * @package App\Shared\Utility
+ * @api
  */
-class PasswordHelper
+final class PasswordHelper
 {
     /**
      * @param string|AbstractByteArray $password
@@ -17,6 +18,7 @@ class PasswordHelper
      * @param int $timeCost
      * @param int $threads
      * @return string
+     * @api
      */
     public static function hashArgon2(
         string|AbstractByteArray $password,
@@ -40,6 +42,7 @@ class PasswordHelper
      * @param string|AbstractByteArray $password
      * @param string $hash
      * @return bool
+     * @api
      */
     public static function verifyArgon2(string|AbstractByteArray $password, string $hash): bool
     {
@@ -54,6 +57,7 @@ class PasswordHelper
      * NULL-safe password hashing with BCRYPT
      * @param string|AbstractByteArray $password
      * @return string
+     * @api
      */
     public static function hashBcrypt(string|AbstractByteArray $password): string
     {
@@ -68,6 +72,7 @@ class PasswordHelper
      * @param string|AbstractByteArray $password
      * @param string $hash
      * @return bool
+     * @api
      */
     public static function verifyBcrypt(string|AbstractByteArray $password, string $hash): bool
     {
@@ -81,6 +86,7 @@ class PasswordHelper
     /**
      * @param string $password
      * @return int
+     * @api
      */
     public static function checkStrength(string $password): int
     {

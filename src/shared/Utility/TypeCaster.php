@@ -9,7 +9,7 @@ use Charcoal\Buffers\Frames\Bytes32;
  * Class TypeCaster
  * @package App\Shared\Utility
  */
-class TypeCaster
+final class TypeCaster
 {
     /**
      * @param mixed $input
@@ -35,6 +35,7 @@ class TypeCaster
     /**
      * @param string $input
      * @return Bytes32|null
+     * @api
      */
     public static function getBytes32OrNull(string $input): ?Bytes32
     {

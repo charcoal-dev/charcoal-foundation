@@ -7,7 +7,7 @@ namespace App\Shared\Utility;
  * Class NumberHelper
  * @package App\Shared\Utility
  */
-class NumberHelper
+final class NumberHelper
 {
     /**
      * @param mixed $input
@@ -27,6 +27,7 @@ class NumberHelper
     /**
      * @param string $value
      * @return string
+     * @api
      */
     public static function cleanFloatString(string $value): string
     {

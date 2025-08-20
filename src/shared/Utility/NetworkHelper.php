@@ -3,13 +3,10 @@ declare(strict_types=1);
 
 namespace App\Shared\Utility;
 
-use Charcoal\App\Kernel\Support\NetworkHelper;
-
 /**
- * Class NetworkValidator
- * @package App\Shared\Utility
+ * Provides utility methods to work with HTTP network operations.
  */
-class NetworkHelper extends NetworkHelper
+final class NetworkHelper extends \Charcoal\App\Kernel\Support\NetworkHelper
 {
     /**
      * @param mixed $origin

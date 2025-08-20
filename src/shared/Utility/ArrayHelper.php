@@ -7,7 +7,7 @@ namespace App\Shared\Utility;
  * Class ArrayHelper
  * @package App\Shared\Utility
  */
-class ArrayHelper
+final class ArrayHelper
 {
     /**
      * @param array $data
@@ -58,6 +58,7 @@ class ArrayHelper
     /**
      * @param array $data
      * @return string
+     * @api
      */
     public static function canonicalizeLexicographicJson(array $data): string
     {
@@ -78,6 +79,7 @@ class ArrayHelper
      * @param array|object $input
      * @return array
      * @throws \JsonException
+     * @api
      */
     public static function jsonFilter(array|object $input): array
     {

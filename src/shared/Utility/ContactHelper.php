@@ -3,16 +3,19 @@ declare(strict_types=1);
 
 namespace App\Shared\Utility;
 
-use Charcoal\Charsets\SanitizerValidator;
-use Charcoal\Charsets\SanitizerValidator\ASCII_Processor;
-use Charcoal\Charsets\SanitizerValidator\UTF8_Processor;
-use Charcoal\Charsets\Utf8Range;
+
+use Charcoal\Base\Charsets\Sanitizer\AsciiSanitizer;
+use Charcoal\Base\Charsets\Sanitizer\Modifiers\ChangeCase;
+use Charcoal\Base\Charsets\Sanitizer\Modifiers\CleanSpaces;
+use Charcoal\Base\Charsets\Sanitizer\Modifiers\TrimStr;
+use Charcoal\Base\Charsets\Sanitizer\Utf8Sanitizer;
+use Charcoal\Base\Contracts\Charsets\UnicodeLanguageRangeInterface;
 
 /**
- * Class ContactHelper
- * @package App\Shared\Utility
+ * Utility class for validating and processing contact information such as phone numbers,
+ * email addresses, usernames, and names.
  */
-class ContactHelper
+final class ContactHelper
 {
     /**
      * @param mixed $input
@@ -72,6 +75,7 @@ class ContactHelper
      * @param mixed $input
      * @param int $maxLength
      * @return bool
+     * @api
      */
     public static function isValidUsername(mixed $input, int $maxLength = 20): bool
     {
@@ -84,49 +88,45 @@ class ContactHelper
 
     /**
      * @param int $maxLength
-     * @return ASCII_Processor
+     * @return AsciiSanitizer
+     * @api
      */
-    public static function getNameValidator(int $maxLength = 32): ASCII_Processor
+    public static function getNameValidator(int $maxLength = 32): AsciiSanitizer
     {
-        return SanitizerValidator::ASCII(true)
-            ->trim()
-            ->cleanSpaces()
-            ->len(min: 3, max: $maxLength)
-            ->match('/^[a-z]+(\s[a-z]+)*$/i')
-            ->setCustomFn(function (string $validated) {
-                return ucfirst($validated);
-            });
+        return (new AsciiSanitizer(true, true))
+            ->modifiers(TrimStr::Both, CleanSpaces::All, ChangeCase::Titlecase)
+            ->lengthRange(min: 2, max: $maxLength)
+            ->matchRegEx('/^[a-z]+(\s[a-z]+)*$/i');
     }
 
     /**
      * @param int $maxLength
      * @param bool $allowDashes
-     * @return ASCII_Processor
+     * @return AsciiSanitizer
+     * @api
      */
-    public static function getBrandNameValidator(int $maxLength = 32, bool $allowDashes = true): ASCII_Processor
+    public static function getBrandNameValidator(int $maxLength = 32, bool $allowDashes = true): AsciiSanitizer
     {
-        return SanitizerValidator::ASCII(true)
-            ->trim()
-            ->cleanSpaces()
-            ->len(min: 3, max: $maxLength)
-            ->match($allowDashes ? '/^[a-z\-\_\.]+(\s[a-z0-9\-\_\.]+)*$/i' : '/^[a-z]+(\s[a-z0-9]+)*$/i')
-            ->setCustomFn(function (string $validated) {
-                return ucfirst($validated);
-            });
+        return (new AsciiSanitizer(true, true))
+            ->modifiers(TrimStr::Both, CleanSpaces::All, ChangeCase::Titlecase)
+            ->lengthRange(min: 2, max: $maxLength)
+            ->matchRegEx($allowDashes ?
+                '/^[a-z\-\_\.]+(\s[a-z0-9\-\_\.]+)*$/i' :
+                '/^[a-z]+(\s[a-z0-9]+)*$/i'
+            );
     }
 
     /**
      * @param int $maxLength
-     * @return UTF8_Processor
+     * @param UnicodeLanguageRangeInterface ...$lang
+     * @return Utf8Sanitizer
+     * @api
      */
-    public static function getNameValidatorUtf8(int $maxLength = 32): UTF8_Processor
+    public static function getNameValidatorUtf8(int $maxLength = 32, UnicodeLanguageRangeInterface ...$lang): Utf8Sanitizer
     {
-        return SanitizerValidator::UTF8(allowSpaces: true, filterInvalidChars: false)
-            ->trim()
-            ->cleanSpaces()
-            ->len(min: 2, max: $maxLength)
-            ->addCharset(Utf8Range::Arabic)
-            ->addCharset(Utf8Range::Russian)
-            ->addCharset(Utf8Range::Thai);
+        return (new Utf8Sanitizer(true, true, true))
+            ->modifiers(TrimStr::Both, CleanSpaces::All, ChangeCase::Titlecase)
+            ->lengthRange(min: 2, max: $maxLength)
+            ->validateUnicodeRange(...$lang);
     }
 }
