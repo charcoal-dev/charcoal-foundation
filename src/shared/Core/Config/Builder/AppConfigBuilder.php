@@ -13,6 +13,7 @@ use App\Shared\Core\Config\Snapshot\AppConfig;
 use App\Shared\Core\PathRegistry;
 use App\Shared\Enums\Timezones;
 use Charcoal\App\Kernel\Enums\AppEnv;
+use Charcoal\Filesystem\Path\DirectoryPath;
 
 /**
  * This class is responsible for initializing and aggregating various configuration builders,
@@ -33,16 +34,13 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
     /**
      * @throws \Charcoal\Yaml\Exception\YamlParseException
      */
-    public function __construct(AppEnv $env, PathRegistry $paths)
+    public function __construct(AppEnv $env, DirectoryPath $root, PathRegistry $paths)
     {
         $configData = $this->readYamlConfigFiles($paths->config->absolute . "/config.yaml");
+        parent::__construct($env, $root, Timezones::from(strval($configData["timezone"])));
 
-        parent::__construct(
-            $env,
-            Timezones::from(strval($configData["timezone"])),
-            $this->getCacheConfig($configData["foundation"]["cache"] ?? null),
-            $this->getDatabasesConfig($configData["foundation"]["databases"] ?? null)
-        );
+        $this->cacheStoresFromFileConfig($configData["foundation"]["cache"] ?? null);
+        $this->databasesFromFileConfig($configData["foundation"]["databases"] ?? null);
 
         $this->http = new HttpConfigBuilder();
         $this->httpInterfacesFromFileConfig($configData["foundation"]["http"] ?? null);
@@ -51,6 +49,8 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
         if (!isset($this->mailer)) {
             $this->mailer = null;
         }
+
+        $this->security->setSemaphoreDirectory("/tmp/semaphore");
     }
 
     /**
@@ -69,8 +69,9 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
         return new AppConfig(
             $this->env,
             $this->timezone,
-            $this->cache?->build(),
-            $this->database?->build(),
+            $this->cache->build(),
+            $this->database->build(),
+            $this->security->build(),
             $this->http->build(),
             $this->mailer?->snapshot()
         );

@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Shared\Core\Config\Traits;
 
 use App\Shared\CharcoalApp;
+use App\Shared\Contracts\Foundation\StoredObjectInterface;
 use App\Shared\Core\Config\Persisted\AbstractResolvedConfig;
-use Charcoal\Base\Exceptions\WrappedException;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 
 /**
@@ -19,8 +19,14 @@ trait PersistedConfigResolverTrait
     abstract protected function resolveStaticConfig(CharcoalApp $app): ?AbstractResolvedConfig;
 
     /**
-     * Resolves and returns a configuration object based on the specified parameters.
-     * @throws WrappedException
+     * @param CharcoalApp $app
+     * @param class-string<StoredObjectInterface> $configClassname
+     * @param bool $useStatic
+     * @param bool $useObjectStore
+     * @return AbstractResolvedConfig
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
+     * @throws \Charcoal\Cipher\Exceptions\CipherException
      */
     final protected function resolveConfigObject(
         CharcoalApp $app,
@@ -39,14 +45,7 @@ trait PersistedConfigResolverTrait
         }
 
         if ($useObjectStore) {
-            if (isset($app->coreData->objectStore)) {
-                try {
-                    $configObject = $app->coreData->objectStore->get($configClassname);
-                } catch (\Exception $e) {
-                    throw new WrappedException($e, "Failed to retrieve " .
-                        ObjectHelper::baseClassName($configClassname) . " from ObjectStore");
-                }
-            }
+            $configObject = $app->coreData->objectStore->get($configClassname);
         }
 
         if (!isset($configObject)) {

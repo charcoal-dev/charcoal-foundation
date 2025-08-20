@@ -5,6 +5,7 @@ namespace App\Shared\Core\Config\Snapshot;
 
 use Charcoal\App\Kernel\Config\Snapshot\CacheManagerConfig;
 use Charcoal\App\Kernel\Config\Snapshot\DatabaseManagerConfig;
+use Charcoal\App\Kernel\Config\Snapshot\SecurityConfig;
 use Charcoal\App\Kernel\Contracts\Enums\TimezoneEnumInterface;
 use Charcoal\App\Kernel\Enums\AppEnv;
 
@@ -19,10 +20,11 @@ final readonly class AppConfig extends \Charcoal\App\Kernel\Config\Snapshot\AppC
         TimezoneEnumInterface  $timezone,
         ?CacheManagerConfig    $cache,
         ?DatabaseManagerConfig $database,
+        SecurityConfig         $security,
         public HttpConfig      $http,
         public ?MailerConfig   $mailer,
     )
     {
-        parent::__construct($env, $timezone, $cache, $database);
+        parent::__construct($env, $timezone, $cache, $database, $security);
     }
 }

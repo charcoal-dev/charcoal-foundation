@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Shared\Core\Config\Builder\Traits;
 
 use App\Shared\Enums\Databases;
-use Charcoal\App\Kernel\Config\Builder\DbConfigObjectsBuilder;
 use Charcoal\App\Kernel\Config\Snapshot\DatabaseConfig;
 use Charcoal\Database\Enums\DbConnectionStrategy;
 use Charcoal\Database\Enums\DbDriver;
@@ -14,11 +13,10 @@ use Charcoal\Database\Enums\DbDriver;
  */
 trait DatabaseConfigBuilderTrait
 {
-    final protected function getDatabasesConfig(mixed $dbConfigData): DbConfigObjectsBuilder
+    final protected function databasesFromFileConfig(mixed $dbConfigData): void
     {
-        $dbConfigs = new DbConfigObjectsBuilder();
         if (!is_array($dbConfigData) || !$dbConfigData) {
-            return $dbConfigs;
+            return;
         }
 
         foreach ($dbConfigData as $dbId => $dbConfig) {
@@ -41,7 +39,7 @@ trait DatabaseConfigBuilderTrait
             };
 
             // Append Configuration
-            $dbConfigs->set($key, new DatabaseConfig(
+            $this->database->set($key, new DatabaseConfig(
                 $driver,
                 $dbConfig["database"] ?? "",
                 $dbConfig["host"] ?? "localhost",
@@ -51,7 +49,5 @@ trait DatabaseConfigBuilderTrait
                 $connection
             ));
         }
-
-        return $dbConfigs;
     }
 }

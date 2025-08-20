@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Shared\Core\Config\Builder\Traits;
 
 use App\Shared\Enums\CacheStores;
-use Charcoal\App\Kernel\Config\Builder\CacheConfigObjectsBuilder;
 use Charcoal\App\Kernel\Config\Snapshot\CacheStoreConfig;
 use Charcoal\App\Kernel\Enums\CacheDriver;
 
@@ -15,16 +14,15 @@ use Charcoal\App\Kernel\Enums\CacheDriver;
  */
 trait CacheConfigBuilderTrait
 {
-    final protected function getCacheConfig(mixed $configData): CacheConfigObjectsBuilder
+    final protected function cacheStoresFromFileConfig(mixed $configData): void
     {
-        $cacheConfig = new CacheConfigObjectsBuilder();
         if (!is_array($configData) || !$configData) {
-            return $cacheConfig;
+            return;
         }
 
         $cacheStores = $configData["stores"] ?? null;
         if (!is_array($cacheStores) || !$cacheStores) {
-            return $cacheConfig;
+            return;
         }
 
         foreach ($cacheStores as $storeId => $cacheServer) {
@@ -42,9 +40,7 @@ trait CacheConfigBuilderTrait
             $host = $cacheServer["host"] ?? "";
             $port = $cacheServer["port"] ?? 0;
             $timeout = $cacheServer["timeout"] ?? 0;
-            $cacheConfig->set($storeId, new CacheStoreConfig($driver, $host, $port, $timeout));
+            $this->cache->set($storeId, new CacheStoreConfig($driver, $host, $port, $timeout));
         }
-
-        return $cacheConfig;
     }
 }
