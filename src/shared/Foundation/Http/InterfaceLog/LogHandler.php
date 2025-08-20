@@ -3,54 +3,48 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Http\InterfaceLog;
 
-use App\Shared\Context\AppDbTables;
-use App\Shared\Core\Http\AppAwareEndpoint;
+use App\Shared\Contracts\RouteLogTraceProvider;
+use App\Shared\Core\Http\AbstractAppEndpoint;
+use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\Http\HttpModule;
-use Charcoal\App\Kernel\Orm\AbstractOrmRepository;
-use Charcoal\App\Kernel\Orm\Repository\EntityInsertableTrait;
-use Charcoal\App\Kernel\Orm\Repository\EntityUpdatableTrait;
+use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
+use Charcoal\App\Kernel\Orm\Repository\Traits\EntityInsertableTrait;
+use Charcoal\App\Kernel\Orm\Repository\Traits\EntityUpdatableTrait;
+use Charcoal\Base\Vectors\StringVector;
 use Charcoal\Buffers\Buffer;
-use Charcoal\OOP\Vectors\StringVector;
 
 /**
- * Class InterfaceLogHandler
- * @package App\Shared\Foundation\Http\InterfaceLog
+ * Class handling interface logging operations.
+ * Provides functionality for creating, updating, and retrieving interface log entries.
  * @property HttpModule $module
  */
-class InterfaceLogHandler extends AbstractOrmRepository
+final class LogHandler extends OrmRepositoryBase
 {
     use EntityInsertableTrait;
     use EntityUpdatableTrait;
 
-    /**
-     * @param HttpModule $module
-     */
     public function __construct(HttpModule $module)
     {
-        parent::__construct($module, AppDbTables::HTTP_INTERFACE_LOG);
+        parent::__construct($module, DatabaseTables::HttpInterfaceLog);
     }
 
     /**
-     * @param AppAwareEndpoint $route
-     * @param InterfaceLogSnapshot|null $snapshot
-     * @param RouteLogTraceProvider|null $traceProvider
-     * @return InterfaceLogEntity
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
      */
     public function createLog(
-        AppAwareEndpoint       $route,
-        ?InterfaceLogSnapshot  $snapshot,
+        AbstractAppEndpoint    $route,
+        ?RequestSnapshot       $snapshot,
         ?RouteLogTraceProvider $traceProvider = null
-    ): InterfaceLogEntity
+    ): LogEntity
     {
-        $requestLog = new InterfaceLogEntity();
+        $requestLog = new LogEntity();
         $requestLog->interface = $route->interface->enum;
         $requestLog->ipAddress = $route->userIpAddress;
         $requestLog->method = $route->request->method;
         $requestLog->endpoint = $route->request->url->path ?? "/";
         $requestLog->startOn = round(microtime(true), 4);
         $requestLog->endOn = null;
-        $requestLog->errorCount = 0;
+        $requestLog->alerts = 0;
         $requestLog->responseCode = null;
         $requestLog->flagSid = $traceProvider?->getTraceSid();
         $requestLog->flagUid = $traceProvider?->getTraceUid();
@@ -61,21 +55,16 @@ class InterfaceLogHandler extends AbstractOrmRepository
     }
 
     /**
-     * @param AppAwareEndpoint $route
-     * @param InterfaceLogEntity $requestLog
-     * @param InterfaceLogSnapshot|null $snapshot
-     * @param RouteLogTraceProvider|null $traceProvider
-     * @return void
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
      */
     public function updateLog(
-        AppAwareEndpoint       $route,
-        InterfaceLogEntity     $requestLog,
-        ?InterfaceLogSnapshot  $snapshot,
+        AbstractAppEndpoint    $route,
+        LogEntity              $requestLog,
+        ?RequestSnapshot       $snapshot,
         ?RouteLogTraceProvider $traceProvider = null
     ): void
     {
-        $requestLog->errorCount = $snapshot ? $snapshot->errorCount : 0;
+        $requestLog->alerts = $snapshot ? $snapshot->alerts : 0;
         $requestLog->responseCode = $route->response()->getStatusCode();
         $requestLog->endOn = round(microtime(true), 4);
         $requestLog->flagSid = $requestLog->flagSid ?: $traceProvider?->getTraceSid();
@@ -83,7 +72,7 @@ class InterfaceLogHandler extends AbstractOrmRepository
         $requestLog->flagTid = $requestLog->flagTid ?: $traceProvider?->getTraceTid();
         $requestLog->snapshot = null;
         if ($snapshot) {
-            if ($snapshot->errorCount > 0 || $route->requestLogLevel->value >= 2) {
+            if ($snapshot->alerts > 0 || $route->requestLogLevel->value >= 2) {
                 $requestLog->snapshot = new Buffer(serialize($snapshot));
             }
         }
@@ -97,14 +86,13 @@ class InterfaceLogHandler extends AbstractOrmRepository
     }
 
     /**
-     * @param int $id
-     * @return InterfaceLogEntity
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityNotFoundException
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
+     * @api
      */
-    public function getLog(int $id): InterfaceLogEntity
+    public function getLog(int $id): LogEntity
     {
-        /** @var InterfaceLogEntity */
+        /** @var LogEntity */
         return $this->getFromDbColumn("id", $id);
     }
 }

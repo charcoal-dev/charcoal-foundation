@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Foundation\Http\InterfaceLog;
+namespace App\Shared\Contracts;
 
 /**
  * Interface RouteLogTraceProvider
