@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http\Policy\Concurrency;
+namespace App\Shared\Core\Http\Request\Policy\Concurrency;
 
 /**
  * Class ConcurrencyPolicy

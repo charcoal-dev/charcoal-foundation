@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Cache;
 
-use Charcoal\Base\Contracts\Storage\StorageProviderInterface;
 use Charcoal\Base\Enums\StorageType;
-use Charcoal\Http\Router\Controllers\CacheControl;
+use Charcoal\Cache\CacheClient;
+use Charcoal\Http\Router\Response\Headers\CacheControl;
 
 /**
  * Class ResponseCacheContext
@@ -18,19 +18,19 @@ readonly class ResponseCacheContext
      * @param class-string[] $responseUnserializeClasses
      */
     public function __construct(
-        public string                    $uniqueRequestId,
-        public StorageType               $storage,
-        public ?StorageProviderInterface $storageProvider,
-        public ?CacheControl             $cacheControlHeader,
-        public int                       $validity,
-        public ?string                   $integrityTag,
-        public string                    $responseClassname,
-        public array                     $responseUnserializeClasses = []
+        public string        $uniqueRequestId,
+        public StorageType   $storage,
+        public ?CacheClient  $storageProvider,
+        public ?CacheControl $cacheControlHeader,
+        public int           $validity,
+        public ?string       $integrityTag,
+        public string        $responseClassname,
+        public array         $responseUnserializeClasses = []
     )
     {
         match ($this->storage) {
-            StorageType::FILESYSTEM,
-            StorageType::CACHE => $this->validateStorageType(),
+            StorageType::Filesystem,
+            StorageType::Cache => $this->validateStorageType(),
             default => throw new \LogicException("Storage type not supported"),
         };
     }
@@ -44,11 +44,11 @@ readonly class ResponseCacheContext
             throw new \LogicException("StorageProvider storage type does not match ResponseCacheContext storage type");
         }
 
-        if ($this->storage === StorageType::FILESYSTEM) {
+        if ($this->storage === StorageType::Filesystem) {
             if ($this->storageProvider) {
                 throw new \LogicException("StorageProvider must be NULL for Filesystem storage");
             }
-        } elseif ($this->storage === StorageType::CACHE) {
+        } elseif ($this->storage === StorageType::Cache) {
             if (!$this->storageProvider) {
                 throw new \LogicException("StorageProvider must be set for Cache storage");
             }

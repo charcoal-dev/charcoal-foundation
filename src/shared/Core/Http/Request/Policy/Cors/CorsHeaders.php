@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http\Policy\Cors;
+namespace App\Shared\Core\Http\Request\Policy\Cors;
 
-use App\Shared\Core\Http\AppAwareEndpoint;
+use App\Shared\Core\Http\AbstractAppEndpoint;
 
 /**
  * Class CorsHeaders
@@ -66,10 +66,10 @@ class CorsHeaders
 
     /**
      * @param string $origin
-     * @param AppAwareEndpoint $route
+     * @param AbstractAppEndpoint $route
      * @return void
      */
-    public function dispatch(string $origin, AppAwareEndpoint $route): void
+    public function dispatch(string $origin, AbstractAppEndpoint $route): void
     {
         $route->response()->headers->set("Access-Control-Allow-Origin", $origin)
             ->set("Access-Control-Allow-Methods", implode(",", $this->methods))

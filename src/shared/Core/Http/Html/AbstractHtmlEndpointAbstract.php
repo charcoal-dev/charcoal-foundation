@@ -3,15 +3,16 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Html;
 
-use App\Shared\Core\Http\AppAwareEndpoint;
+use App\Shared\Core\Http\AbstractAppEndpoint;
 use Charcoal\Buffers\Buffer;
-use Charcoal\Http\Router\Controllers\Response\BodyResponse;
+use Charcoal\Http\Commons\Header\WritableHeaders;
+use Charcoal\Http\Router\Response\BodyResponse;
 
 /**
  * Class AbstractHtmlEndpoint
  * @package App\Shared\Core\Http\Html
  */
-abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
+abstract class AbstractHtmlEndpointAbstract extends AbstractAppEndpoint
 {
     private readonly string $templateDirectory;
 
@@ -23,17 +24,11 @@ abstract class AbstractHtmlEndpoint extends AppAwareEndpoint
 
     /**
      * @return BodyResponse
+     * @api
      */
-    final protected function initEmptyResponse(): BodyResponse
+    final protected function createResponseObject(): BodyResponse
     {
-        return new BodyResponse();
-    }
-
-    /**
-     * @return void
-     */
-    protected function prepareResponseCallback(): void
-    {
+        return new BodyResponse(new WritableHeaders());
     }
 
     /**

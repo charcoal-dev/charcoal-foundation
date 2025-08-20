@@ -6,7 +6,7 @@ namespace App\Shared\Core\Http;
 use App\Shared\CharcoalApp;
 use App\Shared\Context\Api\Errors\GatewayError;
 use App\Shared\Core\Http\Cache\ResponseCache;
-use App\Shared\Core\Http\Exception\Cache\ResponseFromCacheException;
+use App\Shared\Core\Http\Exceptions\Cache\ResponseFromCacheException;
 use App\Shared\Core\Http\Request\Policy\Auth\AuthAwareRouteInterface;
 use App\Shared\Core\Http\Request\Policy\Auth\AuthContextInterface;
 use App\Shared\Core\Http\Request\Policy\Concurrency\ConcurrencyEnforcer;
@@ -23,11 +23,11 @@ use App\Shared\Exceptions\Http\CorsOriginMismatchException;
 use App\Shared\Foundation\Http\InterfaceLog\LogEntity;
 use App\Shared\Foundation\Http\InterfaceLog\RequestSnapshot;
 use App\Shared\Utility\NetworkHelper;
-use App\Shared\Utility\StringHelper;
 use Charcoal\App\Kernel\Diagnostics\Diagnostics;
 use Charcoal\App\Kernel\EntryPoint\Http\AbstractRouteController;
-use Charcoal\App\Kernel\Errors;
+use Charcoal\App\Kernel\Support\DtoHelper;
 use Charcoal\Buffers\AbstractFixedLenBuffer;
+use Charcoal\Filesystem\Node\DirectoryNode;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Router\Contracts\Response\ResponseResolvedInterface;
 use Charcoal\Http\Router\Enums\CacheStoreDirective;
@@ -58,10 +58,6 @@ abstract class AbstractAppEndpoint extends AbstractRouteController
     protected readonly ?CorsBinding $corsBinding;
     protected readonly ?ConcurrencyPolicy $concurrencyPolicy;
     private ?FileLock $concurrencyLock = null;
-
-    protected bool $exceptionReturnTrace = false;
-    protected bool $exceptionFullClassname = false;
-    protected bool $exceptionIncludePrevious = false;
 
     /**
      * @throws ApiValidationException
@@ -209,6 +205,7 @@ abstract class AbstractAppEndpoint extends AbstractRouteController
     /**
      * @param ResponseResolvedInterface|null $response
      * @return void
+     * @throws \Charcoal\Filesystem\Exceptions\FilesystemException
      */
     protected function responseDispatcherHook(?ResponseResolvedInterface $response): void
     {
@@ -281,58 +278,17 @@ abstract class AbstractAppEndpoint extends AbstractRouteController
     /**
      * @param \Throwable $t
      * @return void
-     * @throws \Charcoal\Filesystem\Exception\FilesystemException
+     * @throws \Charcoal\Filesystem\Exceptions\FilesystemException
      */
     private function writeLogDumpToFile(\Throwable $t): void
     {
         $logFileDump = [
-            "exception" => Errors::Exception2Array($t),
-            "errors" => $this->app->errors->getAll(),
-            "lifecycle" => $this->app->lifecycle->toArray(),
+            "exception" => DtoHelper::getExceptionObject($t),
+            "diagnostics" => Diagnostics::app()->snapshot(true, true),
         ];
 
-        $this->app->directories->log->getDirectory("queries", true)
-            ->writeToFile(dechex($this->requestLog->id), var_export($logFileDump, true));
-    }
-
-    /**
-     * @param \Throwable $t
-     * @return array
-     */
-    protected function exceptionToArray(\Throwable $t): array
-    {
-        $errorObject = [
-            "message" => StringHelper::getTrimmedOrNull($t->getMessage()),
-            "code" => $t->getCode()
-        ];
-
-        if ($t instanceof ApiValidationException) {
-            if ($t->param) {
-                $errorObject["param"] = $t->param;
-            }
-        }
-
-        if (!$t instanceof ApiValidationException) {
-            $errorObject["exception"] = $this->exceptionFullClassname ?
-                $t::class : OOP::baseClassName($t::class);
-        }
-
-        if (!$errorObject["message"]) {
-            $errorObject["message"] = $this->exceptionFullClassname ?
-                $t::class : OOP::baseClassName($t::class);
-        }
-
-        if ($this->exceptionReturnTrace) {
-            $errorObject["file"] = $t->getFile();
-            $errorObject["line"] = $t->getLine();
-            $errorObject["trace"] = explode("\n", $t->getTraceAsString());
-        }
-
-        if (!$t instanceof ApiValidationException && $this->exceptionIncludePrevious) {
-            $errorObject["previous"] = $t->getPrevious() ?
-                $this->exceptionToArray($t->getPrevious()) : [];
-        }
-
-        return $errorObject;
+        (new DirectoryNode($this->app->paths->log))
+            ->file("/queries/" . dechex($this->requestLog->id), true, true)
+            ->write(var_export($logFileDump, true), true, true);
     }
 }

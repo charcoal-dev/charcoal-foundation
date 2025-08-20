@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http\Exception\Api;
+namespace App\Shared\Core\Http\Exceptions\Api;
 
 /**
  * Class ResponseFinalizedException

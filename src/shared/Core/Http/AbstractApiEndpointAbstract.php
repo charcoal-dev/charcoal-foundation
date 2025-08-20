@@ -9,18 +9,19 @@ use App\Shared\Core\Http\Api\ApiNamespaceInterface;
 use App\Shared\Core\Http\Api\ApiResponse;
 use App\Shared\Core\Http\Api\Error\ApiTranslatedErrorInterface;
 use App\Shared\Core\Http\Api\Error\ValidationErrorTranslator;
-use App\Shared\Core\Http\Exception\Api\EntrypointException;
-use App\Shared\Core\Http\Exception\Api\ResponseFinalizedException;
-use App\Shared\Core\Http\Exception\Cache\ResponseFromCacheException;
-use App\Shared\Exception\ApiValidationException;
-use App\Shared\Exception\ConcurrentHttpRequestException;
-use App\Shared\Exception\CorsOriginMismatchException;
-use App\Shared\Exception\HttpOptionsException;
+use App\Shared\Core\Http\Exceptions\Api\EntrypointException;
+use App\Shared\Core\Http\Exceptions\Api\ResponseFinalizedException;
+use App\Shared\Core\Http\Exceptions\Cache\ResponseFromCacheException;
+use App\Shared\Exceptions\ApiValidationException;
+use App\Shared\Exceptions\Http\ConcurrentHttpRequestException;
+use App\Shared\Exceptions\Http\CorsOriginMismatchException;
+use App\Shared\Exceptions\Http\HttpOptionsException;
 use App\Shared\Utility\StringHelper;
 use App\Shared\Validation\ValidationException;
-use Charcoal\Base\Exception\WrappedException;
-use Charcoal\Http\Commons\HttpMethod;
-use Charcoal\Http\Router\Controllers\Response\NoContentResponse;
+use Charcoal\App\Kernel\Diagnostics\Diagnostics;
+use Charcoal\App\Kernel\Support\DtoHelper;
+use Charcoal\Base\Exceptions\WrappedException;
+use Charcoal\Http\Commons\Enums\HttpMethod;
 
 /**
  * Class AbstractApiEndpoint
@@ -31,13 +32,14 @@ use Charcoal\Http\Router\Controllers\Response\NoContentResponse;
  * @method never post()
  * @method never delete()
  */
-abstract class AbstractApiEndpoint extends AppAwareEndpoint
+abstract class AbstractApiEndpointAbstract extends AbstractAppEndpoint
 {
     public readonly string $userAgent;
     protected bool $allowOptionsCall = true;
 
     /**
      * @return ApiNamespaceInterface
+     * @api
      */
     abstract protected function declareApiNamespace(): ApiNamespaceInterface;
 
@@ -106,6 +108,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     /**
      * @param \Throwable $t
      * @return void
+     * @throws \Charcoal\Http\Router\Exceptions\ResponseDispatchedException
      */
     protected function handleException(\Throwable $t): void
     {
@@ -114,8 +117,7 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
         }
 
         if ($t instanceof HttpOptionsException) {
-            $this->swapResponseObject(new NoContentResponse(204, $this->response()));
-            return;
+            $this->terminate(204);
         }
 
         // Handleable Individual Exception?
@@ -127,16 +129,16 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
                 $errorObject["code"] = $errorCode;
             }
         } else {
-            $errorObject = $this->exceptionToArray($t);
+            $errorObject = DtoHelper::getExceptionObject($t);
         }
 
         // Log to Lifecycle
         if ($t instanceof ApiValidationException || $t instanceof WrappedException) {
             if ($t->getPrevious()) {
-                $this->app->lifecycle->exception($t->getPrevious());
+                Diagnostics::app()->error("Exception caught during validation", exception: $t->getPrevious());
             }
         } else {
-            $this->app->lifecycle->exception($t);
+            Diagnostics::app()->error("Exception caught during validation", exception: $t->getPrevious());
         }
 
         try {
@@ -197,29 +199,10 @@ abstract class AbstractApiEndpoint extends AppAwareEndpoint
     /**
      * @return ApiResponse
      */
-    protected function initEmptyResponse(): ApiResponse
+    public function response(): ApiResponse
     {
-        return new ApiResponse();
-    }
-
-    /**
-     * @return void
-     */
-    protected function prepareResponseCallback(): void
-    {
-        $response = $this->response();
-        if ($response instanceof ApiResponse) {
-            $response->prepareResponseCallback($this, $this->authContext ?? null, $this->requestLog ?? null);
-        }
-    }
-
-    /**
-     * @return ApiResponse|NoContentResponse
-     */
-    public function response(): ApiResponse|NoContentResponse
-    {
-        /** @var ApiResponse|NoContentResponse */
-        return parent::response();
+        /** @var ApiResponse */
+        return $this->getResponseObject();
     }
 
     /**

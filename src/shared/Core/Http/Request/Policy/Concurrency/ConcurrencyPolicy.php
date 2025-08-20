@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http\Policy\Concurrency;
+namespace App\Shared\Core\Http\Request\Policy\Concurrency;
 
-use App\Shared\Core\Http\Policy\Auth\AuthContextInterface;
+use App\Shared\Core\Http\Request\Policy\Auth\AuthContextInterface;
 
 /**
  * Class ConcurrencyPolicy

@@ -1,11 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http\Policy\Cors;
+namespace App\Shared\Core\Http\Request\Policy\Cors;
 
-use App\Shared\Core\Http\AppAwareEndpoint;
-use App\Shared\Exception\CorsOriginMismatchException;
-use App\Shared\Utility\NetworkValidator;
+use App\Shared\Core\Http\AbstractAppEndpoint;
+use App\Shared\Enums\Http\CorsPolicy;
+use App\Shared\Exceptions\Http\CorsOriginMismatchException;
+use App\Shared\Utility\NetworkHelper;
 
 /**
  * Class CorsBinding
@@ -29,11 +30,11 @@ readonly class CorsBinding
     }
 
     /**
-     * @param AppAwareEndpoint $route
+     * @param AbstractAppEndpoint $route
      * @return void
      * @throws CorsOriginMismatchException
      */
-    public function validateOrigin(AppAwareEndpoint $route): void
+    public function validateOrigin(AbstractAppEndpoint $route): void
     {
         if ($this->policy === CorsPolicy::DISABLED) {
             return;
@@ -44,7 +45,7 @@ readonly class CorsBinding
             return;
         }
 
-        if (NetworkValidator::isValidHttpOrigin($route->userClient->origin)) {
+        if (NetworkHelper::isValidHttpOrigin($route->userClient->origin)) {
             if (in_array(strtolower($route->userClient->origin), $this->allowedOrigins, true)) {
                 $this->headers->dispatch($route->userClient->origin, $route);
                 return;

@@ -4,14 +4,13 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http\Cache;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Core\Http\Exception\Cache\ResponseInvalidatedException;
-use App\Shared\Core\Http\Response\CacheSource;
-use App\Shared\Foundation\Http\HttpInterface;
-use Charcoal\Base\Exception\WrappedException;
-use Charcoal\Filesystem\Directory;
-use Charcoal\Filesystem\Exception\FilesystemError;
-use Charcoal\Filesystem\Exception\FilesystemException;
-use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
+use App\Shared\Core\Http\Exceptions\Cache\ResponseInvalidatedException;
+use App\Shared\Enums\Http\HttpInterface;
+use Charcoal\Base\Exceptions\WrappedException;
+use Charcoal\Filesystem\Exceptions\PathNotFoundException;
+use Charcoal\Filesystem\Exceptions\PathTypeException;
+use Charcoal\Filesystem\Node\DirectoryNode;
+use Charcoal\Http\Router\Response\AbstractResponse;
 
 /**
  * Class ResponseCache
@@ -33,24 +32,24 @@ readonly class ResponseCache
     }
 
     /**
-     * @return AbstractControllerResponse|null
+     * @return AbstractResponse|null
      * @throws ResponseInvalidatedException
      * @throws WrappedException
      */
-    public function getCached(): ?AbstractControllerResponse
+    public function getCached(): ?AbstractResponse
     {
         try {
-            if ($this->context->source === CacheSource::NONE) {
+            if (!$this->context->storage) {
                 return null;
             }
 
-            $cachedEntity = $this->context->cacheStore ? $this->getFromCacheStore() :
+            $cachedEntity = $this->context->storageProvider ? $this->getFromCacheStore() :
                 $this->getFromFilesystem($this->context->responseUnserializeClasses);
         } catch (\Exception $e) {
             throw new WrappedException($e, "Failed to retrieve response from cache");
         }
 
-        if (!$cachedEntity instanceof AbstractControllerResponse ||
+        if (!$cachedEntity instanceof AbstractResponse ||
             !is_a($cachedEntity, $this->context->responseClassname)) {
             throw new WrappedException(new \RuntimeException(sprintf(
                 'Expected cached response of type "%s", got "%s"',
@@ -83,7 +82,7 @@ readonly class ResponseCache
     public function deleteCached(): void
     {
         try {
-            $this->context->cacheStore ?
+            $this->context->storageProvider ?
                 $this->deleteFromCacheStore() : $this->deleteFromFilesystem();
         } catch (\Exception $e) {
             throw new WrappedException($e, "Failed to delete cached response");
@@ -91,52 +90,48 @@ readonly class ResponseCache
     }
 
     /**
-     * @param AbstractControllerResponse $response
+     * @param AbstractResponse $response
      * @return void
-     * @throws FilesystemException
-     * @throws \Charcoal\Cache\Exception\CacheException
+     * @throws PathNotFoundException
+     * @throws PathTypeException
+     * @throws \Charcoal\Filesystem\Exceptions\FilesystemException
      */
-    public function saveCachedResponse(AbstractControllerResponse $response): void
+    public function saveCachedResponse(AbstractResponse $response): void
     {
-        if ($this->context->source === CacheSource::NONE) {
+        if (!$this->context->storage) {
             return;
         }
 
-        $this->context->cacheStore ?
+        $this->context->storageProvider ?
             $this->storeInCacheStore($response) : $this->storeInFilesystem($response);
     }
 
     /**
      * @return mixed
-     * @throws \Charcoal\Cache\Exception\CacheDriverOpException
-     * @throws \Charcoal\Cache\Exception\CachedEntityException
+     * @throws \Charcoal\Cache\Exceptions\CachedEntityException
      */
     private function getFromCacheStore(): mixed
     {
-        /** @var AbstractControllerResponse $cached */
-        return $this->app->cache->get($this->context->cacheStore)
-            ->get($this->cachePrefixedKey($this->context->uniqueRequestId));
+        /** @var AbstractResponse $cached */
+        return $this->context->storageProvider->get($this->cachePrefixedKey($this->context->uniqueRequestId));
     }
 
     /**
-     * @param AbstractControllerResponse $response
+     * @param AbstractResponse $response
      * @return void
-     * @throws \Charcoal\Cache\Exception\CacheException
      */
-    private function storeInCacheStore(AbstractControllerResponse $response): void
+    private function storeInCacheStore(AbstractResponse $response): void
     {
-        $this->app->cache->get($this->context->cacheStore)
-            ->set($this->cachePrefixedKey($this->context->uniqueRequestId), $response);
+        $this->context->storageProvider->set($this->cachePrefixedKey($this->context->uniqueRequestId), $response);
     }
 
     /**
      * @return void
-     * @throws \Charcoal\Cache\Exception\CacheDriverOpException
+     * @throws \Charcoal\Cache\Exceptions\CacheDriverException
      */
     private function deleteFromCacheStore(): void
     {
-        $this->app->cache->get($this->context->cacheStore)
-            ->delete($this->cachePrefixedKey($this->context->uniqueRequestId));
+        $this->context->storageProvider->delete($this->cachePrefixedKey($this->context->uniqueRequestId));
     }
 
     /**
@@ -149,61 +144,61 @@ readonly class ResponseCache
     }
 
     /**
-     * @param AbstractControllerResponse $response
+     * @param AbstractResponse $response
      * @return void
-     * @throws \Charcoal\Filesystem\Exception\FilesystemException
+     * @throws PathNotFoundException
+     * @throws PathTypeException
+     * @throws \Charcoal\Filesystem\Exceptions\FilesystemException
      */
-    private function storeInFilesystem(AbstractControllerResponse $response): void
+    private function storeInFilesystem(AbstractResponse $response): void
     {
         $tmpDir = $this->getFilesystemDirectory();
-        if (!$tmpDir->isWritable()) {
+        if (!$tmpDir->path->writable) {
             throw new \RuntimeException("Cannot write to HTTP interface cache directory");
         }
 
-        $tmpDir->writeToFile($this->context->uniqueRequestId,
-            serialize($response),
-            append: false);
+        $tmpDir->file($this->context->uniqueRequestId, true, createIfNotExists: true)
+            ->write(serialize($response), false, false);
     }
 
     /**
      * @param array $allowedClasses
      * @return mixed
-     * @throws FilesystemException
+     * @throws PathNotFoundException
+     * @throws PathTypeException
+     * @throws \Charcoal\Filesystem\Exceptions\FilesystemException
      */
     private function getFromFilesystem(array $allowedClasses = []): mixed
     {
         try {
             $tmpDir = $this->getFilesystemDirectory();
-            $response = $tmpDir->getFile(
+            $response = $tmpDir->file(
                 $this->context->uniqueRequestId,
+                true,
                 createIfNotExists: false
             );
 
             return unserialize($response->read(), ["allowed_classes" => $allowedClasses]);
-        } catch (FilesystemException $e) {
-            if (in_array($e->error, [FilesystemError::PATH_NOT_EXISTS, FilesystemError::PATH_TYPE_ERR])) {
-                return null;
-            }
-
-            throw $e;
+        } catch (PathNotFoundException) {
+            return null;
         }
     }
 
     /**
      * @return void
-     * @throws FilesystemException
+     * @throws \Charcoal\Filesystem\Exceptions\FilesystemException
      */
     private function deleteFromFilesystem(): void
     {
-        $this->getFilesystemDirectory()->delete($this->context->uniqueRequestId);
+        $this->getFilesystemDirectory()->deleteChild($this->context->uniqueRequestId);
     }
 
     /**
-     * @return Directory
-     * @throws \Charcoal\Filesystem\Exception\FilesystemException
+     * @return DirectoryNode
+     * @throws \Charcoal\Filesystem\Exceptions\FilesystemException
      */
-    private function getFilesystemDirectory(): Directory
+    private function getFilesystemDirectory(): DirectoryNode
     {
-        return $this->app->directories->tmp->getDirectory("cache/" . $this->interface->value, true);
+        return (new DirectoryNode($this->app->paths->tmp))->directory("/cache", true, true);
     }
 }

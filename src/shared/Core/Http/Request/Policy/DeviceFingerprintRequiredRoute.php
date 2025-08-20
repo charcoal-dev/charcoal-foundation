@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http\Policy;
+namespace App\Shared\Core\Http\Request\Policy;
 
 use Charcoal\Buffers\AbstractFixedLenBuffer;
 

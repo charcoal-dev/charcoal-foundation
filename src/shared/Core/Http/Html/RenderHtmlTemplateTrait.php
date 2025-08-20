@@ -6,15 +6,13 @@ namespace App\Shared\Core\Http\Html;
 use Charcoal\Buffers\Buffer;
 
 /**
- * Trait RenderHtmlTemplateTrait
- * @package App\Shared\Core\Http\Html
+ * Provides functionality to render an HTML template file with injected data.
+ * The trait ensures proper output buffering and error handling during the rendering process.
  */
 trait RenderHtmlTemplateTrait
 {
     /**
-     * @param string $templateFilepath
-     * @param array $data
-     * @return Buffer
+     * Renders a template file using the provided data and returns the output as a buffer.
      */
     final protected function renderTemplateFile(string $templateFilepath, array $data = []): Buffer
     {

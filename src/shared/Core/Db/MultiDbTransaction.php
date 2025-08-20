@@ -11,7 +11,7 @@ use Charcoal\Database\DatabaseClient;
 /**
  * Class MultiDbTransaction
  * @package App\Shared\Core\Db
- * @api
+ * @deprecated
  */
 class MultiDbTransaction
 {

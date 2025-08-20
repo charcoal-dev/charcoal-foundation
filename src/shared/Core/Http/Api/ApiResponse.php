@@ -3,22 +3,27 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Api;
 
-use App\Shared\Core\Http\AbstractApiEndpointAbstract;
-use App\Shared\Core\Http\Exception\Api\ResponseFinalizedException;
-use App\Shared\Core\Http\Request\Policy\Auth\AuthContextInterface;
-use App\Shared\Foundation\Http\InterfaceLog\LogEntity;
+use App\Shared\Core\Http\Exceptions\Api\ResponseFinalizedException;
+use Charcoal\Http\Commons\Body\WritablePayload;
+use Charcoal\Http\Commons\Enums\ContentType;
+use Charcoal\Http\Commons\Header\WritableHeaders;
 use Charcoal\Http\Router\Response\PayloadResponse;
 
 /**
  * Class ApiResponse
  * @package App\Shared\Core\Http\Api
  */
-class ApiResponse extends PayloadResponse
+abstract class ApiResponse extends PayloadResponse
 {
     protected const string PARAM_ERROR = "error";
     protected const string PARAM_SUCCESS = "isSuccess";
 
     protected bool $isSuccess = false;
+
+    public function __construct()
+    {
+        parent::__construct(new WritableHeaders(), new WritablePayload(), ContentType::Json);
+    }
 
     /**
      * @param int|null $statusCode
@@ -53,20 +58,6 @@ class ApiResponse extends PayloadResponse
         $this->setStatusCode($statusCode);
         $this->set(static::PARAM_ERROR, $error);
         throw new ResponseFinalizedException();
-    }
-
-    /**
-     * @param AbstractApiEndpointAbstract $route
-     * @param AuthContextInterface|null $authContext
-     * @param LogEntity|null $logEntity
-     * @return void
-     */
-    public function prepareResponseCallback(
-        AbstractApiEndpointAbstract $route,
-        ?AuthContextInterface       $authContext,
-        ?LogEntity                  $logEntity,
-    ): void
-    {
     }
 
     /**

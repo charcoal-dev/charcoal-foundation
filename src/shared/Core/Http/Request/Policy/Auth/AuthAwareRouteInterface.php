@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http\Policy\Auth;
+namespace App\Shared\Core\Http\Request\Policy\Auth;
 
 /**
  * Interface AuthAwareRouteInterface
