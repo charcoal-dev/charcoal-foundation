@@ -3,14 +3,15 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Orm;
 
-use Charcoal\App\Kernel\Orm\Db\AbstractOrmTable;
-use Charcoal\Base\Exception\WrappedException;
-use Charcoal\Database\Queries\SortFlag;
-use Charcoal\OOP\OOP;
+use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
+use Charcoal\Base\Enums\Sort;
+use Charcoal\Base\Exceptions\WrappedException;
+use Charcoal\Base\Support\Helpers\ObjectHelper;
 
 /**
  * Class EntityPaginatedFetch
  * @package App\Shared\Core\Orm
+ * @api
  */
 readonly class EntityPaginatedFetch
 {
@@ -19,10 +20,10 @@ readonly class EntityPaginatedFetch
     public int $count;
 
     /**
-     * @param AbstractOrmTable $table
+     * @param OrmTableBase $table
      * @param array $whereQuery
      * @param array $whereData
-     * @param SortFlag $sortFlag
+     * @param Sort $sortFlag
      * @param string $sortColumn
      * @param int $page
      * @param int $perPage
@@ -30,14 +31,14 @@ readonly class EntityPaginatedFetch
      * @throws WrappedException
      */
     public function __construct(
-        AbstractOrmTable $table,
-        array            $whereQuery,
-        array            $whereData,
-        public SortFlag  $sortFlag,
-        string           $sortColumn = "id",
-        public int       $page = 1,
-        public int       $perPage = 100,
-        ?\Closure        $forEachRow = null,
+        OrmTableBase $table,
+        array        $whereQuery,
+        array        $whereData,
+        public Sort  $sortFlag,
+        string       $sortColumn = "id",
+        public int   $page = 1,
+        public int   $perPage = 100,
+        ?\Closure    $forEachRow = null,
     )
     {
         if ($this->page < 1 || $this->perPage < 1) {
@@ -64,7 +65,7 @@ readonly class EntityPaginatedFetch
             )->getAll();
         } catch (\Exception $e) {
             throw new WrappedException($e, "Failed to retrieve paginated entities for table: " .
-                OOP::baseClassName($table::class));
+                ObjectHelper::baseClassName($table::class));
         }
 
         $result = [];
@@ -86,13 +87,13 @@ readonly class EntityPaginatedFetch
     }
 
     /**
-     * @param AbstractOrmTable $table
+     * @param OrmTableBase $table
      * @param string $whereQuery
      * @param array $whereData
      * @return int
      * @throws WrappedException
      */
-    private function getTotalRowCount(AbstractOrmTable $table, string $whereQuery, array $whereData): int
+    private function getTotalRowCount(OrmTableBase $table, string $whereQuery, array $whereData): int
     {
         try {
             $totalCount = $table->getDb()
@@ -106,7 +107,7 @@ readonly class EntityPaginatedFetch
             return $totalCount;
         } catch (\Exception $e) {
             throw new WrappedException($e, "Failed to retrieve total row count for table: " .
-                OOP::baseClassName($table::class));
+                ObjectHelper::baseClassName($table::class));
         }
     }
 }

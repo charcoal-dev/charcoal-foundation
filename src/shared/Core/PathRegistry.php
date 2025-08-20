@@ -15,7 +15,6 @@ final readonly class PathRegistry extends \Charcoal\App\Kernel\Internal\PathRegi
     public DirectoryPath $config;
     public DirectoryPath $emails;
     public DirectoryPath $log;
-    public DirectoryPath $semaphore;
     public DirectoryPath $storage;
     public DirectoryPath $tmp;
 
@@ -27,7 +26,6 @@ final readonly class PathRegistry extends \Charcoal\App\Kernel\Internal\PathRegi
         $this->config = $this->getValidatedPathSnapshot("/config", true, true, false, true);
         $this->log = $this->getValidatedPathSnapshot("/log", true, true, true, true);
         $this->tmp = $this->getValidatedPathSnapshot("/tmp", true, true, true, true);
-        $this->semaphore = $this->getValidatedPathSnapshot("/tmp/semaphore", true, true, true, true);
         $this->storage = $this->getValidatedPathSnapshot("/storage", true, true, false, true);
         $this->emails = $this->getValidatedPathSnapshot("/emails", true, true, false, true);
     }
