@@ -18,6 +18,7 @@ use Charcoal\Cache\CacheClient;
 /**
  * Represents a module that extends the base ORM functionality.
  * Provides logging and metrics capabilities, while managing database table registration.
+ * @property-read CharcoalApp $app
  */
 final class EngineModule extends OrmModuleBase
 {

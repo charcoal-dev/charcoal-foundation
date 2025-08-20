@@ -23,6 +23,7 @@ use Charcoal\Cache\CacheClient;
  * This class provides access to various data and storage components,
  * such as object store handling, country management, brute force logging,
  * and database backup operations.
+ * @property-read CharcoalApp $app
  */
 final class CoreDataModule extends OrmModuleBase
 {
