@@ -1,11 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Shared\Core\Http\Policy\Cors;
+namespace App\Shared\Enums\Http;
 
 /**
- * Class CorsPolicy
- * @package App\Shared\Core\Http\Cors
+ * Represents different policies for handling Cross-Origin Resource Sharing (CORS).
  */
 enum CorsPolicy
 {
