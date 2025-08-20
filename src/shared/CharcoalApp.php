@@ -3,9 +3,6 @@ declare(strict_types=1);
 
 namespace App\Shared;
 
-use App\Domain\Core\AppBindings;
-use App\Domain\DomainManifest;
-use App\Shared\Core\Config\Builder\AppConfigBuilder;
 use App\Shared\Core\Config\Snapshot\AppConfig;
 use App\Shared\Core\ErrorManager;
 use App\Shared\Core\PathRegistry;
@@ -15,7 +12,7 @@ use App\Shared\Foundation\Http\HttpModule;
 use App\Shared\Foundation\Mailer\MailerModule;
 use Charcoal\App\Kernel\AbstractApp;
 use Charcoal\App\Kernel\Enums\AppEnv;
-use Charcoal\Filesystem\Path\DirectoryPath;
+use Charcoal\App\Kernel\Internal\PathRegistry as Directories;
 
 /**
  * Class CharcoalApp
@@ -63,11 +60,13 @@ class CharcoalApp extends AbstractApp
     }
 
     /**
+     * @param PathRegistry $paths
+     * @throws \Charcoal\Filesystem\Exceptions\InvalidPathException
      * @throws \Charcoal\Yaml\Exception\YamlParseException
      */
-    protected function resolveAppConfig(AppEnv $env, DirectoryPath $root): AppConfig
+    protected function resolveAppConfig(AppEnv $env, Directories $paths): AppConfig
     {
-        return (new AppConfigBuilder($env, $root, $this->paths))->build();
+        return DomainManifest::provideAppConfig($env, $paths);
     }
 
     /**

@@ -13,7 +13,6 @@ use App\Shared\Core\Config\Snapshot\AppConfig;
 use App\Shared\Core\PathRegistry;
 use App\Shared\Enums\Timezones;
 use Charcoal\App\Kernel\Enums\AppEnv;
-use Charcoal\Filesystem\Path\DirectoryPath;
 
 /**
  * This class is responsible for initializing and aggregating various configuration builders,
@@ -32,12 +31,13 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
     use MailerFileConfigTrait;
 
     /**
+     * @throws \Charcoal\Filesystem\Exceptions\InvalidPathException
      * @throws \Charcoal\Yaml\Exception\YamlParseException
      */
-    public function __construct(AppEnv $env, DirectoryPath $root, PathRegistry $paths)
+    public function __construct(AppEnv $env, PathRegistry $paths)
     {
-        $configData = $this->readYamlConfigFiles($paths->config->absolute . "/config.yaml");
-        parent::__construct($env, $root, Timezones::from(strval($configData["timezone"])));
+        $configData = $this->readYamlConfigFiles($paths->config->join("./config.yml")->path);
+        parent::__construct($env, $paths, Timezones::from(strval($configData["timezone"])));
 
         $this->cacheStoresFromFileConfig($configData["foundation"]["cache"] ?? null);
         $this->databasesFromFileConfig($configData["foundation"]["databases"] ?? null);
@@ -49,8 +49,6 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
         if (!isset($this->mailer)) {
             $this->mailer = null;
         }
-
-        $this->security->setSemaphoreDirectory("/tmp/semaphore");
     }
 
     /**

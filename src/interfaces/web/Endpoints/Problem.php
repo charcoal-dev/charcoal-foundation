@@ -9,6 +9,7 @@ use App\Interfaces\Web\AbstractWebEndpoint;
 /**
  * Class Problem
  * @package App\Interfaces\Web\Endpoints
+ * @api
  */
 class Problem extends AbstractWebEndpoint
 {

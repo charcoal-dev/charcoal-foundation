@@ -4,6 +4,11 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http\Html;
 
 use Charcoal\Buffers\Buffer;
+use Charcoal\Filesystem\Enums\PathType;
+use Charcoal\Filesystem\Exceptions\InvalidPathException;
+use Charcoal\Filesystem\Exceptions\PathTypeException;
+use Charcoal\Filesystem\Path\FilePath;
+use Charcoal\Filesystem\Path\SafePath;
 
 /**
  * Provides functionality to render an HTML template file with injected data.
@@ -13,10 +18,16 @@ trait RenderHtmlTemplateTrait
 {
     /**
      * Renders a template file using the provided data and returns the output as a buffer.
+     * @throws InvalidPathException
+     * @throws PathTypeException
      */
-    final protected function renderTemplateFile(string $templateFilepath, array $data = []): Buffer
+    final protected function renderTemplateFile(FilePath|SafePath|string $templateFilepath, array $data = []): Buffer
     {
-        if (!file_exists($templateFilepath)) {
+        if (!$templateFilepath instanceof FilePath) {
+            $templateFilepath = new FilePath($templateFilepath);
+        }
+
+        if ($templateFilepath->type !== PathType::File) {
             throw new \RuntimeException("Template file not found");
         }
 

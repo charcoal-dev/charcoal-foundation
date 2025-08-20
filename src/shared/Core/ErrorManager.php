@@ -6,7 +6,6 @@ namespace App\Shared\Core;
 use App\Shared\Core\Http\Html\RenderHtmlTemplateTrait;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Errors\ErrorLoggers;
-use Charcoal\Filesystem\Path\FilePath;
 
 /**
  * Manages error handling and the termination process in the application.
@@ -20,20 +19,13 @@ final class ErrorManager extends \Charcoal\App\Kernel\Errors\ErrorManager
     private readonly string $crashHtmlTemplate;
 
     /**
-     * @param AppEnv $env
-     * @param PathRegistry $paths
-     * @param ErrorLoggers|null $loggers
-     * @throws \Charcoal\Filesystem\Exceptions\InvalidPathException
+     * Error Manager Constructor
+     * @noinspection PhpUnhandledExceptionInspection
      */
-    public function __construct(
-        AppEnv $env,
-        \Charcoal\App\Kernel\Internal\PathRegistry $paths,
-        ?ErrorLoggers $loggers = null
-    )
+    public function __construct(AppEnv $env, PathRegistry $paths, ?ErrorLoggers $loggers = null)
     {
         parent::__construct($env, $paths, $loggers);
-        $crashHtmlFile = new FilePath($paths->storage->absolute . "/crash.phtml");
-        $this->crashHtmlTemplate = $crashHtmlFile->absolute;
+        $this->crashHtmlTemplate = $paths->storage->join("./crash.phtml")->path;
     }
 
     /**
@@ -58,6 +50,7 @@ final class ErrorManager extends \Charcoal\App\Kernel\Errors\ErrorManager
 
     /**
      * Handles termination of the application by rendering output in the appropriate format and exiting.
+     * @noinspection PhpUnhandledExceptionInspection
      */
     protected function onTerminate(array $exceptionDto): never
     {

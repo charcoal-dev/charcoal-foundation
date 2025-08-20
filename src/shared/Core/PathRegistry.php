@@ -13,10 +13,12 @@ use Charcoal\Filesystem\Path\DirectoryPath;
 final readonly class PathRegistry extends \Charcoal\App\Kernel\Internal\PathRegistry
 {
     public DirectoryPath $config;
-    public DirectoryPath $emails;
-    public DirectoryPath $log;
-    public DirectoryPath $storage;
     public DirectoryPath $tmp;
+    public DirectoryPath $log;
+    public DirectoryPath $semaphore;
+    public DirectoryPath $templates;
+    public DirectoryPath $storage;
+    public DirectoryPath $emails;
 
     /**
      * Declaring paths right in application constructor (no lazy loading)
@@ -24,8 +26,10 @@ final readonly class PathRegistry extends \Charcoal\App\Kernel\Internal\PathRegi
     public function declarePaths(): void
     {
         $this->config = $this->getValidatedPathSnapshot("/config", true, true, false, true);
-        $this->log = $this->getValidatedPathSnapshot("/log", true, true, true, true);
         $this->tmp = $this->getValidatedPathSnapshot("/tmp", true, true, true, true);
+        $this->log = $this->getValidatedPathSnapshot("/log", true, true, true, true);
+        $this->semaphore = $this->getValidatedPathSnapshot("/tmp/semaphore", true, true, true, true);
+        $this->templates = $this->getValidatedPathSnapshot("/templates", true, true, true, true);
         $this->storage = $this->getValidatedPathSnapshot("/storage", true, true, false, true);
         $this->emails = $this->getValidatedPathSnapshot("/emails", true, true, false, true);
     }

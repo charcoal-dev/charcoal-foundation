@@ -5,6 +5,8 @@ namespace App\Shared\Core\Http\Html;
 
 use App\Shared\Core\Http\AbstractAppEndpoint;
 use Charcoal\Buffers\Buffer;
+use Charcoal\Filesystem\Exceptions\InvalidPathException;
+use Charcoal\Filesystem\Path\DirectoryPath;
 use Charcoal\Http\Commons\Header\WritableHeaders;
 use Charcoal\Http\Router\Response\BodyResponse;
 
@@ -14,13 +16,13 @@ use Charcoal\Http\Router\Response\BodyResponse;
  */
 abstract class AbstractHtmlEndpointAbstract extends AbstractAppEndpoint
 {
-    private readonly string $templateDirectory;
+    private readonly DirectoryPath $templateDirectory;
 
     use RenderHtmlTemplateTrait;
 
     abstract protected function entrypoint(): void;
 
-    abstract protected function resolveTemplateDirectory(): string;
+    abstract protected function resolveTemplateDirectory(): DirectoryPath;
 
     /**
      * @return BodyResponse
@@ -58,10 +60,15 @@ abstract class AbstractHtmlEndpointAbstract extends AbstractAppEndpoint
      * @param string $template
      * @param array $data
      * @return void
+     * @throws InvalidPathException
+     * @throws \Charcoal\Filesystem\Exceptions\FilesystemException
      */
     protected function sendTemplate(string $template, array $data = []): void
     {
-        $this->setBody($this->renderTemplateFile($this->templateDirectory . $template . ".phtml", $data));
+        $this->setBody($this->renderTemplateFile(
+            $this->templateDirectory->join($template . ".phtml")->isFile(),
+            $data
+        ));
     }
 
     /**
