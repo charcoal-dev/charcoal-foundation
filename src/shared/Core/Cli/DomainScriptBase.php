@@ -4,39 +4,41 @@ declare(strict_types=1);
 namespace App\Shared\Core\Cli;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Core\Cli\Script\IpcDependentScriptInterface;
-use App\Shared\Exception\CliScriptException;
-use App\Shared\Foundation\CoreData\SystemAlerts\AlertTraceProviderInterface;
+use App\Shared\Enums\SemaphoreScopes;
+use App\Shared\Exceptions\CliScriptException;
 use App\Shared\Utility\TypeCaster;
-use Charcoal\App\Kernel\Interfaces\Cli\AbstractCliScript;
-use Charcoal\App\Kernel\Interfaces\Cli\AppCliHandler;
-use Charcoal\Semaphore\Exception\SemaphoreLockException;
+use Charcoal\App\Kernel\EntryPoint\Cli\AppCliHandler;
+use Charcoal\App\Kernel\EntryPoint\Cli\AppCliScript;
+use Charcoal\Cli\Enums\ExecutionState;
+use Charcoal\Cli\Events\Terminate\ExceptionCaught;
+use Charcoal\Cli\Events\Terminate\PcntlSignalClose;
+use Charcoal\Semaphore\Exceptions\SemaphoreLockException;
 use Charcoal\Semaphore\Filesystem\FileLock;
 
 /**
- * Class AppAwareCliScript
+ * Class DomainScriptBase
  * @package App\Shared\Core\Cli
  */
-abstract class AppAwareCliScript extends AbstractCliScript implements AlertTraceProviderInterface
+abstract class DomainScriptBase extends AppCliScript
 {
     public readonly int $startedOn;
-    protected readonly ?ScriptExecutionLogBinding $logBinding;
-    protected readonly ?ScriptExecutionLogger $logger;
+    protected readonly ?LogPolicy $logBinding;
+    protected readonly ?ScriptLogger $logger;
     protected readonly ?FileLock $semaphoreLock;
-    private CliScriptState $state;
 
     /**
      * @param AppCliHandler $cli
-     * @param CliScriptState $initialState
+     * @param ExecutionState $initialState
      * @param string|null $semaphoreLockId
      * @throws SemaphoreLockException
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
-     * @throws \Charcoal\Filesystem\Exception\FilesystemException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
+     * @throws \Charcoal\Events\Exceptions\SubscriptionClosedException
+     * @throws \Charcoal\Semaphore\Exceptions\SemaphoreUnlockException
      */
     public function __construct(
         AppCliHandler              $cli,
-        protected readonly ?string $semaphoreLockId = null,
-        CliScriptState             $initialState = CliScriptState::STARTED
+        ExecutionState             $initialState = ExecutionState::STARTED,
+        protected readonly ?string $semaphoreLockId = null
     )
     {
         parent::__construct($cli);
@@ -49,51 +51,48 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
             $this->obtainSemaphoreLock($this->semaphoreLockId, true) : null;
 
         // Declared Depends On?
-        if ($this instanceof IpcDependentScriptInterface) {
+        /*if ($this instanceof IpcDependentScriptInterface) {
             $this->waitForIpcService(
                 $this->ipcDependsOn(),
                 $this->semaphoreLockId ?? $this->scriptClassname,
                 interval: 3,
                 maxAttempts: 100
             );
-        }
+        }*/
 
         // Log Binding & ScriptExecutionLogger
         $this->logBinding = $this->declareExecutionLogging();
         if (!$this->logBinding->loggable) {
             $this->logger = null;
         } else {
-            $this->logger = new ScriptExecutionLogger(
+            $this->logger = new ScriptLogger(
                 $this,
                 $this->state,
                 true,
                 $this->logBinding->label,
                 getmypid(),
-                $this->logBinding->outputBuffering,
-                true
             );
 
             $this->print("{green}Started process tracking # {b}" . $this->logger->logId);
 
-            $this->cli->events->scriptExecException()->listen(function () {
+            $this->cli->events->subscribe()->listen(ExceptionCaught::class, function () {
                 if ($this->logger) {
-                    $this->closeScriptLogger($this->logger, CliScriptState::ERROR);
+                    $this->closeScriptLogger($this->logger, ExecutionState::ERROR);
                 }
             });
 
-            $this->cli->events->pcntlSignalClose()->listen(function (int $sigId) {
-                $this->logger->context->log("PCNTL Signal #$sigId received");
+            $this->cli->events->subscribe()->listen(PcntlSignalClose::class, function () {
                 if ($this->logger) {
-                    $this->closeScriptLogger($this->logger, CliScriptState::STOPPED);
+                    $this->closeScriptLogger($this->logger, ExecutionState::ERROR);
                 }
             });
         }
     }
 
     /**
-     * @return ScriptExecutionLogBinding
+     * @return LogPolicy
      */
-    abstract protected function declareExecutionLogging(): ScriptExecutionLogBinding;
+    abstract protected function declareExecutionLogging(): LogPolicy;
 
     /**
      * @return void
@@ -107,7 +106,7 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
 
     /**
      * @return void
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
      * @throws \Throwable
      */
     final public function exec(): void
@@ -120,12 +119,12 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
         try {
             $this->execScript();
             if (isset($this->logger)) {
-                $this->closeScriptLogger($this->logger, CliScriptState::FINISHED);
+                $this->closeScriptLogger($this->logger, ExecutionState::FINISHED);
             }
         } catch (\Throwable $t) {
             if (isset($this->logBinding, $this->logger)) {
                 $this->logger->context->logException($t);
-                $this->closeScriptLogger($this->logger, CliScriptState::ERROR);
+                $this->closeScriptLogger($this->logger, ExecutionState::ERROR);
             }
 
             if ($t instanceof CliScriptException) {
@@ -146,22 +145,25 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
      */
     public function getAppBuild(): CharcoalApp
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->cli->app;
     }
 
     /**
-     * @return CliScriptState
+     * @return ExecutionState
+     * @api
      */
-    public function getState(): CliScriptState
+    public function getState(): ExecutionState
     {
         return $this->state;
     }
 
     /**
-     * @param CliScriptState $newState
+     * @param ExecutionState $newState
      * @return void
+     * @api
      */
-    public function changeState(CliScriptState $newState): void
+    public function changeState(ExecutionState $newState): void
     {
         $this->state = $newState;
         $this->logger?->changeState($newState);
@@ -169,30 +171,26 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
 
     /**
      * @param string $label
-     * @param bool $outputBuffering
      * @param callable $childFn
      * @param array $childArgs
      * @param bool $scriptAwareContext
      * @return void
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
-     * @throws \Charcoal\Filesystem\Exception\FilesystemException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
+     * @api
      */
     protected function childExecutionLog(
         string   $label,
-        bool     $outputBuffering,
         callable $childFn,
         array    $childArgs = [],
         bool     $scriptAwareContext = false
     ): void
     {
-        $execLogger = new ScriptExecutionLogger(
+        $execLogger = new ScriptLogger(
             $this,
-            CliScriptState::STARTED,
+            ExecutionState::STARTED,
             $scriptAwareContext,
             $label,
-            getmypid(),
-            $outputBuffering,
-            truncateOutputBufferFile: true
+            getmypid()
         );
 
         $this->print("{cyan}Started Child Execution Logger # {yellow}" . $execLogger->logId);
@@ -200,10 +198,10 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
 
         try {
             call_user_func_array($childFn, [$execLogger, ...$childArgs]);
-            $this->closeScriptLogger($execLogger, CliScriptState::FINISHED);
+            $this->closeScriptLogger($execLogger, ExecutionState::FINISHED);
         } catch (\Throwable $t) {
             $execLogger->context->logException($t);
-            $this->closeScriptLogger($execLogger, CliScriptState::ERROR);
+            $this->closeScriptLogger($execLogger, ExecutionState::ERROR);
             throw $t;
         } finally {
             unset($execLogger);
@@ -214,16 +212,16 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
      * @param int $tabs
      * @param bool $compact
      * @return void
+     * @api
      */
     protected function printErrorsIfAny(int $tabs = 0, bool $compact = true): void
     {
-        if ($this->getAppBuild()->errors->count()) {
-            $this->cli->printErrors($tabs, $compact);
-        }
+        $this->cli->printErrors($tabs, $compact);
     }
 
     /**
      * @return string
+     * @api
      */
     public function getTraceInterface(): string
     {
@@ -232,6 +230,7 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
 
     /**
      * @return int|null
+     * @api
      */
     public function getTraceId(): ?int
     {
@@ -239,14 +238,14 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
     }
 
     /**
-     * @param ScriptExecutionLogger $logger
-     * @param CliScriptState $finalState
+     * @param ScriptLogger $logger
+     * @param ExecutionState $finalState
      * @return void
-     * @throws \Charcoal\App\Kernel\Orm\Exception\EntityOrmException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
      */
-    private function closeScriptLogger(ScriptExecutionLogger $logger, CliScriptState $finalState): void
+    private function closeScriptLogger(ScriptLogger $logger, ExecutionState $finalState): void
     {
-        if ($logger->getState() !== CliScriptState::STARTED) {
+        if ($logger->getState() !== ExecutionState::STARTED) {
             $logger->changeState($finalState);
         }
 
@@ -259,13 +258,14 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
      * @param bool $setAutoRelease
      * @return FileLock
      * @throws SemaphoreLockException
+     * @throws \Charcoal\Semaphore\Exceptions\SemaphoreUnlockException
      */
     protected function obtainSemaphoreLock(string $resourceId, bool $setAutoRelease): FileLock
     {
         $this->inline(sprintf("Obtaining semaphore lock for {yellow}{invert} %s {/} ... ", $resourceId));
 
         try {
-            $lock = $this->getAppBuild()->semaphore->obtainLock($resourceId, null);
+            $lock = $this->getAppBuild()->security->semaphore->lock(SemaphoreScopes::Cli, $resourceId);
             $this->inline("{green}Success{/} {grey}[AutoRelease={/}");
             if ($setAutoRelease) {
                 $lock->setAutoRelease();
@@ -278,22 +278,6 @@ abstract class AppAwareCliScript extends AbstractCliScript implements AlertTrace
         } catch (SemaphoreLockException $e) {
             $this->print("{red}{invert} " . $e->error->name . " {/}");
             throw $e;
-        }
-    }
-
-    /**
-     * A safe sleep method that can catch PCNTL signals while sleeping
-     * @param int $seconds
-     * @return void
-     */
-    protected function safeSleep(int $seconds = 1): void
-    {
-        for ($i = 0; $i < $seconds; $i++) {
-            if (($i % 3) === 0) {
-                $this->cli->catchPcntlSignal();
-            }
-
-            sleep(1);
         }
     }
 }

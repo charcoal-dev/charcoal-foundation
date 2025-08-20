@@ -7,7 +7,7 @@ namespace App\Shared\Core\Cli;
  * Class ScriptExecutionLogBinding
  * @package App\Shared\Foundation\Engine\ExecutionLog
  */
-readonly class ScriptExecutionLogBinding
+readonly class LogPolicy
 {
     public function __construct(
         public bool    $loggable = true,
