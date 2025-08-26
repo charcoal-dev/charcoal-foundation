@@ -2,11 +2,11 @@
 core:
   # Core/Foundation (L0) Configuration Files
   imports:
-    - core/cache.yml
-    - core/ciphers.yml
-    - core/databases.yml
-    - core/http.yml
-    - core/mailer.yml
+    - foundation/cache.yml
+    - foundation/ciphers.yml
+    - foundation/databases.yml
+    - foundation/http.yml
+    - foundation/mailer.yml
 
 # Timezone identifier for entire application
 timezone: "UTC"
