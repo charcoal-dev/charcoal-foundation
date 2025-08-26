@@ -33,8 +33,8 @@ else
 fi
 
 require_env() {
-  [[ -f "$ENV_FILE" ]] || err "Error:{/} Environment configuration file {yellow}[.env]{/} not found."
-  normal -n "Test"
+  [[ -f "$ENV_FILE" ]] || err2 "Error:{/} Environment configuration file {yellow}[.env]{/} not found."
+  info "Charcoal Diagnostics:{/}{grey} copy the packaged {cyan2}dev/sample.env{/}{grey} as {cyan2}.env{/}{grey} in project root."
   exit 1;
   set -a; # export vars when sourcing
   # shellcheck disable=SC1090
