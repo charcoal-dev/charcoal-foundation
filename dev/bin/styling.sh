@@ -3,11 +3,9 @@
 # @link https://github.com/charcoal-dev/charcoal-foundation
 #
 
-# --- styling ---
 ICON_OK="${ICON_OK:-✅}"; ICON_INFO="${ICON_INFO:-💡}"; ICON_WARN="${ICON_WARN:-⚠️}"; ICON_ERR="${ICON_ERR:-❌}"
 #ICON_OK="${ICON_OK:-✔}"; ICON_INFO="${ICON_INFO:-💡}"; ICON_WARN="${ICON_WARN:-⚠}"; ICON_ERR="${ICON_ERR:-✖}"
 
-# ---- Color enable/disable ----
 if [[ -t 1 && "${NO_COLOR:-0}" != "1" ]]; then
   CLR_RESET=$'\e[0m'
   CLR_OK=$'\e[32m'; CLR_INFO=$'\e[36m'; CLR_WARN=$'\e[33m'; CLR_ERR=$'\e[31m'
@@ -20,7 +18,6 @@ else
   declare -A CLR=([reset]="" [red]="" [green]="" [yellow]="" [blue]="" [magenta]="" [cyan]="" [grey]="" [bold]="")
 fi
 
-# ---- Inline color formatter: replaces {color} ... {/} ----
 colorize() {
   local text="$*"
   # Replace {/} → actual reset sequence
@@ -36,7 +33,6 @@ colorize() {
   printf '%s' "$text"
 }
 
-# ---- Core emitter: usage: _emit <icon> <color> [-n] <message...> ----
 _emit() {
   local icon="$1" color="$2"; shift 2
   local newline=1
@@ -57,10 +53,10 @@ _emit() {
   fi
 }
 
-ok()     { _emit "$ICON_OK"   "$CLR_OK"   "$@"; }
-info()   { _emit "$ICON_INFO" "$CLR_INFO" "$@"; }
-warn()   { _emit "$ICON_WARN" "$CLR_WARN" "$@"; }
-err2() { _emit "$ICON_ERR" "$CLR_WARN" "$@"; }
+ok() { _emit "$ICON_OK" "$CLR_OK" "$@"; }
+info() { _emit "$ICON_INFO" "$CLR_INFO" "$@"; }
+warn() { _emit "$ICON_WARN" "$CLR_WARN" "$@"; }
+err2() { { _emit "$ICON_ERR" "$CLR_WARN" "$@"; } 1>&2; }
 err() { { _emit "$ICON_ERR" "$CLR_ERR" "$@"; } 1>&2; exit 1; }
-normal() { _emit ""           "${CLR[reset]:-$CLR_RESET}" "$@"; }
+normal() { _emit "" "${CLR[reset]:-$CLR_RESET}" "$@"; }
 blank(){ printf '%s\n' "${CLR[reset]:-$CLR_RESET}"; }
