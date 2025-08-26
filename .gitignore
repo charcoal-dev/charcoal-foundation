@@ -14,14 +14,13 @@ phpunit.phar
 /coverage.xml
 /coverage.clover.xml
 
-docker/containers/engine/vendor/
-docker/containers/web/vendor/
+dev/docker/containers/engine/vendor/
+dev/docker/containers/web/vendor/
 
 proxy/charcoal.nginx
 proxy/charcoal-dev.crt
 proxy/charcoal-dev.key
 
-/charcoal.sh
 log/engine/*
 log/web/*
 log/*
