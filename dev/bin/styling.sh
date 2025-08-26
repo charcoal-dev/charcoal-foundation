@@ -3,7 +3,7 @@
 # @link https://github.com/charcoal-dev/charcoal-foundation
 #
 
-ICON_OK="${ICON_OK:-✅}"; ICON_INFO="${ICON_INFO:-⚡}"; ICON_WARN="${ICON_WARN:-⚠️}"; ICON_ERR="${ICON_ERR:-❌}"
+ICON_OK="${ICON_OK:-✅}"; ICON_INFO="${ICON_INFO:-💡}"; ICON_WARN="${ICON_WARN:-⚠️}"; ICON_ERR="${ICON_ERR:-❌}"
 #ICON_OK="${ICON_OK:-✔}"; ICON_INFO="${ICON_INFO:-💡}"; ICON_WARN="${ICON_WARN:-⚠}"; ICON_ERR="${ICON_ERR:-✖}"
 
 if [[ -t 1 && "${NO_COLOR:-0}" != "1" ]]; then
