@@ -3,8 +3,16 @@
 # @link https://github.com/charcoal-dev/charcoal-foundation
 #
 
-ICON_OK="${ICON_OK:-✅}"; ICON_INFO="${ICON_INFO:-💡}"; ICON_WARN="${ICON_WARN:-⚠️}"; ICON_ERR="${ICON_ERR:-❌}"
-#ICON_OK="${ICON_OK:-✔}"; ICON_INFO="${ICON_INFO:-💡}"; ICON_WARN="${ICON_WARN:-⚠}"; ICON_ERR="${ICON_ERR:-✖}"
+#ICON_OK="${ICON_OK:-✅}";
+ICON_OK=$'\u2714';
+
+ICON_INFO="${ICON_INFO:-ℹ️}";
+
+#ICON_WARN="${ICON_WARN:-⚠️}";
+ICON_WARN=$'\e[33m\u26a0\e0[m';
+
+ICON_ERR="${ICON_ERR:-❌}"
+#ICON_ERR=$'\u2715';
 
 if [[ -t 1 && "${NO_COLOR:-0}" != "1" ]]; then
   CLR_RESET=$'\e[0m'
@@ -12,13 +20,14 @@ if [[ -t 1 && "${NO_COLOR:-0}" != "1" ]]; then
   declare -A CLR=(
     [reset]=$'\e[0m' [red]=$'\e[31m' [green]=$'\e[32m' [yellow]=$'\e[33m'
     [blue]=$'\e[34m' [magenta]=$'\e[35m' [cyan]=$'\e[36m' [cyan2]=$'\e[96m'
-    [grey]=$'\e[90m' [bold]=$'\e[1m'
+    [grey]=$'\e[90m' [bold]=$'\e[1m' [b]=$'\e[1m' [dim]=$'\e[2m'
   )
 else
   CLR_RESET=""; CLR_OK=""; CLR_INFO=""; CLR_WARN=""; CLR_ERR="";
   declare -A CLR=(
     [reset]="" [red]="" [green]="" [yellow]="" [blue]=""
     [magenta]="" [cyan]="" [cyan2]="" [grey]="" [bold]=""
+    [b]="" [dim]=""
   )
 fi
 
@@ -28,7 +37,7 @@ colorize() {
   text="${text//\{\/\}/${CLR[reset]}}"
 
   # Apply other tags
-  local order=(red green yellow blue magenta cyan cyan2 grey bold reset)
+  local order=(red green yellow blue magenta cyan cyan2 grey bold b dim reset)
   local k
   for k in "${order[@]}"; do
     text="${text//\{$k\}/${CLR[$k]}}"
