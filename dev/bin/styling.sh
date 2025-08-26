@@ -28,7 +28,7 @@ colorize() {
   text="${text//\{\/\}/${CLR[reset]}}"
 
   # Apply other tags
-  local order=(red green yellow blue magenta cyan grey bold reset)
+  local order=(red green yellow blue magenta cyan cyan2 grey bold reset)
   local k
   for k in "${order[@]}"; do
     text="${text//\{$k\}/${CLR[$k]}}"
