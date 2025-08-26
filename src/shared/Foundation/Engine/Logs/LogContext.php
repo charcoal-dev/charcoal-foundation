@@ -50,7 +50,7 @@ final class LogContext
      * @param string|int|bool|float|null $value
      * @return $this
      */
-    public function dump(string $name, string|int|bool|null|float $value): static
+    public function dump(string $name, string|int|bool|null|float $value): self
     {
         $this->dump[$name] = $value;
         return $this;
@@ -60,7 +60,7 @@ final class LogContext
      * @param string $log
      * @return $this
      */
-    public function log(string $log): static
+    public function log(string $log): self
     {
         $this->logs[] = ["message" => $log, "timestamp" => microtime(true)];
         return $this;
@@ -69,7 +69,7 @@ final class LogContext
     /**
      * @api
      */
-    public function setArgument(string $name, string|int|bool|null|float $value): static
+    public function setArgument(string $name, string|int|bool|null|float $value): self
     {
         $this->arguments[$name] = $value;
         return $this;

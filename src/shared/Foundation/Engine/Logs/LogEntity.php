@@ -38,7 +38,7 @@ final class LogEntity extends OrmEntityBase
      */
     protected function collectSerializableData(): array
     {
-        throw new \LogicException(static::class . " does not need to be serialized");
+        throw new \LogicException(self::class . " does not need to be serialized");
     }
 
     /**

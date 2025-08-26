@@ -7,7 +7,7 @@ namespace App\Shared\Utility;
  * Class ArrayHelper
  * @package App\Shared\Utility
  */
-final class ArrayHelper
+final readonly class ArrayHelper
 {
     /**
      * @param array $data
@@ -36,7 +36,7 @@ final class ArrayHelper
      */
     public static function canonicalizeLexicographic(array $data): array
     {
-        if (!static::isSequential($data)) {
+        if (!self::isSequential($data)) {
             uksort($data, function ($a, $b) {
                 if (ctype_digit((string)$a) && ctype_digit((string)$b)) {
                     return strnatcmp((string)$a, (string)$b);
@@ -48,11 +48,11 @@ final class ArrayHelper
 
         foreach ($data as $key => $value) {
             if (is_array($value)) {
-                $data[$key] = static::canonicalizeLexicographic($value);
+                $data[$key] = self::canonicalizeLexicographic($value);
             }
         }
 
-        return static::isSequential($data) ? $data : (count($data) === 0 ? [] : $data);
+        return self::isSequential($data) ? $data : (count($data) === 0 ? [] : $data);
     }
 
     /**
@@ -62,7 +62,7 @@ final class ArrayHelper
      */
     public static function canonicalizeLexicographicJson(array $data): string
     {
-        return json_encode(static::canonicalizeLexicographic($data),
+        return json_encode(self::canonicalizeLexicographic($data),
             JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 

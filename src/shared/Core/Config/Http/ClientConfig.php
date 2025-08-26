@@ -5,7 +5,7 @@ namespace App\Shared\Core\Config\Http;
 
 use Charcoal\Http\Client\Security\TlsContext;
 use Charcoal\Http\Commons\Enums\ContentType;
-use Charcoal\Http\Commons\Enums\Http;
+use Charcoal\Http\Commons\Enums\HttpProtocol;
 
 /**
  * This class initializes a default client policy with predefined settings.
@@ -17,7 +17,7 @@ final readonly class ClientConfig extends \Charcoal\Http\Client\ClientConfig
     public function __construct()
     {
         parent::__construct(
-            version: Http::Version3,
+            version: HttpProtocol::Version3,
             tlsContext: new TlsContext(),
             authContext: null,
             proxyServer: null,

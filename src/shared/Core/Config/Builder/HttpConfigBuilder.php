@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Core\Config\Builder;
 
 use App\Shared\Core\Config\Http\ClientConfig;
-use App\Shared\Core\Config\Http\RouterConfig;
+use App\Shared\Core\Config\Http\ServerConfig;
 use App\Shared\Core\Config\Persisted\HttpInterfaceConfig;
 use App\Shared\Core\Config\Snapshot\HttpConfig;
 use App\Shared\Enums\Http\HttpInterface;
@@ -36,7 +36,7 @@ final class HttpConfigBuilder extends AbstractConfigObjectsCollector implements 
     public function build(): HttpConfig
     {
         return new HttpConfig(
-            new RouterConfig(),
+            new ServerConfig(),
             new ClientConfig(),
             $this->getCollection()
         );

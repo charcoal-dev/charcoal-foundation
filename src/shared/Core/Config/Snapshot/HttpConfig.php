@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Shared\Core\Config\Snapshot;
 
 use App\Shared\Core\Config\Http\ClientConfig;
-use App\Shared\Core\Config\Http\RouterConfig;
+use App\Shared\Core\Config\Http\ServerConfig;
 use App\Shared\Enums\Http\HttpInterface;
 use Charcoal\App\Kernel\Internal\Config\ConfigSnapshotInterface;
 
@@ -18,12 +18,12 @@ final readonly class HttpConfig implements ConfigSnapshotInterface
     public array $interfaces;
 
     /**
-     * @param RouterConfig $router
+     * @param ServerConfig $router
      * @param ClientConfig $client
      * @param array<string, \App\Shared\Core\Config\Persisted\HttpInterfaceConfig> $interfaces
      */
     public function __construct(
-        public RouterConfig $router,
+        public ServerConfig $router,
         public ClientConfig $client,
         array               $interfaces
     )

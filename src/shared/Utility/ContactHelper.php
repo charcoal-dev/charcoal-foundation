@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Shared\Utility;
 
-
 use Charcoal\Base\Charsets\Sanitizer\AsciiSanitizer;
 use Charcoal\Base\Charsets\Sanitizer\Modifiers\ChangeCase;
 use Charcoal\Base\Charsets\Sanitizer\Modifiers\CleanSpaces;
@@ -15,7 +14,7 @@ use Charcoal\Base\Contracts\Charsets\UnicodeLanguageRangeInterface;
  * Utility class for validating and processing contact information such as phone numbers,
  * email addresses, usernames, and names.
  */
-final class ContactHelper
+final readonly class ContactHelper
 {
     /**
      * @param mixed $input
@@ -26,7 +25,7 @@ final class ContactHelper
     {
         if (is_string($input) && NumberHelper::inRange(strlen($input), 5, 20)) {
             if (preg_match('/^\+\d{1,6}(' . preg_quote($delimiter) . '\d{1,14})+$/', $input)) {
-                return static::phoneToE164($input) !== false;
+                return self::phoneToE164($input) !== false;
             }
         }
 

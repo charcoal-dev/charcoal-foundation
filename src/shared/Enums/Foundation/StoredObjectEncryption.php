@@ -4,8 +4,9 @@ declare(strict_types=1);
 namespace App\Shared\Enums\Foundation;
 
 /**
- * Class StoredObjectEncryption
- * @package App\Shared\Enums\Foundation
+ * Represents the encryption states for a stored object.
+ * Provides methods to determine if encryption is enabled
+ * or if encrypted caching should be applied.
  */
 enum StoredObjectEncryption
 {

@@ -3,8 +3,9 @@ declare(strict_types=1);
 
 namespace App\Interfaces\Web;
 
-use App\Shared\Core\Http\Response\CacheControlHelper;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
+use Charcoal\Filesystem\Exceptions\FilesystemException;
+use Charcoal\Filesystem\Exceptions\InvalidPathException;
 use Composer\InstalledVersions;
 
 /**
@@ -12,11 +13,12 @@ use Composer\InstalledVersions;
  */
 class FallbackEndpoint extends AbstractWebEndpoint
 {
+    /**
+     * @throws InvalidPathException
+     * @throws FilesystemException
+     */
     protected function entrypoint(): void
     {
-        // Browser/CDN side caching:
-        $this->setCacheControl(CacheControlHelper::publicCdnCache(3600, 21600));
-
         $this->sendTemplate("fallback", [
             "appClassname" => ObjectHelper::baseClassName($this->app::class),
             "appKernelBuild" => InstalledVersions::getVersion("charcoal-dev/app-kernel"),
