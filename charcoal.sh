@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
+#
+# Part of the "charcoal-dev/charcoal-foundation" package.
+# @link https://github.com/charcoal-dev/charcoal-foundation
+#
+
 # charcoal.sh — root orchestrator (Foundation)
 set -euo pipefail
 
-# --- styling ---
-red()   { printf "\033[31m%s\033[0m\n" "$*"; }
-grn()   { printf "\033[32m%s\033[0m\n" "$*"; }
-ylw()   { printf "\033[33m%s\033[0m\n" "$*"; }
-blu()   { printf "\033[34m%s\033[0m\n" "$*"; }
-bold()  { printf "\033[1m%s\033[0m\n" "$*"; }
-err()   { red "✖ $*"; exit 1; }
-info()  { ylw "• $*"; }
-ok()    { grn "✔ $*"; }
+if locale -a 2>/dev/null | grep -qi 'en_US\.utf-8'; then
+  export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+else
+  export LANG=C.UTF-8 LC_ALL=C.UTF-8
+fi
 
+# Paths Configuration
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 ENV_FILE="$ROOT/dev/.env"
 DB_INIT_JSON="$ROOT/dev/docker/db.init.json"
@@ -21,11 +23,19 @@ LOGS_SEMA_DIR="$SEMAPHORE_DIR/logs"
 SERVICES_FILE="$ROOT/dev/bin/services.sh"
 [[ -f "$SERVICES_FILE" ]] && . "$SERVICES_FILE" || svc(){ echo "$1"; }
 
+# Colors and Styling
+STYLING_FILE="$ROOT/dev/bin/styling.sh"
+if [ -r "$STYLING_FILE" ]; then
+  . "$STYLING_FILE"
+else
+  printf 'Missing styling file: %s\n' "$STYLING_FILE" >&2
+  exit 1
+fi
+
 require_env() {
-  [[ -f "$ENV_FILE" ]] || err "dev/.env not found.
-Create it from sample:
-  cp dev/sample.env dev/.env
-Edit values, then re-run."
+  [[ -f "$ENV_FILE" ]] || err "Error:{/} Environment configuration file {yellow}[.env]{/} not found."
+  normal -n "Test"
+  exit 1;
   set -a; # export vars when sourcing
   # shellcheck disable=SC1090
   . "$ENV_FILE"
@@ -78,11 +88,10 @@ generate_db_init_sql() {
   [[ -f "$DB_INIT_JSON" ]] || { info "No db.init.json, skipping DB bootstrap."; return 0; }
   has_profile db || { info "Profile 'db' disabled, skipping DB bootstrap."; return 0; }
 
-  local owner_env schemas
   info "Generating MySQL init SQL from dev/docker/db.init.json …"
 
+  # parse schemas only
   if command -v jq >/dev/null 2>&1; then
-    owner_env=$(jq -r '.owner_env // "MYSQL_USER"' "$DB_INIT_JSON")
     mapfile -t schemas < <(jq -r '.schemas[]' "$DB_INIT_JSON")
   elif command -v python3 >/dev/null 2>&1; then
     readarray -t schemas < <(python3 - <<'PY'
@@ -91,18 +100,12 @@ j=json.load(open(sys.argv[1]))
 for s in j.get("schemas",[]): print(s)
 PY
 "$DB_INIT_JSON")
-    owner_env=$(python3 - <<'PY'
-import json,sys
-j=json.load(open(sys.argv[1]))
-print(j.get("owner_env","MYSQL_USER"))
-PY
-"$DB_INIT_JSON")
   else
     err "Need either 'jq' or 'python3' to parse dev/docker/db.init.json"
   fi
 
-  local owner="${!owner_env:-}"
-  [[ -n "$owner" ]] || err "Env '$owner_env' not set (from db.init.json). Define it in dev/.env."
+  # hardcode owner
+  local owner="charcoal"
 
   install -d -m 0755 "$(dirname "$DB_INIT_OUT")"
   {
