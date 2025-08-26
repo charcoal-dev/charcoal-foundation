@@ -21,7 +21,7 @@ databases:
     password: ~ # Use the configured MySQL root password
 ```
 
-All databases are initialized from [init.sql](../../../docker/containers/db/init/init.sql) file therefore append it as
+All databases are initialized from [init.sql](../../../dev/docker/containers/db/init/init.sql) file therefore append it as
 necessary:
 
 ```php
