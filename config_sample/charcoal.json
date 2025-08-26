@@ -1,0 +1,8 @@
+{
+  "timezone": "UTC",
+  "cache": "$charcoal.config.foundation[cache]",
+  "databases": "$charcoal.config.foundation[databases]",
+  "security": "$charcoal.config.foundation[security]",
+  "http": "$charcoal.config.foundation[http]",
+  "mailer": "$charcoal.config.foundation[mailer]"
+}
