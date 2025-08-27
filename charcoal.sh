@@ -14,7 +14,9 @@ else
 fi
 
 # Paths Configuration
-ROOT="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="${ROOT:-$SCRIPT_DIR/..}"
+#ROOT="$(cd "$(dirname "$0")" && pwd)"
 ENV_FILE="$ROOT/dev/.env"
 DB_INIT_JSON="$ROOT/dev/db.manifest.json"
 DB_INIT_OUT="$ROOT/dev/docker/utils/db/init/01-init-dbs.sql"
