@@ -16,6 +16,10 @@ docs/**
 
 # Runtime data (mounted at runtime)
 var/**
+!var/storage/
+!var/storage/seed/**
+!var/storage/defaults/**
+!var/**/.gitkeep
 
 # Local vendors (containers build their own)
 vendor/**
