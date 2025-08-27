@@ -117,7 +117,7 @@ compose() {
   COMPOSE_PROFILES="$EFFECTIVE" \
   docker compose \
     -f dev/docker/docker-compose.yml \
-    -f dev/docker/compose/mounts.dev.yml \
+    -f "$mounts" \
     -f dev/docker/compose/manifest.overrides.yml \
     "$@"
 }
