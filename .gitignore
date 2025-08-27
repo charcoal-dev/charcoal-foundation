@@ -1,21 +1,36 @@
+# IDE / Workspace
 .idea/
+.vscode/
 workspace/
+.DS_Store
+Thumbs.db
 
-# Docker builds
+# Generated Dockerfiles (per-SAPI)
+dev/.env
+dev/docker/sapi/**/Dockerfile
+!dev/docker/sapi/Dockerfile
 dev/docker/compose/**
 !dev/docker/compose/mounts.dev.yml
 !dev/docker/compose/mounts.prod.yml
-dev/docker/sapi/**/Dockerfile
-!dev/docker/sapi/Dockerfile
+dev/docker/sandbox/
+dev/docker/sandbox/**
+!dev/docker/sandbox/vendor/.gitkeep
+dev/vendor/
 
-# IDE Specific
-vendor/
-composer.lock
+# IDE Specificvendor/
 composer.phar
+composer.lock
+
+# Tests build artifacts
 tests/build/*
 
+# Temporary Files
+var/**
+!var/**/.gitkeep
+!var/storage/
+!var/storage/**
+
 # Downstream App Specific
-.env
 config/
 deployment/
 
@@ -25,8 +40,3 @@ phpunit.phar
 /coverage/
 /coverage.xml
 /coverage.clover.xml
-
-# Temporary Files
-var/**
-!var/storage/
-!var/storage/**

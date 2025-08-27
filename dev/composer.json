@@ -13,15 +13,18 @@
   "minimum-stability": "dev",
   "autoload": {
     "psr-4": {
-      "App\\Shared\\": "shared",
-      "App\\Domain\\": "domain",
-      "App\\Interfaces\\Engine\\": "interfaces/engine",
-      "App\\Interfaces\\Web\\": "interfaces/web"
+      "App\\Shared\\": "app/shared/",
+      "App\\Domain\\": "app/domain/",
+      "App\\Sapi\\Engine\\": "app/sapi/engine/",
+      "App\\Sapi\\Web\\": "app/sapi/web/"
     }
   },
   "autoload-dev": {
     "psr-4": {
       "Charcoal\\Tests\\Foundation\\": "../tests/"
     }
+  },
+  "config": {
+    "optimize-autoloader": true
   }
 }
