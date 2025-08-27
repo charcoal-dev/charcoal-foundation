@@ -41,7 +41,6 @@ else
   exit 1
 fi
 
-
 require_env() {
   [[ -f "$ENV_FILE" ]] || err2 "Error:{/} Environment configuration file {yellow}[dev/.env]{/} not found."
   info "Charcoal Diagnostics:{/}{grey} Contact vendor for package specific environments configuration file."
@@ -51,6 +50,13 @@ require_env() {
   . "$ENV_FILE"
   set +a
 }
+
+: "${SAPI_ENGINE_IP:=${PUBLIC_ENGINE_IP:-}}"
+: "${SERVICE_MYSQL_IP:=${PUBLIC_MYSQL_IP:-}}"
+: "${SERVICE_REDIS_IP:=${PUBLIC_REDIS_IP:-}}"
+: "${SERVICE_PMA_IP:=${PUBLIC_PMA_IP:-}}"
+CHARCOAL_PROJECT="${CHARCOAL_PROJECT:-foundation-app}"
+CHARCOAL_DOCKER="${CHARCOAL_DOCKER:-engine,web,mysql,redis}"
 
 # turn COMPOSE_FILES="a.yml:b.yml" into "-f dev/docker/a.yml -f dev/docker/b.yml"
 compose_flags() {
@@ -67,7 +73,16 @@ profile_flags() {
 }
 
 compose() {
-  docker compose --env-file "$ENV_FILE" $(compose_flags) "$@"
+  DOCKER_BUILDKIT=1 \
+  COMPOSE_DOCKER_CLI_BUILD=1 \
+  COMPOSE_IGNORE_ORPHANS=1 \
+  COMPOSE_PROJECT_NAME="charcoal-$CHARCOAL_PROJECT" \
+  COMPOSE_PROFILES="$EFFECTIVE" \
+  docker compose \
+    -f dev/docker/docker-compose.yml \
+    -f dev/docker/compose/mounts.dev.yml \
+    -f dev/docker/compose/manifest.overrides.yml \
+    "$@"
 }
 
 has_profile() {
