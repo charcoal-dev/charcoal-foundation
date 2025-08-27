@@ -200,15 +200,15 @@ YML
   [[ $wrote -eq 1 ]] || rm -f "$HTTP_ENV_OVR"
 }
 
-
 gen_sapi_df() {
-  local id="$1" base="$2" extras="$3" out="$ROOT/dev/docker/sapi/$id/Dockerfile"
+  local id="$1" base="$2" extras="$3"
+  local out="$ROOT/dev/docker/sapi/app/$id/Dockerfile"
   mkdir -p "$(dirname "$out")"
   sed -e "s/__SAPI_BASE__/$base/g" \
       -e "s/__DEPS__/$extras/g" \
       -e "s/__SAPI_ID__/$id/g" \
       "$ROOT/dev/docker/sapi/Dockerfile.stub" > "$out"
-  ok "Dockerfile for $id → dev/docker/sapi/$id/Dockerfile"
+  ok "Dockerfile for $id → dev/docker/sapi/app/$id/Dockerfile"
 }
 
 cmd_build_docker() {
