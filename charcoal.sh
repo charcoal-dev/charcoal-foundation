@@ -207,14 +207,14 @@ gen_sapi_df() {
   sed -e "s/__SAPI_BASE__/$base/g" \
       -e "s/__DEPS__/$extras/g" \
       -e "s/__SAPI_ID__/$id/g" \
-      "$ROOT/dev/docker/sapi/Dockerfile.stub" > "$out"
+      "$ROOT/dev/docker/sapi/Dockerfile" > "$out"
   ok "Dockerfile for $id → dev/docker/sapi/app/$id/Dockerfile"
 }
 
 cmd_build_docker() {
   require_env
-  gen_sapi_df engine cli "mariadb-client"
-  gen_sapi_df web    fpm "nginx gettext-base iputils-ping"
+  gen_sapi_df engine cli "curl mariadb-client"
+  gen_sapi_df web fpm "curl nginx gettext-base"
   ensure_runtime_dirs
   write_manifest_overrides
   generate_db_init_sql
