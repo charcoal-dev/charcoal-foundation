@@ -147,7 +147,9 @@ cmd_build_docker() {
   generate_db_init_sql
   ensure_port_overrides
   info "Compose up (profiles: ${COMPOSE_PROFILES:-none}) …"
-  compose up -d --build
+  local UIDGID=(--build-arg HOST_UID="$(id -u)" --build-arg HOST_GID="$(id -g)")
+  compose build "${UIDGID[@]}"
+  compose up -d
   if engine_healthy 60; then
     ok "Engine is healthy."
   else
