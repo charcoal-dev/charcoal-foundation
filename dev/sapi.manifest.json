@@ -1,16 +1,25 @@
 {
-  "servers": [
-    {
-      "enabled": true,
-      "id": "engine",
-      "type": "cli",
-      "entrypoint": "interfaces/engine"
-    },
-    {
-      "enabled": true,
-      "id": "web",
-      "type": "http",
-      "entrypoint": "interfaces/web/public_html"
-    }
-  ]
+  "charcoal": {
+    "sapi": [
+      {
+        "enabled": true,
+        "id": "engine",
+        "type": "cli",
+        "root": "/engine",
+        "env": {
+          "WHO_AM_I": "engine"
+        }
+      },
+      {
+        "enabled": true,
+        "id": "web",
+        "type": "http",
+        "root": "/web/public_html",
+        "port": 6001,
+        "env": {
+          "WHO_AM_I": "web"
+        }
+      }
+    ]
+  }
 }
