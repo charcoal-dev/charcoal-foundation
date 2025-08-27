@@ -97,7 +97,7 @@ write_manifest_overrides() {
       echo "    environment:"
       # docroot for http
       if [[ "${SAPI_TYPE[$id]}" == "http" && -n "${SAPI_DOCROOT[$id]:-}" ]]; then
-        echo "      NGINX_DOCROOT: \"${SAPI_DOCROOT[$id]}\""
+        echo "      CHARCOAL_SAPI_ROOT: \"${SAPI_DOCROOT[$id]}\""
       fi
       # arbitrary env from manifest
       if [[ -n "${SAPI_ENV_JSON[$id]:-}" && "${SAPI_ENV_JSON[$id]}" != "{}" ]]; then

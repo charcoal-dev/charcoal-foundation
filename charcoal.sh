@@ -193,7 +193,7 @@ ensure_http_env_overrides() {
     cat >> "$HTTP_ENV_OVR" <<YML
   $(svc "$id"):
     environment:
-      - NGINX_DOCROOT=$doc
+      - CHARCOAL_SAPI_ROOT=$doc
 YML
     wrote=1
   done
