@@ -1,0 +1,28 @@
+services:
+  engine:
+    volumes:
+      - ../../dev/docker/sandbox:/home/charcoal/sandbox
+      - ../../dev/docker/sandbox/vendor:/home/charcoal/vendor
+      - ../../app/sapi/engine:/home/charcoal/app/sapi/engine:ro
+      - ../../app/domain:/home/charcoal/app/domain:ro
+      - ../../app/shared:/home/charcoal/app/shared:ro
+      - ../../interfaces/engine:/home/charcoal/engine:ro
+      - ../../var/log/engine:/home/charcoal/log
+      - ../../var/tmp/engine:/home/charcoal/tmp
+      - ../../var/shared:/home/charcoal/shared
+      - ../../var/storage:/home/charcoal/storage
+  web:
+    volumes:
+      - ../../dev/docker/sandbox/vendor:/home/charcoal/vendor:ro
+      - ../../app/sapi/web:/home/charcoal/app/sapi/web:ro
+      - ../../app/domain:/home/charcoal/app/domain:ro
+      - ../../app/shared:/home/charcoal/app/shared:ro
+      - ../../interfaces/web/public_html:/home/charcoal/web/public_html:ro
+      - ../../interfaces/web/templates:/home/charcoal/web/templates:ro
+      - ../../var/log/web:/home/charcoal/log
+      - ../../var/tmp/web:/home/charcoal/tmp
+      - ../../var/shared:/home/charcoal/shared
+      - ../../var/storage:/home/charcoal/storage:ro
+  mysql:
+    volumes:
+      - ../../dev/docker/utils/db/init:/docker-entrypoint-initdb.d:ro

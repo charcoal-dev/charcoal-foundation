@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# Part of the "charcoal-dev/charcoal-foundation" package.
+# @link https://github.com/charcoal-dev/charcoal-foundation
+#
+
 PHP=`which php`
 BIN=$(dirname $0)/charcoal.php
 
