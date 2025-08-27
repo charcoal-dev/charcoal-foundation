@@ -30,7 +30,8 @@ tests/build/*
 var/**
 !var/**/.gitkeep
 !var/storage/
-!var/storage/**
+!var/storage/seed/**
+!var/storage/defaults/**
 
 # Downstream App Specific
 config/
