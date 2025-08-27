@@ -1,16 +1,16 @@
 {
   "servers": [
     {
+      "enabled": true,
       "id": "engine",
       "type": "cli",
-      "entry": "servers/engine",
-      "enabled": true
+      "entrypoint": "interfaces/engine"
     },
     {
+      "enabled": true,
       "id": "web",
       "type": "http",
-      "entry": "servers/web",
-      "enabled": true
+      "entrypoint": "interfaces/web/public_html"
     }
   ]
 }
