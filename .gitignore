@@ -5,7 +5,7 @@ workspace/
 .DS_Store
 Thumbs.db
 
-# Generated Dockerfiles (per-SAPI)
+# Development and Builds
 dev/.env
 dev/docker/sapi/**/Dockerfile
 !dev/docker/sapi/Dockerfile
@@ -15,10 +15,12 @@ dev/docker/compose/**
 dev/docker/sandbox/
 dev/docker/sandbox/**
 !dev/docker/sandbox/vendor/.gitkeep
+dev/tools/
+!dev/phpunit.xml
 dev/vendor/
 
 # IDE Specificvendor/
-composer.phar
+dev/tools/composer.phar
 composer.lock
 
 # Tests build artifacts
@@ -35,7 +37,7 @@ config/
 deployment/
 
 # PHPUnit Specific
-phpunit.phar
+dev/tools/phpunit.phar
 /.phpunit.result.cache
 /coverage/
 /coverage.xml

@@ -1,6 +1,34 @@
-dev/**
-!dev/docker/sapi/**
-var/**
-tests/**
+# VCS & meta
 .git
 .gitignore
+.gitattributes
+.dockerignore
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Tests & docs (not needed at build)
+tests/**
+docs/**
+
+# Runtime data (mounted at runtime)
+var/**
+
+# Local vendors (containers build their own)
+vendor/**
+
+# Local env & compose overrides
+dev/.env
+
+# Ignore most of dev/, then re-include what's needed for image builds
+dev/**
+!dev/docker/sapi/**
+!dev/docker/utils/redis/**
+!dev/composer.json
+!dev/composer.lock
+
+# Node (if present)
+node_modules/
