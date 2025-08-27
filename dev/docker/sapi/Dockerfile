@@ -16,9 +16,9 @@ COPY dev/docker/sapi/app/__SAPI_ID__/ /opt/sapi/override
 RUN set -e; \
   for d in /opt/sapi/base /opt/sapi/override; do \
     [ -f "$d/entrypoint.sh" ]    && cp -f "$d/entrypoint.sh" /entrypoint.sh && chmod +x /entrypoint.sh; \
-    [ -f "$d/supervisord.conf" ] && cp -f "$d/supervisord.conf" /etc/supervisord.conf; \
+    [ -f "$d/supervisord.ini" ] && cp -f "$d/supervisord.ini" /etc/supervisord.conf; \
     [ -f "$d/nginx.conf" ]       && mkdir -p /etc/nginx && cp -f "$d/nginx.conf" /etc/nginx/nginx.template.conf; \
-    [ -f "$d/php8.3-fpm.conf" ]  && mkdir -p /usr/local/etc/php-fpm.d && cp -f "$d/php8.3-fpm.conf" /usr/local/etc/php-fpm.d/zz-charcoal.conf; \
+    [ -f "$d/php8.3-fpm.ini" ]  && mkdir -p /usr/local/etc/php-fpm.d && cp -f "$d/php8.3-fpm.ini" /usr/local/etc/php-fpm.d/zz-charcoal.conf; \
   done; \
   rm -rf /opt/sapi
 
