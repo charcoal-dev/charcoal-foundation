@@ -4,10 +4,10 @@ services:
     volumes:
       - ../../dev/docker/sandbox:/home/charcoal/sandbox
       - ../../dev/docker/sandbox/vendor:/home/charcoal/vendor
+      - ../../config:/home/charcoal/config:ro
       - ../../app/sapi/engine:/home/charcoal/app/sapi/engine:ro
       - ../../app/domain:/home/charcoal/app/domain:ro
       - ../../app/shared:/home/charcoal/app/shared:ro
-      - ../../config:/home/charcoal/config:ro
       - ../../interfaces/engine:/home/charcoal/engine:ro
       - ../../var/log/engine:/home/charcoal/log
       - ../../var/tmp/engine:/home/charcoal/tmp
@@ -17,10 +17,10 @@ services:
     build: { target: dev }
     volumes:
       - ../../dev/docker/sandbox/vendor:/home/charcoal/vendor:ro
+      - ../../config:/home/charcoal/config:ro
       - ../../app/sapi/web:/home/charcoal/app/sapi/web:ro
       - ../../app/domain:/home/charcoal/app/domain:ro
       - ../../app/shared:/home/charcoal/app/shared:ro
-      - ../../config:/home/charcoal/config:ro
       - ../../interfaces/web/public_html:/home/charcoal/web/public_html:ro
       - ../../interfaces/web/templates:/home/charcoal/web/templates:ro
       - ../../var/log/web:/home/charcoal/log
