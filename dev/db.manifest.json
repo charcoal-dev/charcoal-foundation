@@ -1,6 +1,5 @@
 {
   "schemas": [
-    "charcoal",
-    "charcoal_logs"
+    "charcoal"
   ]
 }
