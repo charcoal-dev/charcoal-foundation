@@ -16,7 +16,7 @@ dev/docker/sandbox/
 dev/docker/sandbox/**
 !dev/docker/sandbox/vendor/.gitkeep
 dev/tools/
-!dev/phpunit.xml
+!dev/tools/phpunit.xml
 dev/vendor/
 
 # IDE Specificvendor/

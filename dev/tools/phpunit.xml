@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Part of the "charcoal-dev/charcoal-foundation" package.
+  ~ @link https://github.com/charcoal-dev/charcoal-foundation
+  -->
+<phpunit
+        bootstrap="vendor/autoload.php"
+        colors="true"
+        executionOrder="depends,defects"
+        beStrictAboutTestsThatDoNotTestAnything="false"
+        beStrictAboutOutputDuringTests="false"
+        failOnRisky="false"
+        failOnWarning="false">
+    <php>
+        <ini name="sys_temp_dir" value="/var/tmp"/>
+        <env name="TMPDIR" value="/var/tmp"/>
+        <env name="PHPUNIT_RESULT_CACHE" value="/var/tmp/phpunit.result.cache"/>
+    </php>
+    <testsuites>
+        <testsuite name="Charcoal Foundation App Tests">
+            <directory suffix="Test.php">tests</directory>
+        </testsuite>
+    </testsuites>
+    <coverage>
+        <report>
+            <html outputDirectory="/var/tmp/coverage/html"/>
+            <clover outputFile="/var/tmp/coverage/coverage.clover.xml"/>
+            <xml outputDirectory="/var/tmp/coverage/xml"/>
+        </report>
+    </coverage>
+    <logging>
+        <junit outputFile="/var/tmp/reports/junit.xml"/>
+        <testdoxHtml outputFile="/var/tmp/reports/testdox.html"/>
+        <testdoxText outputFile="/var/tmp/reports/testdox.txt"/>
+    </logging>
+</phpunit>
