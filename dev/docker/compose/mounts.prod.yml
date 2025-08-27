@@ -1,5 +1,6 @@
 services:
   engine:
+    build: { target: prod }
     volumes:
       - ../../dev/docker/sandbox:/home/charcoal/sandbox
       - ../../dev/docker/sandbox/vendor:/home/charcoal/vendor
@@ -8,6 +9,7 @@ services:
       - ../../var/shared:/home/charcoal/shared
       - ../../var/storage:/home/charcoal/storage
   web:
+    build: { target: prod }
     volumes:
       - ../../dev/docker/sandbox/vendor:/home/charcoal/vendor:ro
       - ../../var/log/web:/home/charcoal/log

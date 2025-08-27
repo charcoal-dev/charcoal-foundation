@@ -6,11 +6,14 @@ services:
     env_file: [../.env]
     build:
       context: ../../
-      dockerfile: dev/docker/sapi/engine/Dockerfile
+      dockerfile: dev/docker/sapi/app/engine/Dockerfile
     restart: always
     networks:
       charcoal-foundation-vlan:
         ipv4_address: "${SERVICE_ENGINE_IP}"
+  healthcheck:
+    test: ["CMD", "php", "-v"]
+    interval: 10s; timeout: 3s; retries: 5
 
   # (SAPI) Http:- Web Service
   web:
@@ -18,12 +21,14 @@ services:
     env_file: [../.env]
     build:
       context: ../../
-      dockerfile: dev/docker/sapi/fpm-nginx/Dockerfile
+      dockerfile: dev/docker/sapi/app/web/Dockerfile
     restart: always
     depends_on: { engine: { condition: service_started } }
     networks:
       charcoal-foundation-vlan:
         ipv4_address: "${SERVICE_WEB_IP}"
+    test: ["CMD", "sh", "-c", "nc -z 127.0.0.1 6000"]
+    interval: 10s; timeout: 3s; retries: 10
 
   # (Aux) MySQL:- Database
   mysql:
