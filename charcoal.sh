@@ -21,6 +21,7 @@ DB_INIT_OUT="$ROOT/dev/docker/containers/db/init/01-init-dbs.sql"
 SEMAPHORE_DIR="$ROOT/var/shared/semaphore"
 LOGS_SEMA_DIR="$SEMAPHORE_DIR/logs"
 SERVICES_FILE="$ROOT/dev/bin/services.sh"
+OVR_PORTS="$ROOT/dev/docker/compose.ports.yml"
 [[ -f "$SERVICES_FILE" ]] && . "$SERVICES_FILE" || svc(){ echo "$1"; }
 
 # Colors and Styling
@@ -34,7 +35,7 @@ fi
 
 require_env() {
   [[ -f "$ENV_FILE" ]] || err2 "Error:{/} Environment configuration file {yellow}[.env]{/} not found."
-  info "Charcoal Diagnostics:{/}{grey} Copy the packaged \"dev/sample.env\" as \".env\" in project root."
+  info "Charcoal Diagnostics:{/}{grey} Contact vendor for package specific environments configuration file."
   exit 1;
   set -a; # export vars when sourcing
   # shellcheck disable=SC1090
@@ -122,10 +123,27 @@ PY
   ok "Wrote $(realpath --relative-to="$ROOT" "$DB_INIT_OUT")"
 }
 
+ensure_port_overrides() {
+  rm -f "$OVR_PORTS"
+  local wrote=0
+  if [[ -n "${SERVICE_WEB_PORT:-}" ]]; then
+    mkdir -p "$(dirname "$OVR_PORTS")"
+    cat > "$OVR_PORTS" <<YML
+services:
+  $(svc web):
+    ports:
+      - "${SERVICE_WEB_PORT}:6000"
+YML
+    wrote=1
+  fi
+  [[ $wrote -eq 1 ]] && ok "Port override: dev/docker/compose.ports.yml" || info "No ports exposed (SERVICE_WEB_PORT unset)."
+}
+
 cmd_build_docker() {
   require_env
   ensure_runtime_dirs
   generate_db_init_sql
+  ensure_port_overrides
   info "Compose up (profiles: ${COMPOSE_PROFILES:-none}) …"
   compose up -d --build
   if engine_healthy 60; then
