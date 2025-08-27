@@ -16,12 +16,14 @@ fi
 # Paths Configuration
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 ENV_FILE="$ROOT/dev/.env"
-DB_INIT_JSON="$ROOT/dev/docker/db.init.json"
-DB_INIT_OUT="$ROOT/dev/docker/containers/db/init/01-init-dbs.sql"
+DB_INIT_JSON="$ROOT/dev/db.manifest.json"
+DB_INIT_OUT="$ROOT/dev/docker/utils/db/init/01-init-dbs.sql"
 SEMAPHORE_DIR="$ROOT/var/shared/semaphore"
 LOGS_SEMA_DIR="$SEMAPHORE_DIR/logs"
-SERVICES_FILE="$ROOT/dev/bin/services.sh"
 OVR_PORTS="$ROOT/dev/docker/compose.ports.yml"
+MOUNTS_DEV="$ROOT/dev/docker/compose/mounts.dev.yml"
+MOUNTS_PROD="$ROOT/dev/docker/compose/mounts.prod.yml"
+SERVICES_FILE="$ROOT/dev/bin/services.sh"
 [[ -f "$SERVICES_FILE" ]] && . "$SERVICES_FILE" || svc(){ echo "$1"; }
 
 # Colors and Styling
@@ -34,7 +36,7 @@ else
 fi
 
 require_env() {
-  [[ -f "$ENV_FILE" ]] || err2 "Error:{/} Environment configuration file {yellow}[.env]{/} not found."
+  [[ -f "$ENV_FILE" ]] || err2 "Error:{/} Environment configuration file {yellow}[dev/.env]{/} not found."
   info "Charcoal Diagnostics:{/}{grey} Contact vendor for package specific environments configuration file."
   exit 1;
   set -a; # export vars when sourcing
@@ -87,7 +89,7 @@ engine_healthy() {
 
 generate_db_init_sql() {
   [[ -f "$DB_INIT_JSON" ]] || { info "No db.init.json, skipping DB bootstrap."; return 0; }
-  has_profile db || { info "Profile 'db' disabled, skipping DB bootstrap."; return 0; }
+  has_profile mysql || { info "Profile 'mysql' disabled, skipping DB bootstrap."; return 0; }
 
   info "Generating MySQL init SQL from dev/docker/db.init.json …"
 

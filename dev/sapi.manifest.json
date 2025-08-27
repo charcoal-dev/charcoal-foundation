@@ -1,0 +1,16 @@
+{
+  "servers": [
+    {
+      "id": "engine",
+      "type": "cli",
+      "entry": "servers/engine",
+      "enabled": true
+    },
+    {
+      "id": "web",
+      "type": "http",
+      "entry": "servers/web",
+      "enabled": true
+    }
+  ]
+}

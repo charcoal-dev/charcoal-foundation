@@ -21,7 +21,7 @@ databases:
     password: ~ # Use the configured MySQL root password
 ```
 
-All databases are initialized from [init.sql](../../../dev/docker/containers/db/init/init.sql) file therefore append it as
+All databases are initialized from [init.sql](../../../dev/docker/utils/db/init/init.sql) file therefore append it as
 necessary:
 
 ```php
@@ -39,9 +39,9 @@ $app->databases->getDb("second");
 
 ## Optional: Enhancing Type Safety
 
-For stricter typing, you can modify the [`App\Shared\Core\Db\AppDatabase`](../../../src/shared/Core/Db/AppDatabase.php)
+For stricter typing, you can modify the [`App\Shared\Core\Db\AppDatabase`](../../../app/shared/Core/Db/AppDatabase.php)
 enum
 and
-the [`App\Shared\Core\Db\Databases`](../../../src/shared/Core/Db/Databases.php) class to include the newly configured
+the [`App\Shared\Core\Db\Databases`](../../../app/shared/Core/Db/Databases.php) class to include the newly configured
 databases.
 This approach reduces reliance on string-based identifiers and improves code maintainability.

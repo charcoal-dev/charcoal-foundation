@@ -18,8 +18,8 @@
     "psr-4": {
       "App\\Shared\\": "shared",
       "App\\Domain\\": "domain",
-      "App\\Interfaces\\Engine\\": "interfaces/engine",
-      "App\\Interfaces\\Web\\": "interfaces/web"
+      "App\\Interfaces\\Engine\\": "sapi/engine",
+      "App\\Interfaces\\Web\\": "sapi/web"
     }
   }
 }

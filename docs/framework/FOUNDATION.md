@@ -18,10 +18,10 @@ Below are the primary namespaces included in this framework:
 
 | Namespace                 | Directory                                            | Description                                                               |
 |---------------------------|------------------------------------------------------|---------------------------------------------------------------------------|
-| `App\Shared\*`            | [src/shared](../../src/shared)                       | Core modules and classes that the application inherits from the framework |
-| `App\Domain\*`            | [src/domain](../../src/domain)                       | Additional modules and classes used by the application                    |
-| `App\Interfaces\Engine\*` | [src/interfaces/engine](../../src/interfaces/engine) | Classes specifically designed for CLI scripts and processes               |
-| `App\Interfaces\Web\*`    | [src/interfaces/web](../../src/interfaces/web)       | Controllers and other classes needed for HTTP-facing operations           |
+| `App\Shared\*`            | [src/shared](../../app/shared)                       | Core modules and classes that the application inherits from the framework |
+| `App\Domain\*`            | [src/domain](../../app/domain)                       | Additional modules and classes used by the application                    |
+| `App\Interfaces\Engine\*` | [src/interfaces/engine](../../app/sapi/engine) | Classes specifically designed for CLI scripts and processes               |
+| `App\Interfaces\Web\*`    | [src/interfaces/web](../../app/sapi/web)       | Controllers and other classes needed for HTTP-facing operations           |
 
 ## Containers and Access
 
