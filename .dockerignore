@@ -23,6 +23,7 @@ var/**
 
 # Local vendors (containers build their own)
 vendor/**
+app/vendor/**
 
 # Local env & compose overrides
 dev/.env

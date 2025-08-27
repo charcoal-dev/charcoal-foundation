@@ -18,8 +18,12 @@ dev/docker/sandbox/**
 dev/tools/
 !dev/tools/phpunit.xml
 dev/vendor/
+/composer.json
+/composer.lock
+app/vendor/
 
-# IDE Specificvendor/
+# IDE Specific
+vendor/
 dev/tools/composer.phar
 composer.lock
 
