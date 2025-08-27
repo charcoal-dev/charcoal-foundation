@@ -23,8 +23,12 @@ LOGS_SEMA_DIR="$SEMAPHORE_DIR/logs"
 OVR_PORTS="$ROOT/dev/docker/compose.ports.yml"
 MOUNTS_DEV="$ROOT/dev/docker/compose/mounts.dev.yml"
 MOUNTS_PROD="$ROOT/dev/docker/compose/mounts.prod.yml"
+
 SERVICES_FILE="$ROOT/dev/bin/services.sh"
 [[ -f "$SERVICES_FILE" ]] && . "$SERVICES_FILE" || svc(){ echo "$1"; }
+
+# Load App Manifest
+load_manifest
 
 # Colors and Styling
 STYLING_FILE="$ROOT/dev/bin/styling.sh"
@@ -34,6 +38,7 @@ else
   printf 'Missing styling file: %s\n' "$STYLING_FILE" >&2
   exit 1
 fi
+
 
 require_env() {
   [[ -f "$ENV_FILE" ]] || err2 "Error:{/} Environment configuration file {yellow}[dev/.env]{/} not found."
@@ -69,8 +74,10 @@ has_profile() {
 
 ensure_runtime_dirs() {
   umask 0027
-  install -d -m 0750 "$ROOT/var/log/web" "$ROOT/var/log/engine"
-  install -d -m 0750 "$ROOT/var/tmp/web" "$ROOT/var/tmp/engine"
+  [[ ${#SAPI_IDS[@]} -eq 0 ]] && SAPI_IDS=(engine web)
+  for id in "${SAPI_IDS[@]}"; do
+    install -d -m 0750 "$ROOT/var/log/$id" "$ROOT/var/tmp/$id"
+  done
   install -d -m 0750 "$ROOT/var/shared" "$ROOT/var/storage"
   install -d -m 0750 "$SEMAPHORE_DIR" "$LOGS_SEMA_DIR"
 }
@@ -125,21 +132,23 @@ PY
   ok "Wrote $(realpath --relative-to="$ROOT" "$DB_INIT_OUT")"
 }
 
-ensure_port_overrides() {
-  rm -f "$OVR_PORTS"
+ensure_http_env_overrides() {
+  rm -f "$HTTP_ENV_OVR"; mkdir -p "$(dirname "$HTTP_ENV_OVR")"
+  { echo "services:"; } > "$HTTP_ENV_OVR"
   local wrote=0
-  if [[ -n "${SERVICE_WEB_PORT:-}" ]]; then
-    mkdir -p "$(dirname "$OVR_PORTS")"
-    cat > "$OVR_PORTS" <<YML
-services:
-  $(svc web):
-    ports:
-      - "${SERVICE_WEB_PORT}:6000"
+  for id in "${HTTP_SAPIS[@]}"; do
+    doc="${SAPI_DOCROOT[$id]:-}"
+    [[ -z "$doc" ]] && continue
+    cat >> "$HTTP_ENV_OVR" <<YML
+  $(svc "$id"):
+    environment:
+      - NGINX_DOCROOT=$doc
 YML
     wrote=1
-  fi
-  [[ $wrote -eq 1 ]] && ok "Port override: dev/docker/compose.ports.yml" || info "No ports exposed (SERVICE_WEB_PORT unset)."
+  done
+  [[ $wrote -eq 1 ]] || rm -f "$HTTP_ENV_OVR"
 }
+
 
 gen_sapi_df() {
   local id="$1" base="$2" extras="$3" out="$ROOT/dev/docker/sapi/$id/Dockerfile"
@@ -156,8 +165,8 @@ cmd_build_docker() {
   gen_sapi_df engine cli "mariadb-client"
   gen_sapi_df web    fpm "nginx gettext-base iputils-ping"
   ensure_runtime_dirs
+  write_manifest_overrides
   generate_db_init_sql
-  ensure_port_overrides
   info "Compose up (profiles: ${COMPOSE_PROFILES:-none}) …"
   local UIDGID=(--build-arg CHARCOAL_UID="$(id -u)" --build-arg CHARCOAL_GID="$(id -g)")
   compose build "${UIDGID[@]}"
