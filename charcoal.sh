@@ -141,13 +141,25 @@ YML
   [[ $wrote -eq 1 ]] && ok "Port override: dev/docker/compose.ports.yml" || info "No ports exposed (SERVICE_WEB_PORT unset)."
 }
 
+gen_sapi_df() {
+  local id="$1" base="$2" extras="$3" out="$ROOT/dev/docker/sapi/$id/Dockerfile"
+  mkdir -p "$(dirname "$out")"
+  sed -e "s/__SAPI_BASE__/$base/g" \
+      -e "s/__DEPS__/$extras/g" \
+      -e "s/__SAPI_ID__/$id/g" \
+      "$ROOT/dev/docker/sapi/Dockerfile.stub" > "$out"
+  ok "Dockerfile for $id → dev/docker/sapi/$id/Dockerfile"
+}
+
 cmd_build_docker() {
   require_env
+  gen_sapi_df engine cli "mariadb-client"
+  gen_sapi_df web    fpm "nginx gettext-base iputils-ping"
   ensure_runtime_dirs
   generate_db_init_sql
   ensure_port_overrides
   info "Compose up (profiles: ${COMPOSE_PROFILES:-none}) …"
-  local UIDGID=(--build-arg HOST_UID="$(id -u)" --build-arg HOST_GID="$(id -g)")
+  local UIDGID=(--build-arg CHARCOAL_UID="$(id -u)" --build-arg CHARCOAL_GID="$(id -g)")
   compose build "${UIDGID[@]}"
   compose up -d
   if engine_healthy 60; then
