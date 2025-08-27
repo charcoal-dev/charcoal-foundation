@@ -7,21 +7,23 @@
 set -euo pipefail
 umask 0027
 
-# Defaults (can be overridden via env)
-: "${NGINX_LISTEN:=6000}"
 : "${SERVER_NAME:=_}"
+: "${CHARCOAL_SAPI_ROOT:?CHARCOAL_SAPI_ROOT not set (check dev/sapi.manifest.json)}"
 
-# Require vendor (dev: run ./charcoal.sh build app)
-if [[ ! -f /home/charcoal/vendor/autoload.php ]]; then
-  echo "vendor/ missing. Run: ./charcoal.sh build app" >&2
-  exit 1
-fi
+# vendor guard
+[[ -f /home/charcoal/vendor/autoload.php ]] || {
+  echo "vendor/ missing. Run: ./charcoal.sh build app" >&2; exit 1; }
 
+# docroot guards
+[[ -d "$CHARCOAL_SAPI_ROOT" ]] || { echo "SAPI root not a directory: $CHARCOAL_SAPI_ROOT" >&2; exit 1; }
+[[ -r "$CHARCOAL_SAPI_ROOT" ]] || { echo "SAPI root not readable: $CHARCOAL_SAPI_ROOT" >&2; exit 1; }
+
+# render nginx.conf (user-writable location)
 if [[ -f /etc/nginx/nginx.template.conf ]]; then
-  export NGINX_LISTEN SERVER_NAME
-  envsubst '${NGINX_LISTEN} ${SERVER_NAME}' \
+  mkdir -p /home/charcoal/nginx
+  envsubst '${CHARCOAL_SAPI_ROOT} ${SERVER_NAME}' \
     < /etc/nginx/nginx.template.conf \
-    > /etc/nginx/nginx.conf
+    > /home/charcoal/nginx/nginx.conf
 fi
 
 mkdir -p /home/charcoal/{log,tmp,shared,storage}
