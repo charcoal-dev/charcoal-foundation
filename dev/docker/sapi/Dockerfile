@@ -8,7 +8,7 @@ RUN groupadd -g ${CHARCOAL_GID} charcoal \
 
 # SAPI Environment Setup
 RUN apt-get update \
- && apt-get install -y --no-install-recommends supervisor __DEPS__ git unzip ca-certificates \
+ && apt-get install -y --no-install-recommends supervisor __DEPS__ ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
 COPY dev/docker/sapi/__SAPI_BASE__/ /opt/sapi/base
@@ -29,7 +29,7 @@ RUN install -d -m 0750 /home/charcoal/{log,tmp,shared,storage}
 # Preinstall composer repositories:
 FROM base AS builder
 USER root
-RUN apt-get update && apt-get install -y --no-install-recommends curl \
+RUN apt-get update && apt-get install -y --no-install-recommends curl git unzip ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 RUN curl -sS https://getcomposer.org/installer | php \
  && mv composer.phar /usr/local/bin/composer
