@@ -28,10 +28,10 @@ tests/build/*
 
 # Temporary Files
 var/**
-!var/**/.gitkeep
 !var/storage/
 !var/storage/seed/**
 !var/storage/defaults/**
+!var/**/.gitkeep
 
 # Downstream App Specific
 config/
