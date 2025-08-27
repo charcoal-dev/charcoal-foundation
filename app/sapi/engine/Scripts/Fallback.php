@@ -6,14 +6,14 @@
 
 declare(strict_types=1);
 
-namespace App\Interfaces\Engine\Scripts;
+namespace App\Sapi\Engine\Scripts;
 
 use App\Shared\Core\Cli\DomainScriptBase;
 use App\Shared\Core\Cli\LogPolicy;
 
 /**
  * Class Fallback
- * @package App\Interfaces\Engine\Scripts
+ * @package App\Sapi\Engine\Scripts
  * @api
  */
 class Fallback extends DomainScriptBase

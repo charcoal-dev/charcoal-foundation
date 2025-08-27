@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace App\Interfaces\Engine\Scripts;
+namespace App\Sapi\Engine\Scripts;
 
 use App\Shared\Core\Cli\DomainScriptBase;
 use App\Shared\Core\Cli\LogPolicy;
@@ -18,7 +18,7 @@ use Charcoal\Database\ORM\Migrations;
 
 /**
  * Class Install
- * @package App\Interfaces\Engine\Scripts
+ * @package App\Sapi\Engine\Scripts
  * @api
  */
 class Install extends DomainScriptBase

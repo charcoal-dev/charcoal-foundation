@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace App\Interfaces\Web;
+namespace App\Sapi\Web;
 
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 use Charcoal\Filesystem\Exceptions\FilesystemException;

@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace App\Interfaces\Engine\Scripts\Config;
+namespace App\Sapi\Engine\Scripts\Config;
 
 use App\Shared\Core\Cli\DomainScriptBase;
 use App\Shared\Core\Cli\LogPolicy;
@@ -17,7 +17,7 @@ use Charcoal\Filesystem\Exceptions\FilesystemException;
 
 /**
  * Class ImportCountries
- * @package App\Interfaces\Engine\Scripts\Config
+ * @package App\Sapi\Engine\Scripts\Config
  * @api
  */
 class ImportCountries extends DomainScriptBase

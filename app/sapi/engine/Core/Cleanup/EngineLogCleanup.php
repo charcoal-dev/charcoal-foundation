@@ -6,11 +6,11 @@
 
 declare(strict_types=1);
 
-namespace App\Interfaces\Engine\Core\Cleanup;
+namespace App\Sapi\Engine\Core\Cleanup;
 
 /**
  * Class EngineLogCleanup
- * @package App\Interfaces\Engine\Core\Cleanup
+ * @package App\Sapi\Engine\Core\Cleanup
  * @api
  */
 class EngineLogCleanup

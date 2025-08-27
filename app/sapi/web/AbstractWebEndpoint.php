@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace App\Interfaces\Web;
+namespace App\Sapi\Web;
 
 use App\Shared\Core\Config\Persisted\HttpInterfaceConfig;
 use App\Shared\Core\Http\Html\AbstractHtmlEndpointAbstract;

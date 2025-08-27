@@ -6,14 +6,14 @@
 
 declare(strict_types=1);
 
-namespace App\Interfaces\Web\Endpoints;
+namespace App\Sapi\Web\Endpoints;
 
 
-use App\Interfaces\Web\AbstractWebEndpoint;
+use App\Sapi\Web\AbstractWebEndpoint;
 
 /**
  * Class Problem
- * @package App\Interfaces\Web\Endpoints
+ * @package App\Sapi\Web\Endpoints
  * @api
  */
 class Problem extends AbstractWebEndpoint
