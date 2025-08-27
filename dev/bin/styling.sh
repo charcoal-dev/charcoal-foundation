@@ -1,18 +1,15 @@
+#!/usr/bin/env bash
 #
 # Part of the "charcoal-dev/charcoal-foundation" package.
 # @link https://github.com/charcoal-dev/charcoal-foundation
 #
 
-#ICON_OK="${ICON_OK:-✅}";
-ICON_OK=$'\u2714';
+set -euo pipefail
 
-ICON_INFO="${ICON_INFO:-ℹ️}";
-
-#ICON_WARN="${ICON_WARN:-⚠️}";
-ICON_WARN=$'\e[33m\u26a0\e0[m';
-
+ICON_OK=$'\u2714'
+ICON_INFO="${ICON_INFO:-ℹ️}"
+ICON_WARN=$'\e[33m\u26a0\e[0m';
 ICON_ERR="${ICON_ERR:-❌}"
-#ICON_ERR=$'\u2715';
 
 if [[ -t 1 && "${NO_COLOR:-0}" != "1" ]]; then
   CLR_RESET=$'\e[0m'

@@ -26,13 +26,7 @@ OVR_PORTS="$ROOT/dev/docker/compose.ports.yml"
 MOUNTS_DEV="$ROOT/dev/docker/compose/mounts.dev.yml"
 MOUNTS_PROD="$ROOT/dev/docker/compose/mounts.prod.yml"
 
-SERVICES_FILE="$ROOT/dev/bin/services.sh"
-[[ -f "$SERVICES_FILE" ]] && . "$SERVICES_FILE" || svc(){ echo "$1"; }
-
-# Load App Manifest
-load_manifest
-
-# Colors and Styling
+# Colors and Styling (defines ok/info/warn/err used by helpers)
 STYLING_FILE="$ROOT/dev/bin/styling.sh"
 if [ -r "$STYLING_FILE" ]; then
   . "$STYLING_FILE"
@@ -41,22 +35,62 @@ else
   exit 1
 fi
 
+# Services helpers (manifest loader, overrides)
+SERVICES_FILE="$ROOT/dev/bin/services.sh"
+if [ -r "$SERVICES_FILE" ]; then
+  . "$SERVICES_FILE"
+else
+  svc(){ echo "$1"; }
+fi
+
+# Load App Manifest
+load_manifest
+
+# Require Env Configuration
 require_env() {
-  [[ -f "$ENV_FILE" ]] || err2 "Error:{/} Environment configuration file {yellow}[dev/.env]{/} not found."
-  info "Charcoal Diagnostics:{/}{grey} Contact vendor for package specific environments configuration file."
-  exit 1;
-  set -a; # export vars when sourcing
+  [[ -f "$ENV_FILE" ]] || {
+    err2 "Error:{/} Environment configuration file {yellow}[dev/.env]{/} not found."
+    info "Charcoal Diagnostics:{/}{grey} Contact vendor for package specific environments configuration file."
+    exit 1
+  }
+  set -a
   # shellcheck disable=SC1090
   . "$ENV_FILE"
   set +a
 }
 
-: "${SAPI_ENGINE_IP:=${PUBLIC_ENGINE_IP:-}}"
-: "${SERVICE_MYSQL_IP:=${PUBLIC_MYSQL_IP:-}}"
-: "${SERVICE_REDIS_IP:=${PUBLIC_REDIS_IP:-}}"
-: "${SERVICE_PMA_IP:=${PUBLIC_PMA_IP:-}}"
 CHARCOAL_PROJECT="${CHARCOAL_PROJECT:-foundation-app}"
 CHARCOAL_DOCKER="${CHARCOAL_DOCKER:-engine,web,mysql,redis}"
+
+# Gate profiles: keep infra as requested; drop disabled SAPIs
+resolve_profiles() {
+  local req enabled_sapis all_sapis p EFFECT=""
+  req="${CHARCOAL_DOCKER//[[:space:]]/}"
+
+  if command -v jq >/dev/null 2>&1 && [[ -f "$MANIFEST" ]]; then
+    all_sapis="$(jq -r '.charcoal.sapi[].id' "$MANIFEST" 2>/dev/null || true)"
+    enabled_sapis="$(jq -r '.charcoal.sapi[] | select(.enabled!=false) | .id' "$MANIFEST" 2>/dev/null || true)"
+  else
+    # Fallback: we only know enabled SAPIs from services.sh
+    all_sapis="${SAPI_IDS[*]}"
+    enabled_sapis="${SAPI_IDS[*]}"
+  fi
+
+  IFS=',' read -ra arr <<<"$req"
+  for p in "${arr[@]}"; do
+    if [[ " $all_sapis " == *" $p "* ]]; then
+      # it's a SAPI → include only if enabled
+      [[ " $enabled_sapis " == *" $p "* ]] && EFFECT+="${EFFECT:+,}$p"
+    else
+      # infra (mysql/redis/pma/etc) → keep as requested
+      EFFECT+="${EFFECT:+,}$p"
+    fi
+  done
+  export EFFECTIVE="$EFFECT"
+}
+
+# `has_profile` should check EFFECTIVE (falls back to requested)
+has_profile() { [[ ",${EFFECTIVE:-$CHARCOAL_DOCKER}," == *",$1,"* ]]; }
 
 # turn COMPOSE_FILES="a.yml:b.yml" into "-f dev/docker/a.yml -f dev/docker/b.yml"
 compose_flags() {
@@ -115,7 +149,7 @@ generate_db_init_sql() {
   [[ -f "$DB_INIT_JSON" ]] || { info "No db.init.json, skipping DB bootstrap."; return 0; }
   has_profile mysql || { info "Profile 'mysql' disabled, skipping DB bootstrap."; return 0; }
 
-  info "Generating MySQL init SQL from dev/docker/db.init.json …"
+  info "Generating MySQL init SQL from dev/db.manifest.json …"
 
   # parse schemas only
   if command -v jq >/dev/null 2>&1; then
@@ -184,7 +218,8 @@ cmd_build_docker() {
   ensure_runtime_dirs
   write_manifest_overrides
   generate_db_init_sql
-  info "Compose up (profiles: ${COMPOSE_PROFILES:-none}) …"
+  resolve_profiles
+  info "Compose up (profiles: ${EFFECTIVE:-none}) …"
   local UIDGID=(--build-arg CHARCOAL_UID="$(id -u)" --build-arg CHARCOAL_GID="$(id -g)")
   compose build "${UIDGID[@]}"
   compose up -d
