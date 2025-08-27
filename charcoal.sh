@@ -15,8 +15,8 @@ fi
 
 # Paths Configuration
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-ROOT="${ROOT:-$SCRIPT_DIR/..}"
-#ROOT="$(cd "$(dirname "$0")" && pwd)"
+#ROOT="${ROOT:-$SCRIPT_DIR/..}"
+ROOT="$(cd "$(dirname "$0")" && pwd)"
 ENV_FILE="$ROOT/dev/.env"
 DB_INIT_JSON="$ROOT/dev/db.manifest.json"
 DB_INIT_OUT="$ROOT/dev/docker/utils/db/init/01-init-dbs.sql"
@@ -221,6 +221,7 @@ cmd_build_docker() {
   resolve_profiles
   info "Compose up (profiles: ${EFFECTIVE:-none}) …"
   local UIDGID=(--build-arg CHARCOAL_UID="$(id -u)" --build-arg CHARCOAL_GID="$(id -g)")
+  [[ "${CHARCOAL_DRYRUN:-0}" = "1" ]] && { ok "Dry-run: skipping docker."; exit 0; }
   compose build "${UIDGID[@]}"
   compose up -d
   if engine_healthy 60; then
