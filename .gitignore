@@ -1,30 +1,32 @@
 .idea/
-vendor/
 workspace/
+
+# Docker builds
+dev/docker/compose/**
+!dev/docker/compose/mounts.dev.yml
+!dev/docker/compose/mounts.prod.yml
+dev/docker/sapi/**/Dockerfile
+!dev/docker/sapi/Dockerfile
+
+# IDE Specific
+vendor/
 composer.lock
 composer.phar
 tests/build/*
 
+# Downstream App Specific
 .env
-/deployment/
-/config/
+config/
+deployment/
 
+# PHPUnit Specific
 phpunit.phar
 /.phpunit.result.cache
 /coverage/
 /coverage.xml
 /coverage.clover.xml
 
-docker/containers/engine/vendor/
-docker/containers/web/vendor/
-
-proxy/charcoal.nginx
-proxy/charcoal-dev.crt
-proxy/charcoal-dev.key
-
-/charcoal.sh
-log/engine/*
-log/web/*
-log/*
-tmp/semaphore/*
-tmp/*
+# Temporary Files
+var/**
+!var/storage/
+!var/storage/**

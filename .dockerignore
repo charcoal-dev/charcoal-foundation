@@ -1,0 +1,6 @@
+dev/**
+!dev/docker/sapi/**
+var/**
+tests/**
+.git
+.gitignore
