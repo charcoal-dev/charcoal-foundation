@@ -1,0 +1,76 @@
+# Charcoal Monolith:- (L0) Foundation App
+services:
+  # (SAPI) Cli:- Engine Service
+  engine:
+    profiles: ["engine"]
+    env_file: [../.env]
+    build:
+      context: ../../
+      dockerfile: dev/docker/sapi/engine/Dockerfile
+    restart: always
+    networks:
+      charcoal-foundation-vlan:
+        ipv4_address: "${SERVICE_ENGINE_IP}"
+
+  # (SAPI) Http:- Web Service
+  web:
+    profiles: ["web"]
+    env_file: [../.env]
+    build:
+      context: ../../
+      dockerfile: dev/docker/sapi/fpm-nginx/Dockerfile
+    restart: always
+    depends_on: { engine: { condition: service_started } }
+    networks:
+      charcoal-foundation-vlan:
+        ipv4_address: "${SERVICE_WEB_IP}"
+
+  # (Aux) MySQL:- Database
+  mysql:
+    profiles: ["mysql"]
+    image: mysql:8.1
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=charcoal
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - charcoal-mysql-dbs:/var/lib/mysql
+    networks:
+      charcoal-foundation-vlan:
+        ipv4_address: "${SERVICE_MYSQL_IP}"
+
+  # (Aux) PhpMyAdmin:- MySQL Administration
+  phpmyadmin:
+    profiles: ["pma"]
+    image: phpmyadmin/phpmyadmin:latest
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+    depends_on: { mysql: { condition: service_started } }
+    networks:
+      charcoal-foundation-vlan:
+        ipv4_address: "${SERVICE_PMA_IP}"
+
+  # (Aux) Redis:- Caching Engine
+  redis:
+    profiles: ["redis"]
+    build:
+      context: ../../
+      dockerfile: dev/docker/utils/redis/Dockerfile
+    restart: always
+    networks:
+      charcoal-foundation-vlan:
+        ipv4_address: "${SERVICE_REDIS_IP}"
+
+# Networks Configuration
+networks:
+  charcoal-foundation-vlan:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "${APP_SUBNET}"
+
+# Auxiliary Volumes
+volumes:
+  charcoal-mysql-dbs: {}
