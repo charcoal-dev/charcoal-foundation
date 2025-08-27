@@ -35,8 +35,9 @@ RUN curl -sS https://getcomposer.org/installer | php \
  && mv composer.phar /usr/local/bin/composer
 
 USER charcoal
-WORKDIR /home/charcoal/sandbox
-COPY dev/composer.json dev/composer.lock ./
+WORKDIR /home/charcoal/dev/composer
+COPY dev/composer/composer.json composer.json
+COPY dev/composer/composer.lock composer.lock
 RUN composer install --no-dev --prefer-dist -o --no-interaction
 
 # App Environment: DEV
@@ -55,5 +56,5 @@ COPY app/sapi/__SAPI_ID__/ app/sapi/__SAPI_ID__/
 COPY app/domain/ app/domain/
 COPY app/shared/ app/shared/
 COPY interfaces/__SAPI_ID__/ __SAPI_ID__/
-COPY --from=builder /home/charcoal/sandbox/vendor/ /home/charcoal/vendor/
+COPY --from=builder /home/charcoal/dev/composer/vendor/ /home/charcoal/dev/composer/vendor/
 ENTRYPOINT ["/entrypoint.sh"]

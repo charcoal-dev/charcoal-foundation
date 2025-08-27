@@ -7,24 +7,23 @@ Thumbs.db
 
 # Development and Builds
 dev/.env
+# Composer (Packagist)
+dev/composer/**
+dev/composer/vendor/
+dev/composer/vendor/**
+!dev/composer/composer.json
+# Docker & Compose
 dev/docker/sapi/**/Dockerfile
 !dev/docker/sapi/Dockerfile
 dev/docker/compose/**
 !dev/docker/compose/mounts.dev.yml
 !dev/docker/compose/mounts.prod.yml
-dev/docker/sandbox/
-dev/docker/sandbox/**
-!dev/docker/sandbox/vendor/.gitkeep
-dev/tools/
+# Toolkit
+dev/tools/**
 !dev/tools/phpunit.xml
-dev/vendor/
-/composer.json
-/composer.lock
-app/vendor/
 
 # IDE Specific
 vendor/
-dev/tools/composer.phar
 composer.lock
 
 # Tests build artifacts

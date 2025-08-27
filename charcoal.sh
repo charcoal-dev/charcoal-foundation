@@ -107,6 +107,9 @@ profile_flags() {
 }
 
 compose() {
+  local mounts="dev/docker/compose/mounts.dev.yml"
+  [[ "${CHARCOAL_ENV:-dev}" == "prod" ]] && mounts="dev/docker/compose/mounts.prod.yml"
+
   DOCKER_BUILDKIT=1 \
   COMPOSE_DOCKER_CLI_BUILD=1 \
   COMPOSE_IGNORE_ORPHANS=1 \

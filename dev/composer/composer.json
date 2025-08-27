@@ -14,15 +14,15 @@
   "prefer-stable": true,
   "autoload": {
     "psr-4": {
-      "App\\Shared\\": "app/shared/",
-      "App\\Domain\\": "app/domain/",
-      "App\\Sapi\\Engine\\": "app/sapi/engine/",
-      "App\\Sapi\\Web\\": "app/sapi/web/"
+      "App\\Shared\\": "../../app/shared/",
+      "App\\Domain\\": "../../app/domain/",
+      "App\\Sapi\\Engine\\": "../../app/sapi/engine/",
+      "App\\Sapi\\Web\\": "../../app/sapi/web/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Charcoal\\Tests\\Foundation\\": "../tests/"
+      "Charcoal\\Tests\\Foundation\\": "../../tests/"
     }
   },
   "config": {

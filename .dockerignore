@@ -32,8 +32,8 @@ dev/.env
 dev/**
 !dev/docker/sapi/**
 !dev/docker/utils/redis/**
-!dev/composer.json
-!dev/composer.lock
+!dev/composer/composer.json
+!dev/composer/composer.lock
 
 # Node (if present)
 node_modules/

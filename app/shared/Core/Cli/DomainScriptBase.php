@@ -37,7 +37,6 @@ abstract class DomainScriptBase extends AppCliScript
      * @param string|null $semaphoreLockId
      * @throws SemaphoreLockException
      * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
-     * @throws \Charcoal\Events\Exceptions\SubscriptionClosedException
      * @throws \Charcoal\Semaphore\Exceptions\SemaphoreUnlockException
      */
     public function __construct(

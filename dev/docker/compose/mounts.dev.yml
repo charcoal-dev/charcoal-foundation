@@ -2,8 +2,7 @@ services:
   engine:
     build: { target: dev }
     volumes:
-      - ../../dev/docker/sandbox:/home/charcoal/sandbox
-      - ../../dev/docker/sandbox/vendor:/home/charcoal/vendor
+      - ../../dev/composer/vendor:/home/charcoal/dev/composer/vendor:ro
       - ../../config:/home/charcoal/config:ro
       - ../../app/sapi/engine:/home/charcoal/app/sapi/engine:ro
       - ../../app/domain:/home/charcoal/app/domain:ro
@@ -16,7 +15,7 @@ services:
   web:
     build: { target: dev }
     volumes:
-      - ../../dev/docker/sandbox/vendor:/home/charcoal/vendor:ro
+      - ../../dev/composer/vendor:/home/charcoal/dev/composer/vendor:ro
       - ../../config:/home/charcoal/config:ro
       - ../../app/sapi/web:/home/charcoal/app/sapi/web:ro
       - ../../app/domain:/home/charcoal/app/domain:ro
