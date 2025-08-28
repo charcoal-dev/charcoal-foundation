@@ -12,7 +12,6 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # PHP extensions (shared by cli/fpm images)
-# PHP extensions (shared by cli/fpm images)
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
@@ -34,13 +33,13 @@ RUN set -eux; \
       gmp \
       zip \
       curl \
-  ; \
-  pecl install -o -f redis \
-  && docker-php-ext-enable redis \
-  && rm -rf /tmp/pear \
-  ; \
-  apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $PHPIZE_DEPS \
-  && rm -rf /var/lib/apt/lists/*
+    ; \
+    pecl install -o -f redis \
+    && docker-php-ext-enable redis \
+    && rm -rf /tmp/pear \
+    ; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $PHPIZE_DEPS \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY dev/docker/sapi/__SAPI_BASE__/ /opt/sapi/base
 COPY dev/docker/sapi/app/__SAPI_ID__/ /opt/sapi/override
