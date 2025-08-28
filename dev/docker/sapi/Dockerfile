@@ -12,27 +12,25 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # PHP extensions (shared by cli/fpm images)
-RUN set -eux; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends \
-      $PHPIZE_DEPS \
-      git \
-      libgmp-dev \
-      libzip-dev \
-      libcurl4-openssl-dev \
-      libsqlite3-dev \
-      zlib1g-dev \
-    ; \
-    docker-php-ext-configure gmp; \
+# 1) Toolchain + headers
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    $PHPIZE_DEPS git \
+    libgmp-dev libzip-dev libcurl4-openssl-dev libsqlite3-dev zlib1g-dev
+
+# 2) Core bundled PHP extensions
+RUN docker-php-ext-configure gmp && \
     docker-php-ext-install -j"$(nproc)" \
-      bcmath mbstring sockets pdo_mysql pdo_sqlite sqlite3 gmp zip curl \
-    ; \
-    git clone --depth 1 --branch 6.1.0 https://github.com/phpredis/phpredis.git /tmp/phpredis; \
-    cd /tmp/phpredis; phpize; ./configure; make -j"$(nproc)"; make install; \
-    docker-php-ext-enable redis; \
-    cd /; rm -rf /tmp/phpredis; \
-    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $PHPIZE_DEPS git \
-    && rm -rf /var/lib/apt/lists/*
+      bcmath mbstring sockets pdo_mysql pdo_sqlite sqlite3 gmp zip curl
+
+# 3) phpredis from source (avoids PECL flakiness)
+RUN git clone --depth 1 --branch 6.0.2 https://github.com/phpredis/phpredis.git /tmp/phpredis && \
+    cd /tmp/phpredis && phpize && ./configure && make -j"$(nproc)" && make install && \
+    docker-php-ext-enable redis && \
+    rm -rf /tmp/phpredis
+
+# 4) Cleanup (note: previous layers still keep the install)
+RUN apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $PHPIZE_DEPS git && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY dev/docker/sapi/__SAPI_BASE__/ /opt/sapi/base
 COPY dev/docker/sapi/app/__SAPI_ID__/ /opt/sapi/override
