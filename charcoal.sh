@@ -317,6 +317,12 @@ cmd_logs() {
   fi
 }
 
+cmd_services() {
+  require_env
+  # use JSON output to list service keys reliably
+  compose config --format json | jq -r '.services | keys[]'
+}
+
 usage() {
   cat <<'USAGE'
 Usage:
@@ -344,6 +350,7 @@ main() {
     engine) shift || true; cmd_engine "$@";;
     docker) shift || true; cmd_docker "$@";;
     logs)   shift || true; cmd_logs "$@";;
+    services) cmd_services ;;
     *) usage; exit 1;;
   esac
 }
