@@ -21,7 +21,7 @@ use PHPUnit\Framework\TestCase;
  * Class CharcoalAppConstructTest
  * @package Charcoal\Tests\Foundation
  */
-class CharcoalAppConstructTest extends TestCase
+class ConstructTest extends TestCase
 {
     /**
      * @noinspection PhpExceptionImmediatelyRethrownInspection
