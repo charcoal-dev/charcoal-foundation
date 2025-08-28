@@ -37,8 +37,8 @@ var/**
 !var/**/.gitkeep
 
 # Downstream App Specific
-config/
-deployment/
+/config
+/deployment
 
 # PHPUnit Specific
 dev/tools/phpunit.phar

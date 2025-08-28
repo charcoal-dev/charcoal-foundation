@@ -11,8 +11,8 @@ namespace App\Shared\Core\Config\Builder;
 use App\Shared\Core\Config\Builder\Traits\CacheConfigBuilderTrait;
 use App\Shared\Core\Config\Builder\Traits\DatabaseConfigBuilderTrait;
 use App\Shared\Core\Config\Builder\Traits\HttpFileConfigTrait;
+use App\Shared\Core\Config\Builder\Traits\JsonConfigReaderTrait;
 use App\Shared\Core\Config\Builder\Traits\MailerFileConfigTrait;
-use App\Shared\Core\Config\Builder\Traits\YamlConfigFilesTrait;
 use App\Shared\Core\Config\Persisted\MailerConfig;
 use App\Shared\Core\Config\Snapshot\AppConfig;
 use App\Shared\Core\PathRegistry;
@@ -29,19 +29,19 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
     public readonly HttpConfigBuilder $http;
     public readonly ?MailerConfig $mailer;
 
-    use YamlConfigFilesTrait;
     use CacheConfigBuilderTrait;
     use DatabaseConfigBuilderTrait;
+    use JsonConfigReaderTrait;
     use HttpFileConfigTrait;
     use MailerFileConfigTrait;
 
     /**
-     * @throws \Charcoal\Filesystem\Exceptions\InvalidPathException
-     * @throws \Charcoal\Yaml\Exception\YamlParseException
+     * @param AppEnv $env
+     * @param PathRegistry $paths
      */
     public function __construct(AppEnv $env, PathRegistry $paths)
     {
-        $configData = $this->readYamlConfigFiles($paths->config->join("./config.yml")->path);
+        $configData = $this->readCharcoalJsonConfig($paths->config);
         parent::__construct($env, $paths, Timezones::from(strval($configData["timezone"])));
 
         $this->cacheStoresFromFileConfig($configData["foundation"]["cache"] ?? null);
