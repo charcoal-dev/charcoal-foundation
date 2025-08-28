@@ -45,7 +45,6 @@ final class ErrorManager extends \Charcoal\App\Kernel\Errors\ErrorManager
      */
     public function collectSerializableData(): array
     {
-        $data = parent::__serialize();
         $data["crashHtmlTemplate"] = $this->crashHtmlTemplate;
         return $data;
     }
@@ -56,7 +55,6 @@ final class ErrorManager extends \Charcoal\App\Kernel\Errors\ErrorManager
      */
     public function __unserialize(array $data): void
     {
-        parent::__unserialize($data);
         $this->crashHtmlTemplate = $data["crashHtmlTemplate"];
     }
 
