@@ -12,11 +12,12 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # PHP extensions (shared by cli/fpm images)
+# PHP extensions (shared by cli/fpm images)
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
       $PHPIZE_DEPS \
-      git \
+      curl \
       libgmp-dev \
       libzip-dev \
       libcurl4-openssl-dev \
@@ -36,21 +37,14 @@ RUN set -eux; \
       zip \
       curl \
     ; \
-    # Build phpredis from GitHub (PHP 8.3 compatible)
-    cd /tmp; \
-    curl -fsSL -o phpredis.tar.gz https://github.com/phpredis/phpredis/archive/refs/tags/6.1.0.tar.gz; \
-    mkdir -p /tmp/phpredis-src; \
-    tar -xzf phpredis.tar.gz -C /tmp/phpredis-src --strip-components=1; \
-    test -f /tmp/phpredis-src/config.m4; \
-    cd /tmp/phpredis-src; \
-    phpize; \
-    ./configure; \
-    make -j"$(nproc)"; \
-    make install; \
-    echo "extension=redis.so" > /usr/local/etc/php/conf.d/docker-php-ext-redis.ini; \
-    # Cleanup
-    cd /; rm -rf /tmp/phpredis-src /tmp/phpredis.tar.gz /tmp/pear; \
-    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false git $PHPIZE_DEPS \
+    # Build phpredis like a bundled extension (no manual phpize)
+    curl -fsSL -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/refs/tags/6.1.0.tar.gz; \
+    mkdir -p /usr/src/php/ext/redis; \
+    tar -xzf /tmp/phpredis.tar.gz -C /usr/src/php/ext/redis --strip-components=1; \
+    test -f /usr/src/php/ext/redis/config.m4; \
+    docker-php-ext-install -j"$(nproc)" redis; \
+    rm -rf /tmp/phpredis.tar.gz /tmp/pear; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $PHPIZE_DEPS \
     && rm -rf /var/lib/apt/lists/*
 
 COPY dev/docker/sapi/__SAPI_BASE__/ /opt/sapi/base
