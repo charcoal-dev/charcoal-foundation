@@ -19,12 +19,11 @@ use App\Shared\Foundation\Mailer\MailerModule;
 use Charcoal\App\Kernel\AppManifest;
 use Charcoal\App\Kernel\Domain\AbstractModule;
 use Charcoal\App\Kernel\Enums\AppEnv;
-use Charcoal\Filesystem\Exceptions\InvalidPathException;
 use Charcoal\Filesystem\Node\DirectoryNode;
 
 /**
- * Class DomainManifest
- * @package App\Domain
+ * Represents the domain-specific application manifest.
+ * Provides module binding, configuration provisioning, path resolution, and error service initialization.
  */
 final class DomainManifest extends AppManifest
 {
@@ -44,8 +43,9 @@ final class DomainManifest extends AppManifest
     }
 
     /**
-     * @throws InvalidPathException
-     * @throws \Charcoal\Yaml\Exception\YamlParseException
+     * @param AppEnv $env
+     * @param PathRegistry $paths
+     * @return AppConfig
      */
     public static function provideAppConfig(AppEnv $env, PathRegistry $paths): AppConfig
     {
