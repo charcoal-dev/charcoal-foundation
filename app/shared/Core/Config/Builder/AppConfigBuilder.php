@@ -10,7 +10,6 @@ namespace App\Shared\Core\Config\Builder;
 
 use App\Shared\Core\Config\Builder\Traits\CacheConfigBuilderTrait;
 use App\Shared\Core\Config\Builder\Traits\DatabaseConfigBuilderTrait;
-use App\Shared\Core\Config\Builder\Traits\HttpFileConfigTrait;
 use App\Shared\Core\Config\Builder\Traits\JsonConfigReaderTrait;
 use App\Shared\Core\Config\Builder\Traits\MailerFileConfigTrait;
 use App\Shared\Core\Config\Persisted\MailerConfig;
@@ -32,7 +31,6 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
     use CacheConfigBuilderTrait;
     use DatabaseConfigBuilderTrait;
     use JsonConfigReaderTrait;
-    use HttpFileConfigTrait;
     use MailerFileConfigTrait;
 
     /**
@@ -41,7 +39,6 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
      */
     public function __construct(AppEnv $env, PathRegistry $paths)
     {
-        $configData = $this->readCharcoalJsonConfig($paths->config);
         parent::__construct($env, $paths, Timezones::from(strval($configData["timezone"])));
 
         $this->cacheStoresFromFileConfig($configData["foundation"]["cache"] ?? null);
@@ -57,7 +54,8 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
     }
 
     /**
-     * @api
+     * @param mixed $mailerConfig
+     * @return void
      */
     protected function includeMailerConfig(mixed $mailerConfig): void
     {

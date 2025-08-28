@@ -8,16 +8,17 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Config\Persisted;
 
-use App\Shared\Contracts\Config\PersistedConfigProvidesSnapshot;
+use App\Shared\Contracts\Config\PersistedConfigSnapshotProvider;
 use App\Shared\Enums\Http\HttpLogLevel;
 use Charcoal\App\Kernel\Internal\Config\ConfigSnapshotInterface;
 
 /**
  * Represents the configuration of an HTTP interface, providing options to control logging,
  * tracing, and caching behavior.
+ * @deprecated
  */
 class HttpInterfaceConfig extends AbstractResolvedConfig implements
-    PersistedConfigProvidesSnapshot
+    PersistedConfigSnapshotProvider
 {
     public bool $status;
     public HttpLogLevel $logData;

@@ -1,0 +1,11 @@
+{
+  "maxUriBytes": 256,
+  "maxHeaders": 40,
+  "maxHeaderLength": 256,
+  "headerKeyValidation": "rfc7230",
+  "paramKeyValidation": "strict",
+  "maxBodyBytes": 10240,
+  "maxParams": 32,
+  "maxParamLength": 256,
+  "dtoMaxDepth": 3
+}

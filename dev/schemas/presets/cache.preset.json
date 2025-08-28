@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:charcoal:foundation:schemas:presets:cache:1.0.0",
+  "title": "Cache preset",
+  "type": "object",
+  "properties": {
+    "$imports": {
+      "$ref": "../globals/imports.schema.json#/$defs/imports"
+    },
+    "driver": {
+      "type": "string",
+      "enum": ["array", "file", "redis", "memcached", "null"]
+    },
+    "defaultTtl": { "type": "integer", "minimum": 0 },
+    "namespace": { "type": "string" },
+    "file": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "redis": {
+      "type": "object",
+      "properties": {
+        "host": { "type": "string" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "database": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "memcached": {
+      "type": "object",
+      "properties": {
+        "servers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "host": { "type": "string" },
+              "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+              "weight": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["host", "port"],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

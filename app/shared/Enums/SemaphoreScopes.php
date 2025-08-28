@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace App\Shared\Enums;
 
 use Charcoal\App\Kernel\Contracts\Enums\SemaphoreScopeEnumInterface;
+use Charcoal\App\Kernel\Enums\SemaphoreType;
 
 /**
  * Enumeration representing different semaphore scope types.
@@ -29,13 +30,13 @@ enum SemaphoreScopes: string implements SemaphoreScopeEnumInterface
     }
 
     /**
-     * @return SemaphoreNode
+     * @return SemaphoreType
      */
-    public function getNode(): SemaphoreNode
+    public function getType(): SemaphoreType
     {
         return match ($this) {
-            self::Orm => SemaphoreNode::Shared,
-            self::Http, self::Cli => SemaphoreNode::Local,
+            self::Orm => SemaphoreType::Filesystem_Shared,
+            self::Http, self::Cli => SemaphoreType::Filesystem_Private,
         };
     }
 }

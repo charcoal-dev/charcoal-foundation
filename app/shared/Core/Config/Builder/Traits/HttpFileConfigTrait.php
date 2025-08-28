@@ -16,7 +16,7 @@ use App\Shared\Enums\Http\HttpLogLevel;
  * Provides logic for building and configuring HTTP interface configurations.
  * Designed to validate and construct instances of HttpInterfaceConfig
  * based on an array of interface definitions.
- * @api
+ * @deprecated
  */
 trait HttpFileConfigTrait
 {

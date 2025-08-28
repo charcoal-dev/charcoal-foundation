@@ -1,0 +1,9 @@
+{
+  "$schema": "../../dev/schemas/presets/cors.schema.json",
+  "enforced": true,
+  "maxAge": 600,
+  "origins": [
+    "http://localhost:4200",
+    "https://www.charcoal.dev"
+  ]
+}
