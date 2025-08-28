@@ -3,9 +3,10 @@
   "charcoal": {
     "timezone": "UTC",
     "$imports": [
-      "foundation/cache.json",
-      "foundation/databases.json",
-      "foundation/mailer.json"
+      "foundation/cache",
+      "foundation/databases",
+      "foundation/mailer",
+      "foundation/http"
     ]
   }
 }

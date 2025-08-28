@@ -15,10 +15,10 @@ use Charcoal\App\Kernel\Enums\SapiType;
  * Defines the Interfaces enumeration which represents different types of SAPI (Server API) interfaces.
  * Implements the SapiEnumInterface for standardization.
  */
-enum Interfaces implements SapiEnumInterface
+enum Interfaces: string implements SapiEnumInterface
 {
-    case Engine;
-    case Web;
+    case Engine = "engine";
+    case Web = "web";
 
     /**
      * Determines the SAPI (Server API) type based on the current instance.

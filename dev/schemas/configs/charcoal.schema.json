@@ -8,14 +8,14 @@
       "type": "object",
       "properties": {
         "$imports": {
-          "$ref": "../dev/schemas/globals/imports.schema.json#/$defs/imports"
+          "$ref": "../globals/imports.schema.json#/$defs/imports"
         },
         "timezone": { "type": "string", "minLength": 1 }
       },
       "required": ["timezone"],
-      "additionalProperties": true
+      "additionalProperties": false
     }
   },
   "required": ["charcoal"],
-  "additionalProperties": false
+  "additionalProperties": true
 }

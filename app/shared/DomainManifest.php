@@ -19,6 +19,7 @@ use App\Shared\Foundation\Mailer\MailerModule;
 use Charcoal\App\Kernel\AppManifest;
 use Charcoal\App\Kernel\Domain\AbstractModule;
 use Charcoal\App\Kernel\Enums\AppEnv;
+use Charcoal\App\Kernel\Enums\SemaphoreType;
 use Charcoal\Filesystem\Node\DirectoryNode;
 
 /**
@@ -50,7 +51,8 @@ final class DomainManifest extends AppManifest
     public static function provideAppConfig(AppEnv $env, PathRegistry $paths): AppConfig
     {
         $appConfig = new AppConfigBuilder($env, $paths);
-        $appConfig->security->setSemaphoreDirectory("./tmp/semaphore");
+        $appConfig->security->setSemaphoreDirectory(SemaphoreType::Filesystem_Private, "./tmp/semaphore");
+        $appConfig->security->setSemaphoreDirectory(SemaphoreType::Filesystem_Shared, "./shared/semaphore");
         return $appConfig->build();
     }
 

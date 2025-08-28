@@ -1,25 +1,29 @@
 {
-  "web": {
-    "listen": {
-      "$imports": [
-        "presets/host-00"
-      ]
-    },
-    "cors": {
-      "$imports": [
-        "presets/cors-00"
-      ]
-    },
-    "proxies": {
-      "$imports": [
-        "presets/localhost-00",
-        "presets/docker-00"
-      ]
-    },
-    "wwwSupport": true,
-    "enforceTls": true
-  },
-  "perRequestConstraints": {
-    "$imports": ["presets/security-00"]
+  "http": {
+    "sapi": {
+      "web": {
+        "listen": {
+          "$imports": [
+            "presets/host-00"
+          ]
+        },
+        "cors": {
+          "$imports": [
+            "presets/cors-00"
+          ]
+        },
+        "proxies": {
+          "$imports": [
+            "presets/localhost-00",
+            "presets/docker-00"
+          ]
+        },
+        "wwwSupport": true,
+        "enforceTls": true
+      },
+      "perRequestConstraints": {
+        "$imports": ["presets/security-00"]
+      }
+    }
   }
 }
