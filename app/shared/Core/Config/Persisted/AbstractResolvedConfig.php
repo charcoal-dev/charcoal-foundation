@@ -54,19 +54,11 @@ class AbstractResolvedConfig extends AbstractEntity
     /**
      * @return array
      */
-    final public function __serialize(): array
-    {
-        $data = parent::__serialize();
-        $data["configCachedOn"] = time();
-        return $data;
-    }
-
-    /**
-     * @return array
-     */
     protected function collectSerializableData(): array
     {
         $data = [];
+        $data["configCachedOn"] = time();
+
         $reflection = new \ReflectionClass($this);
         $scope = \ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED;
         foreach ($reflection->getProperties($scope) as $property) {
