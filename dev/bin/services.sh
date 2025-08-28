@@ -84,6 +84,19 @@ PY
   fi
 }
 
+sanitize_json() {
+  # strip CR/LF and validate; return {} if invalid/empty
+  local s="${1//$'\r'/}"; s="${s//$'\n'/}"
+  if [[ -z "$s" ]]; then
+    printf '{}'
+  elif jq -e . >/dev/null 2>&1 <<<"$s"; then
+    printf '%s' "$s"
+  else
+    warn "Invalid env JSON in manifest; falling back to {} → [$s]"
+    printf '{}'
+  fi
+}
+
 write_manifest_overrides() {
   rm -f "$MAN_OVR"; mkdir -p "$(dirname "$MAN_OVR")"
   {
@@ -97,8 +110,8 @@ write_manifest_overrides() {
         echo "      CHARCOAL_SAPI_ROOT: \"${SAPI_DOCROOT[$id]}\""
       fi
       # additional env from manifest (robust)
-      env_json="${SAPI_ENV_JSON[$id]:-\{\}}"
-      if [[ -n "$env_json" && "$env_json" != "{}" ]]; then
+      env_json="$(sanitize_json "${SAPI_ENV_JSON[$id]:-}")"
+      if [[ "$env_json" != "{}" ]]; then
         jq -rn --argjson env "$env_json" '
           $env
           | to_entries[]
