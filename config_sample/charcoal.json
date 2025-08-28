@@ -1,0 +1,8 @@
+{
+  "charcoal": {
+    "timezone": "UTC",
+    "configs": [
+      "$charcoal"
+    ]
+  }
+}

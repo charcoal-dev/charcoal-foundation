@@ -1,5 +1,5 @@
 {
-  "$schema": "schemas/db.manifest.schema.json",
+  "$schema": "schemas/db.manifest.json",
   "schemas": [
     "charcoal"
   ]

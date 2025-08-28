@@ -1,0 +1,13 @@
+{
+  "$schema": "../../dev/schemas/configs/cache.schema.json",
+  "cache": {
+    "stores": {
+      "primary": {
+        "driver": "redis",
+        "host": "10.0.11.3",
+        "port": 6379,
+        "timeout": 1
+      }
+    }
+  }
+}
