@@ -12,10 +12,12 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # PHP extensions (shared by cli/fpm images)
+# PHP extensions (shared by cli/fpm images)
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
       $PHPIZE_DEPS \
+      git \
       libgmp-dev \
       libzip-dev \
       libcurl4-openssl-dev \
@@ -34,11 +36,11 @@ RUN set -eux; \
       zip \
       curl \
     ; \
-    pecl install -o -f redis \
-    && docker-php-ext-enable redis \
-    && rm -rf /tmp/pear \
-    ; \
-    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $PHPIZE_DEPS \
+    git clone --depth 1 --branch 6.0.2 https://github.com/phpredis/phpredis.git /tmp/phpredis; \
+    cd /tmp/phpredis; phpize; ./configure; make -j"$(nproc)"; make install; \
+    docker-php-ext-enable redis; \
+    cd /; rm -rf /tmp/phpredis; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $PHPIZE_DEPS git \
     && rm -rf /var/lib/apt/lists/*
 
 COPY dev/docker/sapi/__SAPI_BASE__/ /opt/sapi/base
