@@ -14,7 +14,7 @@ use Charcoal\App\Kernel\Internal\Config\ConfigSnapshotInterface;
  * Represents a source of persisted configuration that provides the ability
  * to generate a snapshot of its current state.
  */
-interface PersistedConfigProvidesSnapshot
+interface PersistedConfigSnapshotProvider
 {
     public function snapshot(): ConfigSnapshotInterface;
 }
