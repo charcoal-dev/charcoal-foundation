@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Config\Persisted;
 
-use App\Shared\Contracts\Config\PersistedConfigProvidesSnapshot;
+use App\Shared\Contracts\Config\PersistedConfigSnapshotProvider;
 use App\Shared\Contracts\Foundation\StoredObjectInterface;
 use App\Shared\Enums\Mailer\MailDispatchMode;
 use App\Shared\Enums\Mailer\MailProvider;
@@ -19,8 +19,8 @@ use Charcoal\App\Kernel\Internal\Config\ConfigSnapshotInterface;
  * and queue handling options.The class is responsible for defining and managing the configuration details
  * required for mail dispatching and processing.
  */
-final class MailerConfig extends AbstractResolvedConfig implements
-    PersistedConfigProvidesSnapshot, StoredObjectInterface
+final class MailerConfig extends AbstractPersistedConfig implements
+    PersistedConfigSnapshotProvider, StoredObjectInterface
 {
     public MailProvider $service = MailProvider::DISABLED;
     public MailDispatchMode $mode = MailDispatchMode::SEND_ONLY;

@@ -15,10 +15,11 @@ use Charcoal\Base\Enums\FetchOrigin;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 
 /**
- * Class AbstractResolvedConfig
- * @package App\Shared\Core\Config
+ * Represents an abstract class for a persisted configuration.
+ * This class extends the functionality of `AbstractEntity` and implements the `StoredObjectInterface`
+ * and `StorageHooksInterface`. It provides mechanisms for cache handling, serialization, and storage hooks.
  */
-class AbstractResolvedConfig extends AbstractEntity
+class AbstractPersistedConfig extends AbstractEntity
     implements StoredObjectInterface, StorageHooksInterface
 {
     public const bool STORAGE_HOOKS = true;

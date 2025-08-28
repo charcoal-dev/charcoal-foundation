@@ -13,7 +13,7 @@ namespace App\Shared\Core\Config\Persisted;
  * Extends AbstractResolvedConfig and implements PersistedConfigProvidesSnapshot.
  * @api
  */
-final class SmtpConfig extends AbstractResolvedConfig
+final class SmtpConfig extends AbstractPersistedConfig
 {
     public const string CONFIG_ID = "app.Integrations.Mailer.smtpConfig";
 

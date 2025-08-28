@@ -10,7 +10,7 @@ namespace App\Shared\Core\Config\Traits;
 
 use App\Shared\CharcoalApp;
 use App\Shared\Contracts\Foundation\StoredObjectInterface;
-use App\Shared\Core\Config\Persisted\AbstractResolvedConfig;
+use App\Shared\Core\Config\Persisted\AbstractPersistedConfig;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 
 /**
@@ -21,14 +21,14 @@ trait PersistedConfigResolverTrait
     /**
      * Resolves and returns a static configuration object.
      */
-    abstract protected function resolveStaticConfig(CharcoalApp $app): ?AbstractResolvedConfig;
+    abstract protected function resolveStaticConfig(CharcoalApp $app): ?AbstractPersistedConfig;
 
     /**
      * @param CharcoalApp $app
      * @param class-string<StoredObjectInterface> $configClassname
      * @param bool $useStatic
      * @param bool $useObjectStore
-     * @return AbstractResolvedConfig
+     * @return AbstractPersistedConfig
      * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException
      * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
      * @throws \Charcoal\Cipher\Exceptions\CipherException
@@ -38,7 +38,7 @@ trait PersistedConfigResolverTrait
         string      $configClassname,
         bool        $useStatic,
         bool        $useObjectStore,
-    ): AbstractResolvedConfig
+    ): AbstractPersistedConfig
     {
         $configObject = null;
         if ($useStatic) {
