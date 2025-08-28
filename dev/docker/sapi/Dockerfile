@@ -12,7 +12,6 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # PHP extensions (shared by cli/fpm images)
-# PHP extensions (shared by cli/fpm images)
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
@@ -25,24 +24,30 @@ RUN set -eux; \
       libonig-dev \
       zlib1g-dev \
     ; \
+    docker-php-source extract; \
     docker-php-ext-configure gmp; \
-    docker-php-ext-install -j"$(nproc)" \
-      bcmath \
-      mbstring \
-      sockets \
-      pdo_mysql \
-      pdo_sqlite \
-      sqlite3 \
-      gmp \
-      zip \
-      curl \
-    ; \
-    # Build phpredis like a bundled extension (no manual phpize)
+    for ext in bcmath mbstring sockets pdo_mysql pdo_sqlite gmp zip; do \
+      echo ">>> Building PHP extension: ${ext}"; \
+      test -f "/usr/src/php/ext/${ext}/config.m4"; \
+      docker-php-ext-install -j"$(nproc)" "${ext}"; \
+    done; \
+    # Build sqlite3 and curl separately to isolate any issue
+    if [ -f "/usr/src/php/ext/sqlite3/config.m4" ]; then \
+      echo ">>> Building PHP extension: sqlite3"; \
+      docker-php-ext-install -j"$(nproc)" sqlite3; \
+    fi; \
+    if [ -f "/usr/src/php/ext/curl/config.m4" ]; then \
+      echo ">>> Building PHP extension: curl"; \
+      docker-php-ext-install -j"$(nproc)" curl; \
+    fi; \
+    # Add phpredis as if it were bundled, avoiding manual phpize
+    echo ">>> Adding phpredis 6.1.0"; \
     curl -fsSL -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/refs/tags/6.1.0.tar.gz; \
     mkdir -p /usr/src/php/ext/redis; \
     tar -xzf /tmp/phpredis.tar.gz -C /usr/src/php/ext/redis --strip-components=1; \
     test -f /usr/src/php/ext/redis/config.m4; \
     docker-php-ext-install -j"$(nproc)" redis; \
+    docker-php-source delete; \
     rm -rf /tmp/phpredis.tar.gz /tmp/pear; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $PHPIZE_DEPS \
     && rm -rf /var/lib/apt/lists/*
