@@ -1,8 +1,11 @@
 {
+  "$schema": "../dev/schemas/configs/charcoal.schema.json",
   "charcoal": {
     "timezone": "UTC",
-    "configs": [
-      "$charcoal"
+    "$imports": [
+      "@charcoal.config[foundation].cache",
+      "@charcoal.config[foundation].databases",
+      "@charcoal.config[foundation].mailer"
     ]
   }
 }

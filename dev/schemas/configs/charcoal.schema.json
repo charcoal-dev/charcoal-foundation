@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:charcoal:foundation:schemas:config:charcoal:1.0.0",
+  "title": "Charcoal Root Configuration",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["charcoal"],
+  "properties": {
+    "charcoal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timezone", "$imports"],
+      "properties": {
+        "timezone": {
+          "type": "string",
+          "format": "time-zone"
+        },
+        "$imports": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "@charcoal.config[foundation].cache",
+              "@charcoal.config[foundation].databases",
+              "@charcoal.config[foundation].mailer"
+            ]
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

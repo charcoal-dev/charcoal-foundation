@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:charcoal:foundation:schemas:config:mailer:1.0.0",
+  "title": "Mailer Module Configuration",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "mailer"
+  ],
+  "properties": {
+    "mailer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "service",
+        "mode",
+        "sender",
+        "queue"
+      ],
+      "properties": {
+        "service": {
+          "type": "string",
+          "enum": [
+            "disabled",
+            "smtp"
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "queue_only",
+            "send_and_queue",
+            "send_only"
+          ]
+        },
+        "sender": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "email"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            }
+          }
+        },
+        "queue": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "processing",
+            "retryTimeout",
+            "exhaustAfter",
+            "tickInterval"
+          ],
+          "properties": {
+            "processing": {
+              "type": "boolean"
+            },
+            "retryTimeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3600
+            },
+            "exhaustAfter": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "tickInterval": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60
+            }
+          }
+        }
+      }
+    }
+  }
+}
