@@ -107,17 +107,18 @@ profile_flags() {
 }
 
 compose() {
+  # decide mounts by env (your Option 2)
   local mounts="dev/docker/compose/mounts.dev.yml"
   [[ "${CHARCOAL_ENV:-dev}" == "prod" ]] && mounts="dev/docker/compose/mounts.prod.yml"
 
-  # NEW: normalize profiles for this run
-  local effective="${COMPOSE_PROFILES:-${CHARCOAL_DOCKER:-engine,web,mysql,redis}}"
+  # decide profiles (from COMPOSE_PROFILES or your env var CHARCOAL_DOCKER)
+  local EFFECTIVE="${COMPOSE_PROFILES:-${CHARCOAL_DOCKER:-engine,web}}"
 
   DOCKER_BUILDKIT=1 \
   COMPOSE_DOCKER_CLI_BUILD=1 \
   COMPOSE_IGNORE_ORPHANS=1 \
   COMPOSE_PROJECT_NAME="charcoal-$CHARCOAL_PROJECT" \
-  COMPOSE_PROFILES="$effective" \
+  COMPOSE_PROFILES="$EFFECTIVE" \
   docker compose \
     -f dev/docker/docker-compose.yml \
     -f "$mounts" \
