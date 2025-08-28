@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:charcoal:foundation:schemas:dev:manifest:databases:1.0.0",
+  "title": "Databases Manifest",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "schemas": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9_]+$"
+      }
+    }
+  },
+  "required": ["schemas"]
+}

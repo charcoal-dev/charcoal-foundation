@@ -1,4 +1,5 @@
 {
+  "$schema": "schemas/db.manifest.schema.json",
   "schemas": [
     "charcoal"
   ]

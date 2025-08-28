@@ -1,4 +1,5 @@
 {
+  "$schema": "schemas/sapi.manifest.schema.json",
   "charcoal": {
     "sapi": [
       {
