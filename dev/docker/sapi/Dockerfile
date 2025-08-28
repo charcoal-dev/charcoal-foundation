@@ -7,9 +7,28 @@ RUN groupadd -g ${CHARCOAL_GID} charcoal \
  && useradd -m -u ${CHARCOAL_UID} -g ${CHARCOAL_GID} -s /bin/bash charcoal
 
 # SAPI Environment Setup
-RUN apt-get update \
- && apt-get install -y --no-install-recommends supervisor __DEPS__ ca-certificates \
- && rm -rf /var/lib/apt/lists/*
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+      libgmp-dev \
+      libzip-dev \
+      libcurl4-openssl-dev \
+      libsqlite3-dev \
+      zlib1g-dev \
+    ; \
+    docker-php-ext-configure gmp; \
+    docker-php-ext-install -j"$(nproc)" \
+      bcmath \
+      mbstring \
+      sockets \
+      pdo_mysql \
+      pdo_sqlite \
+      sqlite3 \
+      gmp \
+      zip \
+      curl \
+    ; \
+    rm -rf /var/lib/apt/lists/*
 
 COPY dev/docker/sapi/__SAPI_BASE__/ /opt/sapi/base
 COPY dev/docker/sapi/app/__SAPI_ID__/ /opt/sapi/override
