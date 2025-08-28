@@ -14,12 +14,12 @@ namespace App\Shared;
  */
 enum AppBindings
 {
-    /** @ Foundation App */
+    /** @for Foundation App */
     case coreData;
     case http;
     case mailer;
     case engine;
 
-    /** @ Placeholder */
+    /** @for Placeholder */
     case ethereal;
 }
