@@ -74,8 +74,8 @@ services:
   redis:
     profiles: ["redis"]
     build:
-      context: ../../
-      dockerfile: dev/docker/utils/redis/Dockerfile
+      context: ../../dev/docker/utils/redis
+      dockerfile: Dockerfile
     restart: always
     networks:
       charcoal-app-internal:
