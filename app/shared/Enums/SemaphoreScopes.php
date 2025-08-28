@@ -11,8 +11,8 @@ namespace App\Shared\Enums;
 use Charcoal\App\Kernel\Contracts\Enums\SemaphoreScopeEnumInterface;
 
 /**
- * Class SemaphoreScopes
- * @package App\Shared\Enums
+ * Enumeration representing different semaphore scope types.
+ * Implements SemaphoreScopeEnumInterface for unified behavior across scopes.
  */
 enum SemaphoreScopes: string implements SemaphoreScopeEnumInterface
 {
@@ -26,5 +26,16 @@ enum SemaphoreScopes: string implements SemaphoreScopeEnumInterface
     public function getConfigKey(): string
     {
         return $this->value;
+    }
+
+    /**
+     * @return SemaphoreNode
+     */
+    public function getNode(): SemaphoreNode
+    {
+        return match ($this) {
+            self::Orm => SemaphoreNode::Shared,
+            self::Http, self::Cli => SemaphoreNode::Local,
+        };
     }
 }
