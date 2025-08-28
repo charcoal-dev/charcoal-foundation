@@ -96,11 +96,12 @@ write_manifest_overrides() {
       if [[ -n "${SAPI_DOCROOT[$id]:-}" ]]; then
         echo "      CHARCOAL_SAPI_ROOT: \"${SAPI_DOCROOT[$id]}\""
       fi
-      # additional env from manifest (robust, ignore empty)
+      # additional env from manifest (robust)
       env_json="${SAPI_ENV_JSON[$id]:-\{\}}"
       if [[ -n "$env_json" && "$env_json" != "{}" ]]; then
-        printf '%s' "$env_json" | jq -r '
-          to_entries[]
+        jq -rn --argjson env "$env_json" '
+          $env
+          | to_entries[]
           | "      \(.key): \"\(.value|tostring)\""
         '
       fi
