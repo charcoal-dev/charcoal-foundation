@@ -7,9 +7,11 @@ RUN groupadd -g ${CHARCOAL_GID} charcoal \
  && useradd -m -u ${CHARCOAL_UID} -g ${CHARCOAL_GID} -s /bin/bash charcoal
 
 # SAPI Environment Setup
+# PHP extensions (shared by cli/fpm images)
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
+      $PHPIZE_DEPS \
       libgmp-dev \
       libzip-dev \
       libcurl4-openssl-dev \
@@ -28,7 +30,12 @@ RUN set -eux; \
       zip \
       curl \
     ; \
-    rm -rf /var/lib/apt/lists/*
+    pecl install redis \
+    && docker-php-ext-enable redis \
+    && pecl clear-cache \
+    ; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $PHPIZE_DEPS \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY dev/docker/sapi/__SAPI_BASE__/ /opt/sapi/base
 COPY dev/docker/sapi/app/__SAPI_ID__/ /opt/sapi/override
