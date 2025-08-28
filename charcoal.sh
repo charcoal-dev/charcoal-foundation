@@ -110,11 +110,14 @@ compose() {
   local mounts="dev/docker/compose/mounts.dev.yml"
   [[ "${CHARCOAL_ENV:-dev}" == "prod" ]] && mounts="dev/docker/compose/mounts.prod.yml"
 
+  # NEW: normalize profiles for this run
+  local effective="${COMPOSE_PROFILES:-${CHARCOAL_DOCKER:-engine,web,mysql,redis}}"
+
   DOCKER_BUILDKIT=1 \
   COMPOSE_DOCKER_CLI_BUILD=1 \
   COMPOSE_IGNORE_ORPHANS=1 \
   COMPOSE_PROJECT_NAME="charcoal-$CHARCOAL_PROJECT" \
-  COMPOSE_PROFILES="$EFFECTIVE" \
+  COMPOSE_PROFILES="$effective" \
   docker compose \
     -f dev/docker/docker-compose.yml \
     -f "$mounts" \
