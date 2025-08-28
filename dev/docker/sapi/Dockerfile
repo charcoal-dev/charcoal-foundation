@@ -22,17 +22,19 @@ RUN set -eux; \
       libsqlite3-dev \
       libonig-dev \
       zlib1g-dev \
-      git \
     ; \
     docker-php-ext-configure gmp; \
     docker-php-ext-install -j"$(nproc)" \
       bcmath mbstring sockets pdo_mysql pdo_sqlite sqlite3 gmp zip curl \
     ; \
-    git clone --depth 1 --branch 6.1.0 https://github.com/phpredis/phpredis.git /tmp/phpredis; \
-    cd /tmp/phpredis; phpize; ./configure; make -j"$(nproc)"; make install; \
+    pecl channel-update pecl.php.net; \
+    cd /tmp; \
+    pecl download redis-6.1.0; \
+    tar -xzf redis-6.1.0.tgz; \
+    cd /tmp/redis-6.1.0; phpize; ./configure; make -j"$(nproc)"; make install; \
     docker-php-ext-enable redis; \
-    cd /; rm -rf /tmp/phpredis; \
-    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $PHPIZE_DEPS git \
+    cd /; rm -rf /tmp/redis-6.1.0* /tmp/pear; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $PHPIZE_DEPS \
     && rm -rf /var/lib/apt/lists/*
 
 COPY dev/docker/sapi/__SAPI_BASE__/ /opt/sapi/base
