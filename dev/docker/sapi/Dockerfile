@@ -29,11 +29,11 @@ RUN set -eux; \
     ; \
     pecl channel-update pecl.php.net; \
     cd /tmp; \
-    pecl download redis-6.1.0; \
-    tar -xzf redis-6.1.0.tgz; \
-    cd /tmp/redis-6.1.0; phpize; ./configure; make -j"$(nproc)"; make install; \
+    pecl download redis-6.2.0; \
+    tar -xzf redis-6.2.0.tgz; \
+    cd /tmp/redis-6.2.0; phpize; ./configure; make -j"$(nproc)"; make install; \
     docker-php-ext-enable redis; \
-    cd /; rm -rf /tmp/redis-6.1.0* /tmp/pear; \
+    cd /; rm -rf /tmp/redis-6.2.0* /tmp/pear; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $PHPIZE_DEPS \
     && rm -rf /var/lib/apt/lists/*
 
