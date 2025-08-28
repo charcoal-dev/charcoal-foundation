@@ -123,7 +123,8 @@ compose() {
 }
 
 has_profile() {
-  [[ ",${COMPOSE_PROFILES:-}," == *",$1,"* ]]
+  local set="${COMPOSE_PROFILES:-${CHARCOAL_DOCKER:-}}"
+  [[ ",${set}," == *",$1,"* ]]
 }
 
 ensure_runtime_dirs() {
@@ -147,6 +148,8 @@ engine_healthy() {
   done
   return 1
 }
+
+export COMPOSE_PROFILES="${COMPOSE_PROFILES:-${CHARCOAL_DOCKER:-engine,web}}"
 
 generate_db_init_sql() {
   [[ -f "$DB_INIT_JSON" ]] || { info "No db.init.json, skipping DB bootstrap."; return 0; }
