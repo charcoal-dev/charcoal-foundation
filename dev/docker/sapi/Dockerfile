@@ -17,7 +17,6 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends \
       $PHPIZE_DEPS \
       git \
-      pkg-config \
       libgmp-dev \
       libzip-dev \
       libcurl4-openssl-dev \
@@ -39,18 +38,20 @@ RUN set -eux; \
     ; \
     # Build phpredis from GitHub (PHP 8.3 compatible)
     cd /tmp; \
-    git clone --depth 1 --branch 6.1.0 https://github.com/phpredis/phpredis.git phpredis; \
-    cd /tmp/phpredis; \
-    test -f config.m4; \
+    curl -fsSL -o phpredis.tar.gz https://github.com/phpredis/phpredis/archive/refs/tags/6.1.0.tar.gz; \
+    mkdir -p /tmp/phpredis-src; \
+    tar -xzf phpredis.tar.gz -C /tmp/phpredis-src --strip-components=1; \
+    test -f /tmp/phpredis-src/config.m4; \
+    cd /tmp/phpredis-src; \
     phpize; \
     ./configure; \
     make -j"$(nproc)"; \
     make install; \
-    docker-php-ext-enable redis; \
-    cd /; rm -rf /tmp/phpredis; \
-    # Cleanup build deps and caches
+    echo "extension=redis.so" > /usr/local/etc/php/conf.d/docker-php-ext-redis.ini; \
+    # Cleanup
+    cd /; rm -rf /tmp/phpredis-src /tmp/phpredis.tar.gz /tmp/pear; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false git $PHPIZE_DEPS \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /usr/src/php/.deps
+    && rm -rf /var/lib/apt/lists/*
 
 COPY dev/docker/sapi/__SAPI_BASE__/ /opt/sapi/base
 COPY dev/docker/sapi/app/__SAPI_ID__/ /opt/sapi/override
