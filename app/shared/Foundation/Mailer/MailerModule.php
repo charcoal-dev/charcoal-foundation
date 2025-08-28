@@ -67,9 +67,9 @@ final class MailerModule extends OrmModuleBase
      */
     public function __unserialize(array $data): void
     {
-        parent::__unserialize($data);
         $this->backlog = $data["backlog"];
         $this->service = $data["service"];
+        parent::__unserialize($data);
     }
 
     /**
