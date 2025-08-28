@@ -44,11 +44,11 @@ load_manifest() {
     done < <(
       jq -rc '.charcoal.sapi[]
               | select(.enabled != false)
-              | [ .id
-                , (.type // "cli")
-                , (.root // "")
-                , ( (try .port) // 0 )
-                , (.env // {} )
+              | [ (.id|tostring),
+                  (.type // "cli"),
+                  (.root // ""),
+                  ((.port // 0)|tostring),
+                  ((.env // {}) | @json)
                 ]
               | @tsv' "$MANIFEST"
     )
