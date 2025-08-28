@@ -18,70 +18,37 @@ load_manifest() {
   [[ -f "$MANIFEST" ]] || { warn "Manifest not found: $MANIFEST"; return 0; }
 
   # registries
-  SAPI_IDS=(); HTTP_SAPI=(); CLI_SAPI=(); declare -gA SAPI_TYPE SAPI_SERVICE SAPI_DOCROOT SAPI_PORT SAPI_ENV_JSON
-  local base_docroot="/home/charcoal"
+  SAPI_IDS=(); HTTP_SAPI=(); CLI_SAPI=()
+  declare -gA SAPI_TYPE SAPI_SERVICE SAPI_DOCROOT SAPI_PORT SAPI_ENV_B64
 
-  if command -v jq >/dev/null 2>&1; then
-    while IFS=$'\t' read -r id typ root port env_json; do
-      [[ -n "$id" ]] || continue
-      SAPI_IDS+=("$id")
-      SAPI_TYPE["$id"]="${typ:-cli}"
-      SAPI_SERVICE["$id"]="$id"
+  # ...
+  while IFS=$'\t' read -r id typ root port env_b64; do
+    [[ -n "$id" ]] || continue
+    SAPI_IDS+=("$id")
+    SAPI_TYPE["$id"]="${typ:-cli}"
+    SAPI_SERVICE["$id"]="$id"
 
-      if [[ "${typ:-cli}" == "http" ]]; then
-        HTTP_SAPI+=("$id")
-        root="${root#/}"; root="${root%/}"
-        SAPI_DOCROOT["$id"]="$base_docroot/${root}"
-        [[ -n "${port:-}" && "$port" != "0" ]] && SAPI_PORT["$id"]="$port" || true
-      else
-        CLI_SAPI+=("$id")
-      fi
+    if [[ "${typ:-cli}" == "http" ]]; then
+      HTTP_SAPI+=("$id")
+      root="${root#/}"; root="${root%/}"
+      SAPI_DOCROOT["$id"]="/home/charcoal/${root}"
+      [[ -n "${port:-}" && "$port" != "0" ]] && SAPI_PORT["$id"]="$port" || true
+    else
+      CLI_SAPI+=("$id")
+    fi
 
-      # keep raw JSON string for later
-      SAPI_ENV_JSON["$id"]="${env_json:-{}}"
-    done < <(
-      jq -rc '.charcoal.sapi[]
-              | select(.enabled != false)
-              | [ (.id|tostring),
-                  (.type // "cli"),
-                  (.root // ""),
-                  ((.port // 0)|tostring),
-                  ((.env // {}) | @json)
-                ]
-              | @tsv' "$MANIFEST"
-    )
-  elif command -v python3 >/dev/null 2>&1; then
-    while IFS=$'\t' read -r id typ root port env_json; do
-      [[ -n "$id" ]] || continue
-      SAPI_IDS+=("$id")
-      SAPI_TYPE["$id"]="${typ:-cli}"
-      SAPI_SERVICE["$id"]="$id"
-      if [[ "${typ:-cli}" == "http" ]]; then
-        HTTP_SAPI+=("$id")
-        root="${root#/}"; root="${root%/}"
-        SAPI_DOCROOT["$id"]="$base_docroot/${root}"
-        [[ -n "${port:-}" && "$port" != "0" ]] && SAPI_PORT["$id"]="$port" || true
-      else
-        CLI_SAPI+=("$id")
-      fi
-      SAPI_ENV_JSON["$id"]="${env_json:-{}}"
-    done < <(python3 - "$MANIFEST" <<'PY'
-import json,sys
-j=json.load(open(sys.argv[1]))
-for it in j.get("charcoal",{}).get("sapi",[]):
-  if it.get("enabled", True):
-    _id   = str(it.get("id",""))
-    _typ  = it.get("type","cli")
-    _root = it.get("root","")
-    _port = str(it.get("port",0) or 0)
-    _env  = json.dumps(it.get("env",{}), separators=(',',':'))
-    print("\t".join([_id,_typ,_root,_port,_env]))
-PY
-    )
-  else
-    warn "Neither jq nor python3 found; skipping manifest load (no overrides/ports)."
-    return 0
-  fi
+    SAPI_ENV_B64["$id"]="$env_b64"
+  done < <(
+    jq -rc '.charcoal.sapi[]
+            | select(.enabled != false)
+            | [ (.id|tostring),
+                (.type // "cli"),
+                (.root // ""),
+                ((.port // 0)|tostring),
+                ((.env // {}) | @json | @base64)
+              ]
+            | @tsv' "$MANIFEST"
+  )
 }
 
 sanitize_json() {
@@ -110,8 +77,10 @@ write_manifest_overrides() {
         echo "      CHARCOAL_SAPI_ROOT: \"${SAPI_DOCROOT[$id]}\""
       fi
       # additional env from manifest (robust)
-      env_json="$(sanitize_json "${SAPI_ENV_JSON[$id]:-}")"
-      if [[ "$env_json" != "{}" ]]; then
+      env_b64="${SAPI_ENV_B64[$id]:-e30=}"   # e30= is '{}' base64
+      if [[ -n "$env_b64" ]]; then
+        # decode to JSON (fallback to {} on any error)
+        env_json="$(printf '%s' "$env_b64" | base64 -d 2>/dev/null || printf '{}')"
         jq -rn --argjson env "$env_json" '
           $env
           | to_entries[]
