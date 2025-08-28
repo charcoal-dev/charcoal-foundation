@@ -14,6 +14,7 @@ use App\Shared\Exceptions\CliScriptException;
 use App\Shared\Utility\TypeCaster;
 use Charcoal\App\Kernel\EntryPoint\Cli\AppCliHandler;
 use Charcoal\App\Kernel\EntryPoint\Cli\AppCliScript;
+use Charcoal\App\Kernel\Enums\SemaphoreType;
 use Charcoal\Cli\Enums\ExecutionState;
 use Charcoal\Cli\Events\Terminate\ExceptionCaught;
 use Charcoal\Cli\Events\Terminate\PcntlSignalClose;
@@ -269,7 +270,10 @@ abstract class DomainScriptBase extends AppCliScript
         $this->inline(sprintf("Obtaining semaphore lock for {yellow}{invert} %s {/} ... ", $resourceId));
 
         try {
-            $lock = $this->getAppBuild()->security->semaphore->lock(SemaphoreScopes::Cli, $resourceId);
+            $lock = $this->getAppBuild()->security
+                ->semaphore(SemaphoreType::Filesystem_Private)
+                ->lock(SemaphoreScopes::Cli, $resourceId);
+
             $this->inline("{green}Success{/} {grey}[AutoRelease={/}");
             if ($setAutoRelease) {
                 $lock->setAutoRelease();

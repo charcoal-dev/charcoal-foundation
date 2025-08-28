@@ -37,6 +37,8 @@ final class MailerModule extends OrmModuleBase
     public function __construct(CharcoalApp $app)
     {
         parent::__construct($app);
+        $this->backlog = new BacklogHandler($this);
+        $this->service = new MailerService();
     }
 
     /**
@@ -46,6 +48,28 @@ final class MailerModule extends OrmModuleBase
     protected function declareDatabaseTables(TableRegistry $tables): void
     {
         $tables->register(new BacklogTable($this));
+    }
+
+    /**
+     * @return array|array[]|\string[][]
+     */
+    public function collectSerializableData(): array
+    {
+        $data = parent::collectSerializableData();
+        $data["backlog"] = $this->backlog;
+        $data["service"] = $this->service;
+        return $data;
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        parent::__unserialize($data);
+        $this->backlog = $data["backlog"];
+        $this->service = $data["service"];
     }
 
     /**

@@ -48,7 +48,7 @@ final class DomainManifest extends AppManifest
      * @param PathRegistry $paths
      * @return AppConfig
      */
-    public static function provideAppConfig(AppEnv $env, PathRegistry $paths): AppConfig
+    public static function provideAppConfig(AppEnv $env, \Charcoal\App\Kernel\Internal\PathRegistry $paths): AppConfig
     {
         $appConfig = new AppConfigBuilder($env, $paths);
         $appConfig->security->setSemaphoreDirectory(SemaphoreType::Filesystem_Private, "./tmp/semaphore");

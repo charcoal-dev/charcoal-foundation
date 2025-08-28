@@ -32,11 +32,12 @@ class CharcoalAppConstructTest extends TestCase
         fwrite(STDERR, "\033[35mInitializing...\n");
         fwrite(STDERR, "\033[40m\033[33mCharcoal App\033[0m\n");
 
+        $rootDirectory = (new DirectoryPath(__DIR__ . "/build"))->node();
         try {
             $timestamp = MonotonicTimestamp::now();
             $charcoal = new CharcoalApp(
                 AppEnv::Test,
-                (new DirectoryPath(__DIR__ . "/build"))->node(),
+                $rootDirectory,
                 function (BuildStageEvents $events) {
                     fwrite(STDERR, "\033[36mBuild Stage:\033[0m \033[33m" . $events->name . "\033[0m\n");
                 }
@@ -61,7 +62,10 @@ class CharcoalAppConstructTest extends TestCase
         // 2 Subscribers = One for this test, closure passed to constructor is bound to the event subscription,
         // and the other one is the ErrorManager from Foundation app waiting for PathRegistry to resolve so it can
         // load template.
-        $this->assertEquals(2, $eventInspect->history[BuildStageEvents::class],
+        $this->assertCount(2, $eventInspect->history[BuildStageEvents::class],
             "Total 2 overall subscribers");
+
+        // Serialize the application
+        CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["tmp"]);
     }
 }

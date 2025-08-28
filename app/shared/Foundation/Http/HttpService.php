@@ -25,9 +25,9 @@ use Charcoal\Http\Client\Contracts\RequestObserverInterface;
 use Charcoal\Http\Client\HttpClient;
 use Charcoal\Http\Client\Request;
 use Charcoal\Http\Client\Response;
-use Charcoal\Http\Commons\Body\Payload;
+use Charcoal\Http\Commons\Contracts\HeadersInterface;
+use Charcoal\Http\Commons\Contracts\PayloadInterface;
 use Charcoal\Http\Commons\Enums\HttpMethod;
-use Charcoal\Http\Commons\Header\Headers;
 
 /**
  * This class is responsible for sending HTTP requests with various configurations and behaviors.
@@ -48,7 +48,7 @@ final class HttpService implements ModuleBindableInterface, RequestObserverInter
 
     public function __construct(CharcoalApp $app)
     {
-        $this->client = new HttpClient($app->config->http->client);
+        $this->client = new HttpClient($app->config->httpClient);
         $this->proxyConfigs = [];
     }
 
@@ -56,11 +56,11 @@ final class HttpService implements ModuleBindableInterface, RequestObserverInter
      * @throws \Charcoal\Http\Client\Exceptions\RequestException
      */
     public function request(
-        HttpMethod         $method,
-        string             $url,
-        Headers|array|null $headers = null,
-        Payload|array|null $payload = null,
-        HttpLogLevel       $logLevel = HttpLogLevel::None,
+        HttpMethod                  $method,
+        string                      $url,
+        HeadersInterface|array|null $headers = null,
+        PayloadInterface|array|null $payload = null,
+        HttpLogLevel                $logLevel = HttpLogLevel::None,
     ): Request
     {
         return (new Request(
@@ -75,13 +75,13 @@ final class HttpService implements ModuleBindableInterface, RequestObserverInter
      * @throws \Charcoal\Http\Client\Exceptions\RequestException
      */
     public function proxy(
-        ProxyServer        $proxy,
-        HttpMethod         $method,
-        string             $url,
-        Headers|array|null $headers = null,
-        Payload|array|null $payload = null,
-        HttpLogLevel       $logLevel = HttpLogLevel::None,
-        ?DsvString         $flags = null,
+        ProxyServer                 $proxy,
+        HttpMethod                  $method,
+        string                      $url,
+        HeadersInterface|array|null $headers = null,
+        PayloadInterface|array|null $payload = null,
+        HttpLogLevel                $logLevel = HttpLogLevel::None,
+        ?DsvString                  $flags = null,
     ): Request
     {
         return (new Request(

@@ -65,9 +65,9 @@ class CharcoalApp extends AbstractApp
     }
 
     /**
-     * @param PathRegistry $paths
-     * @throws \Charcoal\Filesystem\Exceptions\InvalidPathException
-     * @throws \Charcoal\Yaml\Exception\YamlParseException
+     * @param AppEnv $env
+     * @param Directories $paths
+     * @return AppConfig
      */
     protected function resolveAppConfig(AppEnv $env, Directories $paths): AppConfig
     {

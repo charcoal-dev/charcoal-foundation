@@ -44,6 +44,9 @@ final class HttpModule extends OrmModuleBase
     public function __construct(CharcoalApp $app)
     {
         parent::__construct($app);
+        $this->callLog = new CallLogHandler($this);
+        $this->interfaceLog = new LogHandler($this);
+        $this->proxies = new ProxiesHandler($this);
     }
 
     /**

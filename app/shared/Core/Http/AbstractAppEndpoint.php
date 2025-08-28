@@ -190,11 +190,6 @@ abstract class AbstractAppEndpoint extends AbstractRouteController
             return;
         }
 
-        $this->concurrencyLock = (new ConcurrencyEnforcer(
-            $this->concurrencyPolicy,
-            SemaphoreScopes::Http,
-            $this->interface->enum->value . "_" . $concurrencyScopeLockId
-        ))->acquireFileLock($this->app->security->semaphore, true);
     }
 
 
