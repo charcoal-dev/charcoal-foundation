@@ -31,7 +31,7 @@ RUN set -eux; \
       test -f "/usr/src/php/ext/${ext}/config.m4"; \
       docker-php-ext-install -j"$(nproc)" "${ext}"; \
     done; \
-    # Build sqlite3 and curl separately to isolate any issue
+    # Build sqlite3 and curl separately to isolate any issue \
     if [ -f "/usr/src/php/ext/sqlite3/config.m4" ]; then \
       echo ">>> Building PHP extension: sqlite3"; \
       docker-php-ext-install -j"$(nproc)" sqlite3; \
@@ -40,7 +40,7 @@ RUN set -eux; \
       echo ">>> Building PHP extension: curl"; \
       docker-php-ext-install -j"$(nproc)" curl; \
     fi; \
-    # Add phpredis as if it were bundled, avoiding manual phpize
+    # Add phpredis as if it were bundled, avoiding manual phpize \
     echo ">>> Adding phpredis 6.1.0"; \
     curl -fsSL -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/refs/tags/6.1.0.tar.gz; \
     mkdir -p /usr/src/php/ext/redis; \
@@ -66,6 +66,8 @@ RUN set -e; \
 USER charcoal
 WORKDIR /home/charcoal
 RUN install -d -m 0750 /home/charcoal/log /home/charcoal/tmp /home/charcoal/shared /home/charcoal/storage
+WORKDIR /home/charcoal/dev
+COPY dev/bootstrap.php bootstrap.php
 
 # Preinstall composer repositories:
 FROM base AS builder
@@ -97,6 +99,5 @@ COPY app/sapi/__SAPI_ID__/ app/sapi/__SAPI_ID__/
 COPY app/domain/ app/domain/
 COPY app/shared/ app/shared/
 COPY interfaces/__SAPI_ID__/ __SAPI_ID__/
-COPY dev/bootstrap.php __SAPI_ID__/_bootstrap.php
 COPY --from=builder /home/charcoal/dev/composer/vendor/ /home/charcoal/dev/composer/vendor/
 ENTRYPOINT ["/entrypoint.sh"]
