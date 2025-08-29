@@ -2,7 +2,6 @@
 /**
  * Part of the "charcoal-dev/charcoal-foundation" package.
  * @link https://github.com/charcoal-dev/charcoal-foundation
- * @noinspection PhpInternalEntityUsedInspection
  */
 
 declare(strict_types=1);
