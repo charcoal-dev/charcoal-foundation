@@ -36,7 +36,8 @@ if ($sapiDepth < 1 || $sapiDepth > 6) {
 define("CHARCOAL_SAPI_DEPTH", $sapiRoot);
 
 // Get the root directory for Charcoal App
-define("CHARCOAL_ROOT", realpath(dirname(CHARCOAL_SAPI_ROOT, $sapiDepth)));
+$overridePath = getenv("CHARCOAL_ROOT_INJECT") ? realpath(getenv("CHARCOAL_ROOT_INJECT")) : null;
+define("CHARCOAL_ROOT", $overridePath ?: realpath(dirname(CHARCOAL_SAPI_ROOT, $overridePath ?? $sapiDepth)));
 
 // Entrypoint
 define("CHARCOAL_SAPI_ENTRYPOINT", $_SERVER["SCRIPT_FILENAME"] ??
