@@ -448,12 +448,70 @@ cmd_ssh() {
   fi
 }
 
+cmd_update() {
+  require_env
+  local force=0 show_changelog=1
+  # flags: --force, --no-changelog
+  while [[ $# -gt 0 ]]; do
+    case "${1-}" in
+      --force)        force=1 ;;
+      --no-changelog) show_changelog=0 ;;
+      *) break ;;
+    esac
+    shift || true
+  done
+
+  command -v git >/dev/null 2>&1 || err "git not found on PATH"
+  [[ -d "$ROOT/.git" ]] || err "Not a git repository: $ROOT"
+
+  pushd "$ROOT" >/dev/null
+  local before after
+  before="$(git rev-parse HEAD 2>/dev/null || echo)"
+  info "Running: {grey}git pull --ff-only{/}"
+
+  if ! git pull --ff-only; then
+    popd >/dev/null
+    err "git pull failed (local changes or divergent history). Resolve manually (e.g. git pull --rebase)."
+  fi
+
+  after="$(git rev-parse HEAD 2>/dev/null || echo)"
+
+  if [[ "$after" != "$before" ]]; then
+    # show a short changelog
+    if (( show_changelog )); then
+      local n
+      n="$(git rev-list --count "$before..$after" 2>/dev/null || echo 0)"
+      ok "Repository updated: ${before:0:7} → ${after:0:7}  ({$n} commit$([[ $n -ne 1 ]] && echo s))"
+      info "Changelog:"
+      # one-line, no color, relative time + author
+      git --no-pager log --no-color --pretty=format:'  - %h %s (%cr · %an)' "$before..$after"
+      # optional brief file summary (uncomment if you want)
+      # info "Files changed summary:"
+      # git --no-pager diff --stat --compact-summary "$before..$after"
+    else
+      ok "Repository updated: ${before:0:7} → ${after:0:7}"
+    fi
+
+    popd >/dev/null
+    # build app snapshot
+    cmd_build_app
+  else
+    popd >/dev/null
+    if (( force )); then
+      info "Already up to date at ${before:0:7}, but --force given → building app…"
+      cmd_build_app
+    else
+      ok "Already up to date at ${before:0:7}. Skipping build. Use {yellow}./charcoal.sh update --force{/} to rebuild anyway."
+    fi
+  fi
+}
+
 usage() {
   info -n "Usage:"
   normal "
   {yellow}./charcoal.sh{/} {cyan}build{/} docker
   {yellow}./charcoal.sh{/} {cyan}build{/} {grey}[app]{/} {grey}[--reset]{/}
-  {yellow}./charcoal.sh{/} {cyan}update{/}
+  {yellow}./charcoal.sh{/} {cyan}update{/} {grey}[--force] [--no-changelog]{/}
   {yellow}./charcoal.sh{/} {cyan}logs{/} {magenta}<sapi>{/} {grey}[error|access|all]{/}
   {yellow}./charcoal.sh{/} {cyan}engine{/} inspect
   {yellow}./charcoal.sh{/} {cyan}engine{/} stop {grey}[all|name]{/}
@@ -477,7 +535,7 @@ main() {
       esac
       ;;
 
-    update)   cmd_build_app "$@";;
+    update)   cmd_update "$@";;
     engine)   cmd_engine "$@";;
     docker)   cmd_docker "$@";;
     ssh)      cmd_ssh "$@";;
