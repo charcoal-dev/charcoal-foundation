@@ -19,6 +19,7 @@ use Charcoal\App\Kernel\AbstractApp;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Internal\PathRegistry as Directories;
 use Charcoal\App\Kernel\Support\Errors\FileErrorLogger;
+use Charcoal\Filesystem\Exceptions\InvalidPathException;
 
 /**
  * Class CharcoalApp
@@ -68,9 +69,16 @@ class CharcoalApp extends AbstractApp
      * @param AppEnv $env
      * @param Directories $paths
      * @return AppConfig
+     * @throws InvalidPathException
      */
     protected function resolveAppConfig(AppEnv $env, Directories $paths): AppConfig
     {
+        $this->errors->subscribe(new FileErrorLogger(
+            $this->paths->log->join(AppConstants::ERROR_SINK),
+            useAnsiEscapeSeq: AppConstants::ERROR_SINK_ANSI,
+            eolChar: PHP_EOL
+        ));
+
         return DomainManifest::provideAppConfig($env, $paths);
     }
 
@@ -80,19 +88,6 @@ class CharcoalApp extends AbstractApp
     protected function resolveAppManifest(): DomainManifest
     {
         return new DomainManifest();
-    }
-
-    /**
-     * @return void
-     * @throws \Charcoal\Filesystem\Exceptions\InvalidPathException
-     */
-    protected function errorHandlersDeployedHook(): void
-    {
-        $this->errors->subscribe(new FileErrorLogger(
-            $this->paths->log->join(AppConstants::ERROR_SINK),
-            useAnsiEscapeSeq: AppConstants::ERROR_SINK_ANSI,
-            eolChar: PHP_EOL
-        ));
     }
 
     /**
