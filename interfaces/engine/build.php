@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-require_once "_bootstrap.php";
+require_once "bootstrap.php";
 charcoal_autoloader();
 
 use App\Shared\CharcoalApp;

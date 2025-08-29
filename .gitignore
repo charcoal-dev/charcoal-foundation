@@ -37,6 +37,7 @@ var/**
 !var/**/.gitkeep
 
 # Downstream App Specific
+.env
 /config
 /deployment
 
