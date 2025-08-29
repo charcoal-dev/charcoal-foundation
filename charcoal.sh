@@ -149,6 +149,10 @@ engine_healthy() {
   return 1
 }
 
+ensure_engine_up() {
+  compose up -d --no-deps "$(svc engine)" >/dev/null
+}
+
 export COMPOSE_PROFILES="${COMPOSE_PROFILES:-${CHARCOAL_DOCKER:-engine,web}}"
 
 generate_db_init_sql() {
@@ -270,10 +274,9 @@ cmd_build_docker() {
 cmd_build_app() {
   require_env
   local do_composer="${1-}"  # use --composer to run a local install
+  info "Checking dependencies…"
 
-  info "Refreshing app state (no rebuilds, no env changes)…"
-
-  # DEV workflow sanity check: ensure vendors exist if you’re using dev mounts
+  # Composer
   if [[ -d "dev/composer" ]]; then
     if [[ ! -f "dev/composer/vendor/autoload.php" ]]; then
       warn "Missing dev/composer/vendor/autoload.php"
@@ -289,8 +292,14 @@ cmd_build_app() {
     fi
   fi
 
-  # Add any lightweight cache warmups, schema checks, etc., here (optional).
-  ok "App refresh complete."
+  # CharcoalApp Builder
+  if has_profile engine; then
+    info "Initializing…"
+    ensure_engine_up
+    compose exec -T "$(svc engine)" bash -lc "${ENGINE_SNAPSHOT_CMD:-php -f /home/charcoal/build.php}"
+  else
+    info "Engine profile disabled; skipping snapshot."
+  fi
 }
 
 cmd_engine() {
