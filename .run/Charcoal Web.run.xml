@@ -1,0 +1,20 @@
+<!--
+  ~ Part of the "charcoal-dev/charcoal-foundation" package.
+  ~ @link https://github.com/charcoal-dev/charcoal-foundation
+  -->
+
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Charcoal Web" type="PhpBuiltInWebServerConfigurationType" factoryName="PHP Built-in Web Server" document_root="$PROJECT_DIR$/interfaces/web/public_html" port="7200">
+    <CommandLine workingDirectory="$PROJECT_DIR$/interfaces/web">
+      <envFiles>
+        <find>$PROJECT_DIR$/interfaces/web/.env</find>
+      </envFiles>
+    </CommandLine>
+    <option name="envFilePaths">
+      <list>
+        <option value="$PROJECT_DIR$/interfaces/web/.env" />
+      </list>
+    </option>
+    <method v="2" />
+  </configuration>
+</component>

@@ -1,0 +1,20 @@
+<!--
+  ~ Part of the "charcoal-dev/charcoal-foundation" package.
+  ~ @link https://github.com/charcoal-dev/charcoal-foundation
+  -->
+
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Charcoal Builder" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/interfaces/engine/build.php">
+    <CommandLine workingDirectory="$PROJECT_DIR$/interfaces/engine">
+      <envFiles>
+        <find>$PROJECT_DIR$/interfaces/engine/.env</find>
+      </envFiles>
+    </CommandLine>
+    <option name="envFilePaths">
+      <list>
+        <option value="$PROJECT_DIR$/interfaces/engine/.env" />
+      </list>
+    </option>
+    <method v="2" />
+  </configuration>
+</component>
