@@ -297,7 +297,7 @@ cmd_build_app() {
 
   # CharcoalApp Builder
   if has_profile engine; then
-    info "Initializing…"
+    info "Initializing Charcoal App…"
     normal ""
     compose exec -T "$(svc engine)" bash -lc "${ENGINE_SNAPSHOT_CMD:-php -f /home/charcoal/engine/build.php}"
   else

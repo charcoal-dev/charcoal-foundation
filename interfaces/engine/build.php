@@ -11,23 +11,24 @@ use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\Filesystem\Path\DirectoryPath;
+use Charcoal\Base\Support\Helpers\ObjectHelper;
 
-require "dev/composer/vendor/autoload.php";
+chdir(__DIR__);
+require "../../dev/composer/vendor/autoload.php";
 
 $stdout = new \Charcoal\Cli\Output\StdoutPrinter();
 $stdout->useAnsiCodes(true);
 
 try {
-    $stdout->write("{cyan}Initializing...", true);
+    $stdout->write("{cyan}Charcoal App: ", false);
     $appFqcn = \App\Shared\CharcoalApp::getAppFqcn();
-    $appId = \Charcoal\Base\Support\Helpers\ObjectHelper::baseClassName($appFqcn);
-    $stdout->write("{yellow}" . $appId . "{/}...", true);
-    $stdout->write("", true);
-
-    $stdout->write("{grey}Root Directory: {/}", false);
+    $stdout->write("{yellow}" . ObjectHelper::baseClassName($appFqcn), true);
+    $stdout->write("App Fqcn: ", false);
+    $stdout->write("{cyan}" . $appFqcn, true);
+    $stdout->write("Root Directory: ", false);
     $rootDirectory = (new DirectoryPath(dirname(__FILE__, 3)))->node();
     $stdout->write("{green}" . $rootDirectory->path->absolute, true);
-    $stdout->write("{grey}Shared Context Path: {/}", false);
+    $stdout->write("Shared Context Path: ", false);
     $sharedContext = $rootDirectory->directory("tmp/shared", true, false);
     $stdout->write("{green}" . $sharedContext->path->absolute, true);
 
