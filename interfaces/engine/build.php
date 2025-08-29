@@ -12,7 +12,7 @@ use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\Filesystem\Path\DirectoryPath;
 
-var_dump(__FILE__);
+var_dump(getcwd(), __DIR__);
 $vendor  = realpath(__DIR__ . "/../dev/composer/vendor/autoload.php");
 var_dump(file_exists($vendor), $vendor);
 require "../dev/composer/vendor/autoload.php";
