@@ -30,6 +30,8 @@ fi
 
 mkdir -p /home/charcoal/log /home/charcoal/tmp /home/charcoal/shared /home/charcoal/storage
 
+touch /home/charcoal/log/error.log
+
 install -d -m 0750 \
   /home/charcoal/tmp/nginx \
   /home/charcoal/tmp/nginx/body \
