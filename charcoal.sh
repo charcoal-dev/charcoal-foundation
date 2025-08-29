@@ -25,6 +25,7 @@ LOGS_SEMA_DIR="$SEMAPHORE_DIR/logs"
 OVR_PORTS="$ROOT/dev/docker/compose.ports.yml"
 MOUNTS_DEV="$ROOT/dev/docker/compose/mounts.dev.yml"
 MOUNTS_PROD="$ROOT/dev/docker/compose/mounts.prod.yml"
+HTTP_ENV_OVR="$ROOT/dev/docker/compose/http.env.yml"
 
 # Colors and Styling (defines ok/info/warn/err used by helpers)
 STYLING_FILE="$ROOT/dev/bin/styling.sh"
@@ -107,28 +108,23 @@ profile_flags() {
 }
 
 compose() {
-  # decide mounts by env (your Option 2)
+  # decide mounts by env (Option 2)
   local mounts="dev/docker/compose/mounts.dev.yml"
   [[ "${CHARCOAL_ENV:-dev}" == "prod" ]] && mounts="dev/docker/compose/mounts.prod.yml"
 
-  # decide profiles (from COMPOSE_PROFILES or your env var CHARCOAL_DOCKER)
-  local EFFECTIVE="${COMPOSE_PROFILES:-${CHARCOAL_DOCKER:-engine,web}}"
+  # prefer resolve_profiles → COMPOSE_PROFILES → default
+  local profiles="${EFFECTIVE:-${COMPOSE_PROFILES:-${CHARCOAL_DOCKER:-engine,web}}}"
 
   DOCKER_BUILDKIT=1 \
   COMPOSE_DOCKER_CLI_BUILD=1 \
   COMPOSE_IGNORE_ORPHANS=1 \
   COMPOSE_PROJECT_NAME="charcoal-$CHARCOAL_PROJECT" \
-  COMPOSE_PROFILES="$EFFECTIVE" \
+  COMPOSE_PROFILES="$profiles" \
   docker compose \
-    -f dev/docker/docker-compose.yml \
-    -f "$mounts" \
-    -f dev/docker/compose/manifest.overrides.yml \
+    -f "$ROOT/dev/docker/docker-compose.yml" \
+    -f "$ROOT/$mounts" \
+    -f "$ROOT/dev/docker/compose/manifest.overrides.yml" \
     "$@"
-}
-
-has_profile() {
-  local set="${COMPOSE_PROFILES:-${CHARCOAL_DOCKER:-}}"
-  [[ ",${set}," == *",$1,"* ]]
 }
 
 ensure_runtime_dirs() {
@@ -197,7 +193,7 @@ ensure_http_env_overrides() {
   rm -f "$HTTP_ENV_OVR"; mkdir -p "$(dirname "$HTTP_ENV_OVR")"
   { echo "services:"; } > "$HTTP_ENV_OVR"
   local wrote=0
-  for id in "${HTTP_SAPIS[@]}"; do
+  for id in "${HTTP_SAPI[@]}"; do
     doc="${SAPI_DOCROOT[$id]:-}"
     [[ -z "$doc" ]] && continue
     cat >> "$HTTP_ENV_OVR" <<YML
@@ -327,12 +323,19 @@ cmd_docker() {
   compose "$@"
 }
 
-tail_bg() { # $1=file $2=pidfile
+tail_bg() {
   local file="$1" pidfile="$2"
-  nohup tail -F "$file" >/dev/stdout 2>&1 &
-  local pid=$!
-  echo "$pid" > "$pidfile"
-  ok "Tailing $(basename "$file") in background (PID $pid)"
+
+  # already tailing?
+  if [[ -f "$pidfile" ]] && kill -0 "$(cat "$pidfile")" 2>/dev/null; then
+    info "Already tailing $(basename "$file") (PID $(cat "$pidfile"))."
+    return 0
+  fi
+
+  # line-buffered tail, inherit parent's stdout/stderr
+  ( stdbuf -oL -eL tail -n 200 -F -- "$file" ) &
+  echo $! > "$pidfile"
+  ok "Tailing $(basename "$file") in background (PID $!)"
 }
 
 cmd_logs() {
