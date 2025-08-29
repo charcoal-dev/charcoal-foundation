@@ -2,6 +2,7 @@
 /**
  * Part of the "charcoal-dev/charcoal-foundation" package.
  * @link https://github.com/charcoal-dev/charcoal-foundation
+ * @noinspection PhpUnhandledExceptionInspection
  */
 
 declare(strict_types=1);
@@ -10,6 +11,8 @@ require_once "bootstrap.php";
 charcoal_autoloader();
 
 use App\Shared\CharcoalApp;
+use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
+use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 use Charcoal\Cli\Output\StdoutPrinter;
 use Charcoal\Filesystem\Path\DirectoryPath;
@@ -17,77 +20,31 @@ use Charcoal\Filesystem\Path\DirectoryPath;
 $stdout = new StdoutPrinter();
 $stdout->useAnsiCodes(true);
 
-try {
-    $appFqcn = \App\Shared\CharcoalApp::getAppFqcn();
-    $stdout->write("{yellow}" . ObjectHelper::baseClassName($appFqcn), true);
-    $stdout->write("{cyan}" . $appFqcn, true);
-    $stdout->write("Root Directory: ", false);
-    $rootDirectory = (new DirectoryPath(charcoal_from_root()))->node();
-    $stdout->write("{green}" . $rootDirectory->path->absolute, true);
-    $stdout->write("Shared Context Path: ", false);
-    $sharedContext = $rootDirectory->directory("/shared", true, false);
-    $stdout->write("{green}" . $sharedContext->path->absolute, true);
+$appFqcn = \App\Shared\CharcoalApp::getAppFqcn();
+$stdout->write("{yellow}" . ObjectHelper::baseClassName($appFqcn), true);
+$stdout->write("{cyan}" . $appFqcn, true);
+$stdout->write("Root Directory: ", false);
+$rootDirectory = (new DirectoryPath(charcoal_from_root()))->node();
+$stdout->write("{green}" . $rootDirectory->path->absolute, true);
+$stdout->write("Shared Context Path: ", false);
+$sharedContext = $rootDirectory->directory("shared", true, false);
+$stdout->write("{green}" . $sharedContext->path->absolute, true);
+$stdout->write("", true);
 
-    exit;
-
-    try {
-        $timestamp = MonotonicTimestamp::now();
-        $charcoal = new CharcoalApp(
-            AppEnv::Test,
-            $rootDirectory,
-            function (BuildStageEvents $events) {
-                fwrite(STDERR, "\033[36mBuild Stage:\033[0m \033[33m" . $events->name . "\033[0m\n");
-            }
-        );
-    } catch (\Throwable $t) {
-        throw $t;
+$timestamp = MonotonicTimestamp::now();
+$charcoal = new CharcoalApp(
+    \Charcoal\App\Kernel\Enums\AppEnv::tryFrom(getenv("APP_ENV") ?: "dev"),
+    $rootDirectory,
+    function (BuildStageEvents $events) use ($stdout) {
+        $stdout->write("{cyan}Build Stage:{/} {yellow}" . $events->name . "{/}", true);
     }
+);
 
-    fwrite(STDERR, "\033[35mCharcoal App Initialized\033[0m\n");
+$charcoal->bootstrap($timestamp);
+$startupTime = $charcoal->diagnostics->startupTime / 1e6;
+$stdout->write("", true);
+$stdout->write("{magenta}" . ObjectHelper::baseClassName($appFqcn) . " Initialized", true);
+$stdout->write("{cyan}Initialization Time: {green}" . $startupTime . "ms", true);
 
-
-    $appClassname = \App\Shared\CharcoalApp::getAppClassname();
-    $appClassname = \Charcoal\OOP\OOP::baseClassName($appClass);
-    $rootDirectory = new \Charcoal\Filesystem\Directory(__DIR__);
-
-    $stdout->write(sprintf("Creating {invert}{yellow} %s {/} build... ", $appClassname), false);
-    $startOn = microtime(true);
-    /** @var \App\Shared\CharcoalApp|string $app */
-    $app = new $appClass(\App\Shared\Context\BuildContext::GLOBAL, $rootDirectory);
-    $app->lifecycle->startedOn = $startOn;
-    $app->bootstrap(); # Bootstrap all modules & services
-
-    $stdout->write("{green}" . number_format(microtime(true) - $startOn, 4) . "s", true);
-    $stdout->write("Writing to {cyan}tmp{/} directory... ", false);
-    $app::CreateBuild($app, $app->directories->tmp);
-    $stdout->write("{green}Success{/}", true);
-    $stdout->write("{grey}Checking error handler... ", false);
-    if ($app->errors->count() > 0) {
-        $stdout->write(sprintf("{red}%d{/}", $app->errors->count()), true);
-    } else {
-        $stdout->write("{green}All good!{/}", true);
-    }
-
-} catch (Throwable $t) {
-    $stdout->write("", true);
-    $stdout->write(sprintf(
-        "{red}{invert} %s {/}: {grey}#%s{/} {red}%s{/} {grey}near{/} {cyan}%s{/}{grey}:{/}{yellow}%d{/}",
-        get_class($t),
-        $t->getCode(),
-        $t->getMessage(),
-        $t->getFile(),
-        $t->getLine(),
-    ), true);
-}
-
-if (isset($app)) {
-    if ($app->errors->count()) {
-        $stdout->write("", true);
-        $stdout->write("{red}Errors Caught:{/}", true);
-
-        /** @var \Charcoal\App\Kernel\Errors\ErrorEntry $errorMsg */
-        foreach ($app->errors as $errorMsg) {
-            $stdout->write(json_encode($errorMsg, JSON_PRETTY_PRINT), true);
-        }
-    }
-}
+$build = CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["tmp"]);
+$stdout->write("{cyan}Snapshot Size: {green}" . round(filesize($build->absolute) / 1024, 2) . " KB", true);
