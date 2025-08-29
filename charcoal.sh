@@ -337,7 +337,7 @@ cmd_services() {
 }
 
 usage() {
-  info "Usage:"
+  info -n "Usage:"
   normal "
   {yellow}./charcoal.sh{/} {cyan}build{/} docker
   {yellow}./charcoal.sh{/} {cyan}build{/} app {grey}[--reset]{/}
