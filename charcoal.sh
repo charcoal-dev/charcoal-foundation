@@ -210,6 +210,12 @@ YML
   [[ $wrote -eq 1 ]] || rm -f "$HTTP_ENV_OVR"
 }
 
+ensure_service_up() {
+  require_env
+  local sapi="${1:?sapi required}"
+  compose up -d --no-deps "$(svc "$sapi")" >/dev/null
+}
+
 gen_sapi_df() {
   local id="$1" base="$2" extras="$3"
   local out="$ROOT/dev/docker/sapi/app/$id/Dockerfile"
