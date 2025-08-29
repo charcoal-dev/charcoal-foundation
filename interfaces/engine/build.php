@@ -14,7 +14,7 @@ use Charcoal\Filesystem\Path\DirectoryPath;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 
 chdir(dirname(__DIR__));
-require "../../dev/composer/vendor/autoload.php";
+require "../dev/composer/vendor/autoload.php";
 
 $stdout = new \Charcoal\Cli\Output\StdoutPrinter();
 $stdout->useAnsiCodes(true);
