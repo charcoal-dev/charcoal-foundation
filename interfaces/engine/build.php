@@ -13,7 +13,9 @@ use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\Filesystem\Path\DirectoryPath;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 
+var_dump(getenv());
 require "dev/composer/vendor/autoload.php";
+exit;
 
 $stdout = new \Charcoal\Cli\Output\StdoutPrinter();
 $stdout->useAnsiCodes(true);
@@ -25,7 +27,7 @@ try {
     $stdout->write("App Fqcn: ", false);
     $stdout->write("{cyan}" . $appFqcn, true);
     $stdout->write("Root Directory: ", false);
-    $rootDirectory = (new DirectoryPath(dirname(__FILE__, 3)))->node();
+    $rootDirectory = (new DirectoryPath("/home/charcoal"))->node();
     $stdout->write("{green}" . $rootDirectory->path->absolute, true);
     $stdout->write("Shared Context Path: ", false);
     $sharedContext = $rootDirectory->directory("tmp/shared", true, false);
