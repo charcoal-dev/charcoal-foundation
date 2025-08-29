@@ -292,6 +292,45 @@ tail_bg() { # $1=file $2=pidfile
   ok "Tailing $(basename "$file") in background (PID $pid)"
 }
 
+cmd_logs() {
+  require_env
+
+  local sapi="${1:-}"
+  local kind="${2:-all}"
+
+  [[ -n "$sapi" ]] || err "Usage: ./charcoal.sh logs <sapi> [error|access|all]"
+  case "$kind" in
+    error|access|all) ;;
+    *) err "Use one of: error | access | all" ;;
+  esac
+
+  # Validate SAPI (and resolve compose service name)
+  local service
+  if ! service="$(svc "$sapi")"; then
+    err "Unknown SAPI '$sapi'"
+  fi
+
+  local base="$ROOT/var/log/$sapi"
+  install -d -m 0750 "$LOGS_SEMA_DIR"
+
+  local tailed=0
+  if [[ -d "$base" ]]; then
+    if [[ "$kind" == "error" || "$kind" == "all" ]]; then
+      local f="$base/error.log" p="$LOGS_SEMA_DIR/${sapi}.error.pid"
+      if [[ -f "$f" ]]; then tail_bg "$f" "$p"; tailed=1; fi
+    fi
+    if [[ "$kind" == "access" || "$kind" == "all" ]]; then
+      local f="$base/access.log" p="$LOGS_SEMA_DIR/${sapi}.access.pid"
+      if [[ -f "$f" ]]; then tail_bg "$f" "$p"; tailed=1; fi
+    fi
+  fi
+
+  if [[ $tailed -eq 0 ]]; then
+    info "No local log files under var/log/$sapi; falling back to: docker compose logs -f $service"
+    compose logs -f "$service"
+  fi
+}
+
 logs_cmd() {
   local sapi="$1"; shift || true
   local which="${1:-all}"
