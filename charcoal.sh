@@ -428,18 +428,23 @@ cmd_services() {
 cmd_ssh() {
   require_env
   local sapi="${1-}"; shift || true
-  [[ -n "$sapi" ]] || err "Usage: ./charcoal.sh ssh <sapi> [shell]"
+  [[ -n "$sapi" ]] || err "Usage: ./charcoal.sh ssh <sapi> [shell [args...]]"
 
   local service; service="$(svc "$sapi")" || err "Unknown SAPI '$sapi'"
 
-  local shell="${1- bash}"
   ensure_service_up "$sapi"
+  local shell="${1:-bash}"; shift || true
 
-  # -ti if interactive; -T when stdin isn’t a TTY
+  if [[ "$shell" == "bash" ]]; then
+    if ! compose exec -T "$service" sh -lc 'command -v bash >/dev/null 2>&1'; then
+      shell="sh"
+    fi
+  fi
+
   if [[ -t 0 && -t 1 ]]; then
-    compose exec -ti "$service" "$shell"
+    compose exec -ti "$service" "$shell" "$@"
   else
-    compose exec -T  "$service" "$shell"
+    compose exec -T  "$service" "$shell" "$@"
   fi
 }
 
@@ -448,6 +453,7 @@ usage() {
   normal "
   {yellow}./charcoal.sh{/} {cyan}build{/} docker
   {yellow}./charcoal.sh{/} {cyan}build{/} {grey}[app]{/} {grey}[--reset]{/}
+  {yellow}./charcoal.sh{/} {cyan}update{/}
   {yellow}./charcoal.sh{/} {cyan}logs{/} {magenta}<sapi>{/} {grey}[error|access|all]{/}
   {yellow}./charcoal.sh{/} {cyan}engine{/} inspect
   {yellow}./charcoal.sh{/} {cyan}engine{/} stop {grey}[all|name]{/}
