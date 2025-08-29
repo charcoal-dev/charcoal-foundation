@@ -337,17 +337,17 @@ cmd_services() {
 }
 
 usage() {
-  normal <<'USAGE'
-Usage:
+  info "Usage:"
+  normal "
   {yellow}./charcoal.sh{/} {cyan}build{/} docker
-  ./charcoal.sh build app [--reset]
-  ./charcoal.sh engine inspect
-  ./charcoal.sh engine stop [all|name]
-  ./charcoal.sh engine restart [all|name]
-  ./charcoal.sh engine exec <script> [args...]
-  ./charcoal.sh docker <args...>
-  ./charcoal.sh logs <sapi> [error|access|all]
-USAGE
+  {yellow}./charcoal.sh{/} {cyan}build{/} app {grey}[--reset]{/}
+  {yellow}./charcoal.sh{/} {cyan}logs{/} {magenta}<sapi>{/} {grey}[error|access|all]{/}
+  {yellow}./charcoal.sh{/} {cyan}engine{/} inspect
+  {yellow}./charcoal.sh{/} {cyan}engine{/} stop {grey}[all|name]{/}
+  {yellow}./charcoal.sh{/} {cyan}engine{/} restart {grey}[all|name]{/}
+  {yellow}./charcoal.sh{/} {cyan}engine{/} exec {magenta}<script>{/} {grey}[args...]{/}
+  {yellow}./charcoal.sh{/} {cyan}docker{/} {grey}<args...>{/}
+"
 }
 
 main() {
