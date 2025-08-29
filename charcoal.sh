@@ -441,8 +441,7 @@ main() {
       local sub="${1-}"; shift || true
       case "${sub-}" in
         docker) cmd_build_docker "$@";;
-        app)    cmd_build_app "$@";;
-        "" )    usage; exit 1;;
+        ""|app)    cmd_build_app "$@";;
         * )     err "Unknown 'build' subcommand: ${sub}"; usage; exit 1;;
       esac
       ;;
