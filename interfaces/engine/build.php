@@ -18,13 +18,11 @@ $stdout = new StdoutPrinter();
 $stdout->useAnsiCodes(true);
 
 try {
-    $stdout->write("{cyan}Charcoal App: ", false);
     $appFqcn = \App\Shared\CharcoalApp::getAppFqcn();
     $stdout->write("{yellow}" . ObjectHelper::baseClassName($appFqcn), true);
-    $stdout->write("App Fqcn: ", false);
     $stdout->write("{cyan}" . $appFqcn, true);
     $stdout->write("Root Directory: ", false);
-    $rootDirectory = (new DirectoryPath("/home/charcoal"))->node();
+    $rootDirectory = (new DirectoryPath(charcoal_from_root()))->node();
     $stdout->write("{green}" . $rootDirectory->path->absolute, true);
     $stdout->write("Shared Context Path: ", false);
     $sharedContext = $rootDirectory->directory("tmp/shared", true, false);

@@ -11,4 +11,5 @@ if (!$depth) {
     throw new \Exception("CHARCOAL_SAPI_DEPTH environment variable is not set.");
 }
 
+chdir(__DIR__);
 require_once str_repeat("../", $depth) . "dev/bootstrap.php";
