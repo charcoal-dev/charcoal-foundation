@@ -512,6 +512,7 @@ usage() {
   {yellow}./charcoal.sh{/} {cyan}build{/} docker
   {yellow}./charcoal.sh{/} {cyan}build{/} {grey}[app]{/} {grey}[--reset]{/}
   {yellow}./charcoal.sh{/} {cyan}update{/} {grey}[--force] [--no-changelog]{/}
+  {yellow}./charcoal.sh{/} {cyan}pull{/} {grey}alias of \"update\"{/}
   {yellow}./charcoal.sh{/} {cyan}logs{/} {magenta}<sapi>{/} {grey}[error|access|all]{/}
   {yellow}./charcoal.sh{/} {cyan}engine{/} inspect
   {yellow}./charcoal.sh{/} {cyan}engine{/} stop {grey}[all|name]{/}
@@ -535,7 +536,7 @@ main() {
       esac
       ;;
 
-    update)   cmd_update "$@";;
+    update|pull)   cmd_update "$@";;
     engine)   cmd_engine "$@";;
     docker)   cmd_docker "$@";;
     ssh)      cmd_ssh "$@";;
