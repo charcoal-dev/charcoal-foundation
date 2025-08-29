@@ -12,7 +12,10 @@ use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\Filesystem\Path\DirectoryPath;
 
-require "../../dev/composer/vendor/autoload.php";
+var_dump(__FILE__);
+$vendor  = realpath(__DIR__ . "/../dev/composer/vendor/autoload.php");
+var_dump(file_exists($vendor), $vendor);
+require "../dev/composer/vendor/autoload.php";
 
 $stdout = new \Charcoal\Cli\Output\StdoutPrinter();
 $stdout->useAnsiCodes(true);
