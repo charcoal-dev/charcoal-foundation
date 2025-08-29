@@ -35,6 +35,5 @@ final readonly class PathRegistry extends \Charcoal\App\Kernel\Internal\PathRegi
         $this->tmp = $this->getValidatedPathSnapshot("/tmp", true, true, true, true);
         $this->shared = $this->getValidatedPathSnapshot("/shared", true, true, true, true);
         $this->storage = $this->getValidatedPathSnapshot("/storage", true, true, false, true);
-        $this->emails = $this->getValidatedPathSnapshot("/emails", true, true, false, true);
     }
 }
