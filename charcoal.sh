@@ -295,16 +295,15 @@ tail_bg() { # $1=file $2=pidfile
 cmd_logs() {
   require_env
 
-  local sapi="${1:-}"
-  local kind="${2:-all}"
+  local sapi="${1-}"
+  local kind="${2-all}"
 
-  [[ -n "$sapi" ]] || err "Usage: ./charcoal.sh logs <sapi> [error|access|all]"
-  case "$kind" in
+  [[ -n "${sapi:-}" ]] || err "Usage: ./charcoal.sh logs <sapi> [error|access|all]"
+  case "${kind:-all}" in
     error|access|all) ;;
     *) err "Use one of: error | access | all" ;;
   esac
 
-  # Validate SAPI (and resolve compose service name)
   local service
   if ! service="$(svc "$sapi")"; then
     err "Unknown SAPI '$sapi'"
@@ -317,11 +316,11 @@ cmd_logs() {
   if [[ -d "$base" ]]; then
     if [[ "$kind" == "error" || "$kind" == "all" ]]; then
       local f="$base/error.log" p="$LOGS_SEMA_DIR/${sapi}.error.pid"
-      if [[ -f "$f" ]]; then tail_bg "$f" "$p"; tailed=1; fi
+      [[ -f "$f" ]] && { tail_bg "$f" "$p"; tailed=1; }
     fi
     if [[ "$kind" == "access" || "$kind" == "all" ]]; then
       local f="$base/access.log" p="$LOGS_SEMA_DIR/${sapi}.access.pid"
-      if [[ -f "$f" ]]; then tail_bg "$f" "$p"; tailed=1; fi
+      [[ -f "$f" ]] && { tail_bg "$f" "$p"; tailed=1; }
     fi
   fi
 
@@ -378,9 +377,9 @@ cmd_services() {
 }
 
 usage() {
-  cat <<'USAGE'
+  normal <<'USAGE'
 Usage:
-  ./charcoal.sh build docker
+  {yellow}./charcoal.sh{/} {cyan}build{/} docker
   ./charcoal.sh build app [--reset]
   ./charcoal.sh engine inspect
   ./charcoal.sh engine stop [all|name]
@@ -392,20 +391,35 @@ USAGE
 }
 
 main() {
-  local ns="${1:-}"; shift || true
-  case "$ns" in
+  local ns="${1-}"; shift || true
+
+  case "${ns-}" in
     build)
-      case "${1:-}" in
-        docker) shift; cmd_build_docker "$@";;
-        app)    shift; cmd_build_app "$@";;
-        *) usage; exit 1;;
+      local sub="${1-}"; shift || true
+      case "${sub-}" in
+        docker) cmd_build_docker "$@";;
+        app)    cmd_build_app "$@";;
+        "" )    usage; exit 1;;
+        * )     err "Unknown 'build' subcommand: ${sub}"; usage; exit 1;;
       esac
       ;;
-    engine) shift || true; cmd_engine "$@";;
-    docker) shift || true; cmd_docker "$@";;
-    logs)   shift || true; cmd_logs "$@";;
+
+    engine)   cmd_engine "$@";;
+    docker)   cmd_docker "$@";;
+
+    logs)
+      # Enforce: logs <sapi> [error|access|all]
+      if [[ -z "${1-}" ]]; then
+        err "Usage: ./charcoal.sh logs <sapi> [error|access|all]"
+        exit 1
+      fi
+      cmd_logs "${1-}" "${2-}"
+      ;;
+
     services) cmd_services ;;
-    *) usage; exit 1;;
+
+    "" )      usage; exit 1;;
+    * )       err "Unknown command: ${ns}"; usage; exit 1;;
   esac
 }
 
