@@ -296,7 +296,7 @@ cmd_build_app() {
   if has_profile engine; then
     info "Initializing…"
     ensure_engine_up
-    info ""
+    normal ""
     compose exec -T "$(svc engine)" bash -lc "${ENGINE_SNAPSHOT_CMD:-php -f /home/charcoal/engine/build.php}"
   else
     info "Engine profile disabled; skipping snapshot."
