@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace App\Shared;
 
 use App\Shared\Core\Config\Snapshot\AppConfig;
-use App\Shared\Core\ErrorManager;
 use App\Shared\Core\PathRegistry;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use App\Shared\Foundation\Engine\EngineModule;
@@ -24,7 +23,6 @@ use Charcoal\App\Kernel\Internal\PathRegistry as Directories;
  * @package App\Shared
  * @property PathRegistry $paths
  * @property AppConfig $config
- * @property ErrorManager $errors
  */
 class CharcoalApp extends AbstractApp
 {

@@ -10,7 +10,6 @@ namespace App\Shared;
 
 use App\Shared\Core\Config\Builder\AppConfigBuilder;
 use App\Shared\Core\Config\Snapshot\AppConfig;
-use App\Shared\Core\ErrorManager;
 use App\Shared\Core\PathRegistry;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use App\Shared\Foundation\Engine\EngineModule;
@@ -79,17 +78,5 @@ final class DomainManifest extends AppManifest
     public function resolvePathsRegistry(AppEnv $env, DirectoryNode $root): PathRegistry
     {
         return new PathRegistry($env, $root->path);
-    }
-
-    /**
-     * Resolve and initialize the error service.
-     * @param PathRegistry $paths
-     */
-    public function resolveErrorService(
-        AppEnv                                     $env,
-        \Charcoal\App\Kernel\Internal\PathRegistry $paths
-    ): ErrorManager
-    {
-        return new ErrorManager($env, $paths);
     }
 }

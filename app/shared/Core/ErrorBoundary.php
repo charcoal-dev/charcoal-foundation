@@ -1,0 +1,40 @@
+<?php
+/**
+ * Part of the "charcoal-dev/charcoal-foundation" package.
+ * @link https://github.com/charcoal-dev/charcoal-foundation
+ */
+
+declare(strict_types=1);
+
+namespace App\Shared\Core;
+
+use App\Shared\Core\Http\Html\RenderHtmlTemplateTrait;
+use Charcoal\App\Kernel\Internal\Exceptions\AppCrashException;
+
+/**
+ * A final, readonly class dedicated to handling application crash scenarios by rendering an HTML page.
+ * Extends the core ErrorBoundary capabilities and enhances it with HTML template rendering.
+ */
+final readonly class ErrorBoundary extends \Charcoal\App\Kernel\Support\Errors\ErrorBoundary
+{
+    use RenderHtmlTemplateTrait;
+
+    /**
+     * @noinspection PhpUnhandledExceptionInspection
+     */
+    public static function crashHtmlPage(
+        AppCrashException|\Throwable $exception,
+        string                       $crashHtmlTemplate,
+        bool                         $errorLog = true,
+        bool                         $stdError = false,
+        int                          $pathOffset = 0,
+    ): never
+    {
+        $exceptionDto = self::toErrorStream($exception, $errorLog, $stdError, $pathOffset);
+
+        header("Content-Type: text/html", response_code: 500);
+        header("Cache-Control: no-store, no-cache, must-revalidate");
+        print(self::renderTemplateFile($crashHtmlTemplate, ["exception" => $exceptionDto])->raw());
+        exit(1);
+    }
+}

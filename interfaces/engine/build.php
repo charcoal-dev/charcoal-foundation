@@ -11,10 +11,9 @@ require_once "bootstrap.php";
 charcoal_autoloader();
 
 use App\Shared\CharcoalApp;
+use App\Shared\Core\ErrorBoundary;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
-use Charcoal\App\Kernel\Enums\SapiType;
-use Charcoal\App\Kernel\Errors\ErrorBoundary;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 use Charcoal\Cli\Output\StdoutPrinter;
 use Charcoal\Filesystem\Path\DirectoryPath;
@@ -53,5 +52,5 @@ try {
     $build = CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["tmp"]);
     $stdout->write("{cyan}Snapshot Size: {green}" . round(filesize($build->absolute) / 1024, 2) . " KB", true);
 } catch (\Throwable $t) {
-    ErrorBoundary::terminate(SapiType::Cli, $t, true, true, strlen($rootDirectory?->path?->absolute ?? 0));
+    ErrorBoundary::terminate($t, true, true, strlen($rootDirectory?->path?->absolute ?? 0));
 }

@@ -26,7 +26,7 @@ trait RenderHtmlTemplateTrait
      * @throws InvalidPathException
      * @throws PathTypeException
      */
-    final protected function renderTemplateFile(FilePath|SafePath|string $templateFilepath, array $data = []): Buffer
+    final protected static function renderTemplateFile(FilePath|SafePath|string $templateFilepath, array $data = []): Buffer
     {
         if (!$templateFilepath instanceof FilePath) {
             $templateFilepath = new FilePath($templateFilepath);
