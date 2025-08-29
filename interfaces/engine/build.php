@@ -13,10 +13,8 @@ use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\Filesystem\Path\DirectoryPath;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 
-var_dump(getcwd());
-chdir(__DIR__);
-var_dump(getcwd(), __DIR__);
-require "../../dev/composer/vendor/autoload.php";
+chdir(dirname(__DIR__));
+require "../dev/composer/vendor/autoload.php";
 
 $stdout = new \Charcoal\Cli\Output\StdoutPrinter();
 $stdout->useAnsiCodes(true);
