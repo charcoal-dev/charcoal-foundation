@@ -423,7 +423,7 @@ usage() {
   info -n "Usage:"
   normal "
   {yellow}./charcoal.sh{/} {cyan}build{/} docker
-  {yellow}./charcoal.sh{/} {cyan}build{/} app {grey}[--reset]{/}
+  {yellow}./charcoal.sh{/} {cyan}build{/} {grey}[app]{/} {grey}[--reset]{/}
   {yellow}./charcoal.sh{/} {cyan}logs{/} {magenta}<sapi>{/} {grey}[error|access|all]{/}
   {yellow}./charcoal.sh{/} {cyan}engine{/} inspect
   {yellow}./charcoal.sh{/} {cyan}engine{/} stop {grey}[all|name]{/}
@@ -441,11 +441,12 @@ main() {
       local sub="${1-}"; shift || true
       case "${sub-}" in
         docker) cmd_build_docker "$@";;
-        ""|app)    cmd_build_app "$@";;
+        ""|app) cmd_build_app "$@";;
         * )     err "Unknown 'build' subcommand: ${sub}"; usage; exit 1;;
       esac
       ;;
 
+    update)   cmd_build_app "$@";;
     engine)   cmd_engine "$@";;
     docker)   cmd_docker "$@";;
 
