@@ -19,9 +19,10 @@ use Charcoal\Base\Support\Helpers\ObjectHelper;
 use Charcoal\Cli\Output\StdoutPrinter;
 use Charcoal\Filesystem\Path\DirectoryPath;
 
+ErrorBoundary::alignDockerStdError();
+
 $stdout = new StdoutPrinter();
 $stdout->useAnsiCodes(true);
-
 $appFqcn = \App\Shared\CharcoalApp::getAppFqcn();
 $stdout->write("{yellow}" . ObjectHelper::baseClassName($appFqcn), true);
 $stdout->write("{cyan}" . $appFqcn, true);
@@ -52,5 +53,5 @@ try {
     $build = CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["tmp"]);
     $stdout->write("{cyan}Snapshot Size: {green}" . round(filesize($build->absolute) / 1024, 2) . " KB", true);
 } catch (\Throwable $t) {
-    ErrorBoundary::terminate(SapiType::Cli, $t);
+    ErrorBoundary::terminate(SapiType::Cli, $t, true, false, strlen($rootDirectory?->path?->absolute ?? 0));
 }

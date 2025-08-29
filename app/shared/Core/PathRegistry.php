@@ -17,6 +17,8 @@ use Charcoal\Filesystem\Path\DirectoryPath;
  */
 final readonly class PathRegistry extends \Charcoal\App\Kernel\Internal\PathRegistry
 {
+    public const string ERROR_LOG = "log/error.log";
+
     public DirectoryPath $config;
     public DirectoryPath $tmp;
     public DirectoryPath $log;
@@ -32,7 +34,7 @@ final readonly class PathRegistry extends \Charcoal\App\Kernel\Internal\PathRegi
     public function declarePaths(): void
     {
         $this->log = $this->getValidatedPathSnapshot("/log", true, true, true, true);
-        $this->config = $this->getValidatedPathSnapshot("/config", true, true, false, true);
+        $this->config = $this->getValidatedPathSnapshot("/cosnfig", true, true, false, true);
         $this->tmp = $this->getValidatedPathSnapshot("/tmp", true, true, true, true);
         $this->shared = $this->getValidatedPathSnapshot("/shared", true, true, true, true);
         $this->templates = $this->getValidatedPathSnapshot("/templates", true, true, true, true);
