@@ -65,7 +65,7 @@ RUN set -e; \
 
 USER charcoal
 WORKDIR /home/charcoal
-RUN install -d -m 0750 /home/charcoal/{log,tmp,shared,storage}
+RUN install -d -m 0750 /home/charcoal/log /home/charcoal/tmp /home/charcoal/shared /home/charcoal/storage
 
 # Preinstall composer repositories:
 FROM base AS builder
