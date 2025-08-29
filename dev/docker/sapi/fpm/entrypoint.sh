@@ -14,7 +14,7 @@ mkdir -p /home/charcoal/dev/composer/vendor || true
 echo "[engine] ls vendor:"; ls -la /home/charcoal/dev/composer/vendor || true
 
 # vendor guard
-[[ -f /home/charcoal/vendor/autoload.php ]] || {
+[[ -f /home/charcoal/dev/composer/vendor/autoload.php ]] || {
   echo "vendor/ missing. Run: ./charcoal.sh build app" >&2; exit 1; }
 
 # docroot guards
