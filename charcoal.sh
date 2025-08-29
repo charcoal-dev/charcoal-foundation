@@ -223,33 +223,52 @@ gen_sapi_df() {
 
 cmd_build_docker() {
   require_env
-  local seed="${1-}"  # --dev-vendor to copy vendors to host
 
-  info "Building DEV images…"
-  docker build --build-arg __SAPI_ID__=engine --build-arg __SAPI_BASE__=cli \
-    --target dev  -t charcoal/engine:dev .
-  docker build --build-arg __SAPI_ID__=web    --build-arg __SAPI_BASE__=fpm \
-    --target dev  -t charcoal/web:dev .
+  # 1) Generate per-SAPI Dockerfiles from your templates
+  gen_sapi_df engine cli "curl mariadb-client"
+  gen_sapi_df web    fpm "curl nginx gettext-base"
 
-  info "Building builder (Composer deps)…"
-  docker build --target builder -t charcoal/builder:latest .
+  # 2) Runtime/manifest prep (unchanged)
+  ensure_runtime_dirs
+  write_manifest_overrides
+  generate_db_init_sql
+  resolve_profiles
 
-  info "Building PROD images (vendors baked)…"
-  docker build --build-arg __SAPI_ID__=engine --build-arg __SAPI_BASE__=cli \
-    --target prod -t charcoal/engine:prod .
-  docker build --build-arg __SAPI_ID__=web    --build-arg __SAPI_BASE__=fpm \
-    --target prod -t charcoal/web:prod .
+  info "Building Composer deps (builder stage)…"
+  # Use the engine Dockerfile (has the builder target with Composer)
+  docker build \
+    -f dev/docker/sapi/app/engine/Dockerfile \
+    --target builder \
+    -t charcoal/builder:latest \
+    .
 
-  if [[ "$seed" == "--dev-vendor" ]]; then
-    info "Seeding host dev/composer/vendor from builder…"
-    local cid; cid="$(docker create charcoal/builder:latest)"
+  # 3) Seed host vendors for DEV mounts so engine/web start healthy
+  #    (safe no-op if already present)
+  if [[ ! -f "dev/composer/vendor/autoload.php" ]]; then
+    info "Seeding host dev/composer/vendor from builder image…"
+    local _cid; _cid="$(docker create charcoal/builder:latest)"
     mkdir -p dev/composer/vendor
-    docker cp "$cid":/home/charcoal/dev/composer/vendor/. dev/composer/vendor/
-    docker rm -f "$cid" >/dev/null
-    ok "Host vendors ready for DEV bind mounts."
+    docker cp "${_cid}":/home/charcoal/dev/composer/vendor/. dev/composer/vendor/
+    docker rm -f "${_cid}" >/dev/null
+    ok "Host vendors ready."
+  else
+    info "Host vendors already present; skipping seed."
   fi
 
-  ok "Docker build complete."
+  info "Compose up (profiles: ${EFFECTIVE:-none}) …"
+  local UIDGID=(--build-arg CHARCOAL_UID="$(id -u)" --build-arg CHARCOAL_GID="$(id -g)")
+  [[ "${CHARCOAL_DRYRUN:-0}" = "1" ]] && { ok "Dry-run: skipping docker."; return 0; }
+
+  # 4) Build and start your stack as before
+  compose build "${UIDGID[@]}"
+  compose up -d
+
+  # 5) Health check
+  if engine_healthy 60; then
+    ok "Engine is healthy."
+  else
+    err "Engine did not become healthy in time."
+  fi
 }
 
 cmd_build_app() {
