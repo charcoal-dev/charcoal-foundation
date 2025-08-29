@@ -4,7 +4,7 @@
 # @link https://github.com/charcoal-dev/charcoal-foundation
 #
 
-test -f /home/charcoal/vendor/autoload.php || {
+test -f /home/charcoal/dev/composer/vendor/autoload.php || {
   echo "vendor/ missing. Run: ./charcoal.sh build app"; exit 1; }
 
 exec /usr/bin/supervisord -c /etc/supervisord.conf
