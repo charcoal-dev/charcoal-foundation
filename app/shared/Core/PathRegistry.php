@@ -17,8 +17,6 @@ use Charcoal\Filesystem\Path\DirectoryPath;
  */
 final readonly class PathRegistry extends \Charcoal\App\Kernel\Internal\PathRegistry
 {
-    public const string ERROR_LOG = "log/error.log";
-
     public DirectoryPath $config;
     public DirectoryPath $tmp;
     public DirectoryPath $log;
