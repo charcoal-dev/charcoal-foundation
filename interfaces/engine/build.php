@@ -6,18 +6,15 @@
 
 declare(strict_types=1);
 
+require_once "_bootstrap.php";
+charcoal_autoloader();
+
 use App\Shared\CharcoalApp;
-use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
-use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
-use Charcoal\App\Kernel\Enums\AppEnv;
-use Charcoal\Filesystem\Path\DirectoryPath;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
+use Charcoal\Cli\Output\StdoutPrinter;
+use Charcoal\Filesystem\Path\DirectoryPath;
 
-var_dump(getenv());
-require "dev/composer/vendor/autoload.php";
-exit;
-
-$stdout = new \Charcoal\Cli\Output\StdoutPrinter();
+$stdout = new StdoutPrinter();
 $stdout->useAnsiCodes(true);
 
 try {

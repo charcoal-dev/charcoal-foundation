@@ -97,5 +97,6 @@ COPY app/sapi/__SAPI_ID__/ app/sapi/__SAPI_ID__/
 COPY app/domain/ app/domain/
 COPY app/shared/ app/shared/
 COPY interfaces/__SAPI_ID__/ __SAPI_ID__/
+COPY dev/bootstrap.php __SAPI_ID__/_bootstrap.php
 COPY --from=builder /home/charcoal/dev/composer/vendor/ /home/charcoal/dev/composer/vendor/
 ENTRYPOINT ["/entrypoint.sh"]
