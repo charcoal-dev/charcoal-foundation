@@ -10,6 +10,9 @@ umask 0027
 : "${SERVER_NAME:=_}"
 : "${CHARCOAL_SAPI_ROOT:?CHARCOAL_SAPI_ROOT not set (check dev/sapi.manifest.json)}"
 
+mkdir -p /home/charcoal/dev/composer/vendor || true
+echo "[engine] ls vendor:"; ls -la /home/charcoal/dev/composer/vendor || true
+
 # vendor guard
 [[ -f /home/charcoal/vendor/autoload.php ]] || {
   echo "vendor/ missing. Run: ./charcoal.sh build app" >&2; exit 1; }
