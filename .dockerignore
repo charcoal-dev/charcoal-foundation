@@ -29,6 +29,7 @@ dev/.env
 
 # Ignore most of dev/, then re-include what's needed for image builds
 dev/**
+!dev/bootstrap.php
 !dev/docker/sapi/**
 !dev/docker/utils/redis/**
 !dev/composer/composer.json
