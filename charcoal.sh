@@ -273,29 +273,25 @@ cmd_build_docker() {
 
 cmd_build_app() {
   require_env
+  ensure_engine_up
   local do_composer="${1-}"  # use --composer to run a local install
   info "Checking dependencies…"
 
-  # Composer
+  # Composer — always update (DEV flow)
   if [[ -d "dev/composer" ]]; then
-    if [[ ! -f "dev/composer/vendor/autoload.php" ]]; then
-      warn "Missing dev/composer/vendor/autoload.php"
-      if [[ "$do_composer" == "--composer" ]]; then
-        info "Running: composer install -d dev/composer"
-        composer install -d dev/composer --no-interaction -o || err "Composer failed"
-        ok "Vendors installed."
-      else
-        info "Tip: run './charcoal.sh build docker --dev-vendor' or './charcoal.sh build app --composer'"
-      fi
-    else
-      ok "Vendors present."
+    info "Composer: updating dependencies in dev/composer …"
+    if ! command -v composer >/dev/null 2>&1; then
+      err "Composer not found on host. Install Composer or run './charcoal.sh build docker --dev-vendor'."
     fi
+    ( cd dev/composer && composer update --no-interaction -o ) || err "Composer update failed"
+    ok "Composer update complete."
+  else
+    warn "dev/composer directory not found; skipping composer."
   fi
 
   # CharcoalApp Builder
   if has_profile engine; then
     info "Initializing…"
-    ensure_engine_up
     normal ""
     compose exec -T "$(svc engine)" bash -lc "${ENGINE_SNAPSHOT_CMD:-php -f /home/charcoal/engine/build.php}"
   else
