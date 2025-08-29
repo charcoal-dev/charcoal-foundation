@@ -29,4 +29,13 @@ if [[ -f /etc/nginx/nginx.template.conf ]]; then
 fi
 
 mkdir -p /home/charcoal/log /home/charcoal/tmp /home/charcoal/shared /home/charcoal/storage
+
+install -d -m 0750 \
+  /home/charcoal/tmp/nginx \
+  /home/charcoal/tmp/nginx/body \
+  /home/charcoal/tmp/nginx/proxy \
+  /home/charcoal/tmp/nginx/fastcgi \
+  /home/charcoal/tmp/nginx/uwsgi \
+  /home/charcoal/tmp/nginx/scgi
+
 exec /usr/bin/supervisord -c /etc/supervisord.conf
