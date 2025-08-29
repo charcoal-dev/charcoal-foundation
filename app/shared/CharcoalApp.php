@@ -69,17 +69,23 @@ class CharcoalApp extends AbstractApp
      * @param AppEnv $env
      * @param Directories $paths
      * @return AppConfig
-     * @throws InvalidPathException
      */
     protected function resolveAppConfig(AppEnv $env, Directories $paths): AppConfig
+    {
+        return DomainManifest::provideAppConfig($env, $paths);
+    }
+
+    /**
+     * @return void
+     * @throws InvalidPathException
+     */
+    protected function errorServiceDeployedHook(): void
     {
         $this->errors->subscribe(new FileErrorLogger(
             $this->paths->log->join(AppConstants::ERROR_SINK),
             useAnsiEscapeSeq: AppConstants::ERROR_SINK_ANSI,
             eolChar: PHP_EOL
         ));
-
-        return DomainManifest::provideAppConfig($env, $paths);
     }
 
     /**
