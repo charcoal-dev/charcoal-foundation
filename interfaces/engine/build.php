@@ -7,18 +7,17 @@
 
 declare(strict_types=1);
 
-ini_set("log_errors", "1");
-ini_set("error_log", "/proc/self/fd/2");
 require_once "bootstrap.php";
 charcoal_autoloader();
 
 use App\Shared\CharcoalApp;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
+use Charcoal\App\Kernel\Enums\SapiType;
+use Charcoal\App\Kernel\Errors\ErrorBoundary;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 use Charcoal\Cli\Output\StdoutPrinter;
 use Charcoal\Filesystem\Path\DirectoryPath;
-use Charcoal\App\Kernel\Enums\SapiType;
 
 $stdout = new StdoutPrinter();
 $stdout->useAnsiCodes(true);
@@ -50,9 +49,8 @@ try {
     $stdout->write("", true);
     $stdout->write("{magenta}" . ObjectHelper::baseClassName($appFqcn) . " Initialized", true);
     $stdout->write("{cyan}Initialization Time: {green}" . $startupTime . "ms", true);
-
     $build = CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["tmp"]);
     $stdout->write("{cyan}Snapshot Size: {green}" . round(filesize($build->absolute) / 1024, 2) . " KB", true);
 } catch (\Throwable $t) {
-    \Charcoal\App\Kernel\Errors\ErrorBoundary::terminate(SapiType::Cli, $t);
+    ErrorBoundary::terminate(SapiType::Cli, $t);
 }
