@@ -403,7 +403,7 @@ cmd_logs() {
     fi
   else
     info "No local log files under var/log/$sapi; falling back to: docker compose logs -f $service"
-    exec compose logs -f "$service"
+    compose logs -f "$service"
   fi
 }
 
