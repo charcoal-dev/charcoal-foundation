@@ -419,6 +419,24 @@ cmd_services() {
   compose config --format json | jq -r '.services | keys[]'
 }
 
+cmd_ssh() {
+  require_env
+  local sapi="${1-}"; shift || true
+  [[ -n "$sapi" ]] || err "Usage: ./charcoal.sh ssh <sapi> [shell]"
+
+  local service; service="$(svc "$sapi")" || err "Unknown SAPI '$sapi'"
+
+  local shell="${1- bash}"
+  ensure_service_up "$sapi"
+
+  # -ti if interactive; -T when stdin isn’t a TTY
+  if [[ -t 0 && -t 1 ]]; then
+    compose exec -ti "$service" "$shell"
+  else
+    compose exec -T  "$service" "$shell"
+  fi
+}
+
 usage() {
   info -n "Usage:"
   normal "
@@ -429,6 +447,7 @@ usage() {
   {yellow}./charcoal.sh{/} {cyan}engine{/} stop {grey}[all|name]{/}
   {yellow}./charcoal.sh{/} {cyan}engine{/} restart {grey}[all|name]{/}
   {yellow}./charcoal.sh{/} {cyan}engine{/} exec {magenta}<script>{/} {grey}[args...]{/}
+  {yellow}./charcoal.sh{/} {cyan}ssh{/} {magenta}<sapi>{/} {grey}[shell]{/}
   {yellow}./charcoal.sh{/} {cyan}docker{/} {grey}<args...>{/}
 "
 }
@@ -449,6 +468,7 @@ main() {
     update)   cmd_build_app "$@";;
     engine)   cmd_engine "$@";;
     docker)   cmd_docker "$@";;
+    ssh)      cmd_ssh "$@";;
 
     logs)
       # Enforce: logs <sapi> [error|access|all]
