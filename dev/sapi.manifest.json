@@ -8,7 +8,7 @@
         "type": "cli",
         "root": "/engine",
         "env": {
-          "WHO_AM_I": "engine"
+          "CHARCOAL_SAPI_DEPTH": "1"
         }
       },
       {
@@ -18,7 +18,7 @@
         "root": "/web/public_html",
         "port": 6001,
         "env": {
-          "WHO_AM_I": "web"
+          "CHARCOAL_SAPI_DEPTH": "2"
         }
       }
     ]
