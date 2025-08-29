@@ -31,9 +31,9 @@ final readonly class PathRegistry extends \Charcoal\App\Kernel\Internal\PathRegi
      */
     public function declarePaths(): void
     {
+        $this->log = $this->getValidatedPathSnapshot("/log", true, true, true, true);
         $this->config = $this->getValidatedPathSnapshot("/config", true, true, false, true);
         $this->tmp = $this->getValidatedPathSnapshot("/tmp", true, true, true, true);
-        $this->log = $this->getValidatedPathSnapshot("/log", true, true, true, true);
         $this->shared = $this->getValidatedPathSnapshot("/shared", true, true, true, true);
         $this->templates = $this->getValidatedPathSnapshot("/templates", true, true, true, true);
         $this->storage = $this->getValidatedPathSnapshot("/storage", true, true, false, true);

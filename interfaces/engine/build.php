@@ -7,6 +7,8 @@
 
 declare(strict_types=1);
 
+ini_set("log_errors", "1");
+ini_set("error_log", "/proc/self/fd/2");
 require_once "bootstrap.php";
 charcoal_autoloader();
 
@@ -16,6 +18,7 @@ use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 use Charcoal\Cli\Output\StdoutPrinter;
 use Charcoal\Filesystem\Path\DirectoryPath;
+use Charcoal\App\Kernel\Enums\SapiType;
 
 $stdout = new StdoutPrinter();
 $stdout->useAnsiCodes(true);
@@ -32,19 +35,24 @@ $stdout->write("{green}" . $sharedContext->path->absolute, true);
 $stdout->write("", true);
 
 $timestamp = MonotonicTimestamp::now();
-$charcoal = new CharcoalApp(
-    \Charcoal\App\Kernel\Enums\AppEnv::tryFrom(getenv("APP_ENV") ?: "dev"),
-    $rootDirectory,
-    function (BuildStageEvents $events) use ($stdout) {
-        $stdout->write("{cyan}Build Stage:{/} {yellow}" . $events->name . "{/}", true);
-    }
-);
 
-$charcoal->bootstrap($timestamp);
-$startupTime = $charcoal->diagnostics->startupTime / 1e6;
-$stdout->write("", true);
-$stdout->write("{magenta}" . ObjectHelper::baseClassName($appFqcn) . " Initialized", true);
-$stdout->write("{cyan}Initialization Time: {green}" . $startupTime . "ms", true);
+try {
+    $charcoal = new CharcoalApp(
+        \Charcoal\App\Kernel\Enums\AppEnv::tryFrom(getenv("APP_ENV") ?: "dev"),
+        $rootDirectory,
+        function (BuildStageEvents $events) use ($stdout) {
+            $stdout->write("{cyan}Build Stage:{/} {yellow}" . $events->name . "{/}", true);
+        }
+    );
 
-$build = CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["tmp"]);
-$stdout->write("{cyan}Snapshot Size: {green}" . round(filesize($build->absolute) / 1024, 2) . " KB", true);
+    $charcoal->bootstrap($timestamp);
+    $startupTime = $charcoal->diagnostics->startupTime / 1e6;
+    $stdout->write("", true);
+    $stdout->write("{magenta}" . ObjectHelper::baseClassName($appFqcn) . " Initialized", true);
+    $stdout->write("{cyan}Initialization Time: {green}" . $startupTime . "ms", true);
+
+    $build = CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["tmp"]);
+    $stdout->write("{cyan}Snapshot Size: {green}" . round(filesize($build->absolute) / 1024, 2) . " KB", true);
+} catch (\Throwable $t) {
+    \Charcoal\App\Kernel\Errors\ErrorBoundary::terminate(SapiType::Cli, $t);
+}
