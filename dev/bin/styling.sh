@@ -8,7 +8,7 @@ set -euo pipefail
 
 ICON_OK=$'\u2714'
 ICON_INFO="${ICON_INFO:-ℹ️}"
-ICON_WARN=$'\e[33m\u26a0\e[0m';
+ICON_WARN=$'\u26a0'
 ICON_ERR="${ICON_ERR:-❌}"
 
 if [[ -t 1 && "${NO_COLOR:-0}" != "1" ]]; then
