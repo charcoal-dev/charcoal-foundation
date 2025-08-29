@@ -6,14 +6,50 @@
 
 declare(strict_types=1);
 
-/** @noinspection PhpIncludeInspection */
-require "vendor/autoload.php";
+use App\Shared\CharcoalApp;
+use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
+use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
+use Charcoal\App\Kernel\Enums\AppEnv;
+use Charcoal\Filesystem\Path\DirectoryPath;
 
-$stdout = new \Charcoal\CLI\Console\StdoutPrinter();
+require "../dev/composer/vendor/autoload.php";
+
+$stdout = new \Charcoal\Cli\Output\StdoutPrinter();
 $stdout->useAnsiCodes(true);
 
 try {
-    $appClass = \App\Shared\CharcoalApp::getAppClassname();
+    $stdout->write("{cyan}Initializing...", true);
+    $appFqcn = \App\Shared\CharcoalApp::getAppFqcn();
+    $appId = \Charcoal\Base\Support\Helpers\ObjectHelper::baseClassName($appFqcn);
+    $stdout->write("{yellow}" . $appId . "{/}...", true);
+    $stdout->write("", true);
+
+    $stdout->write("{grey}Root Directory: {/}", false);
+    $rootDirectory = (new DirectoryPath(dirname(__FILE__, 3)))->node();
+    $stdout->write("{green}" . $rootDirectory->path->absolute, true);
+    $stdout->write("{grey}Shared Context Path: {/}", false);
+    $sharedContext = $rootDirectory->directory("tmp/shared", true, false);
+    $stdout->write("{green}" . $sharedContext->path->absolute, true);
+
+    exit;
+
+    try {
+        $timestamp = MonotonicTimestamp::now();
+        $charcoal = new CharcoalApp(
+            AppEnv::Test,
+            $rootDirectory,
+            function (BuildStageEvents $events) {
+                fwrite(STDERR, "\033[36mBuild Stage:\033[0m \033[33m" . $events->name . "\033[0m\n");
+            }
+        );
+    } catch (\Throwable $t) {
+        throw $t;
+    }
+
+    fwrite(STDERR, "\033[35mCharcoal App Initialized\033[0m\n");
+
+
+    $appClassname = \App\Shared\CharcoalApp::getAppClassname();
     $appClassname = \Charcoal\OOP\OOP::baseClassName($appClass);
     $rootDirectory = new \Charcoal\Filesystem\Directory(__DIR__);
 
