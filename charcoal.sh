@@ -292,30 +292,45 @@ tail_bg() { # $1=file $2=pidfile
   ok "Tailing $(basename "$file") in background (PID $pid)"
 }
 
-cmd_logs() {
-  require_env
-  local sapi="${1:-}"; local kind="${2:-all}"
-  [[ -n "$sapi" ]] || err "Usage: ./charcoal.sh logs <sapi> [error|access|all]"
-  local base="$ROOT/var/log/$sapi"
-  [[ -d "$base" ]] || err "Unknown SAPI '$sapi' or log dir missing: var/log/$sapi"
+logs_cmd() {
+  local sapi="$1"; shift || true
+  local which="${1:-all}"
 
-  install -d -m 0750 "$LOGS_SEMA_DIR"
-
-  local tailed=0
-  if [[ "$kind" == "error" || "$kind" == "all" ]]; then
-    local f="$base/error.log" p="$LOGS_SEMA_DIR/${sapi}.error.pid"
-    if [[ -f "$f" ]]; then tail_bg "$f" "$p"; tailed=1; fi
-  fi
-  if [[ "$kind" == "access" || "$kind" == "all" ]]; then
-    local f="$base/access.log" p="$LOGS_SEMA_DIR/${sapi}.access.pid"
-    if [[ -f "$f" ]]; then tail_bg "$f" "$p"; tailed=1; fi
+  if [[ -z "$sapi" ]]; then
+    echo "❌  Usage: ./charcoal.sh logs <sapi> [error|access|all]" >&2
+    exit 1
   fi
 
-  if [[ $tailed -eq 0 ]]; then
-    info "No log files found; falling back to: docker compose logs -f ${sapi}"
-    compose logs -f "$(svc "$sapi")"
+  # Validate SAPI exists
+  if ! ./charcoal.sh services | awk '{print $1}' | grep -qx "$sapi"; then
+    echo "❌  Unknown SAPI '$sapi'" >&2
+    exit 1
   fi
+
+  local log_root="var/log/$sapi"
+  if [[ ! -d "$log_root" ]]; then
+    echo "❌  Log dir missing: $log_root" >&2
+    exit 1
+  fi
+
+  case "$which" in
+    error)  files=( "$log_root/error.log" );;
+    access) files=( "$log_root/access.log" );;
+    all)    mapfile -t files < <(ls -1 "$log_root"/*.log 2>/dev/null);;
+    *) echo "❌  Use one of: error | access | all" >&2; exit 1;;
+  esac
+
+  if [[ "${#files[@]}" -eq 0 ]]; then
+    echo "ℹ️  No log files in $log_root yet." >&2
+    exit 0
+  fi
+
+  tail -n 200 -F "${files[@]}"
 }
+
+case "$1" in
+  logs) shift; logs_cmd "$@"; exit $? ;;
+esac
 
 cmd_services() {
   require_env
