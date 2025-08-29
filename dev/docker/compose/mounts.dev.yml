@@ -2,7 +2,7 @@ services:
   engine:
     build: { target: dev }
     volumes:
-      - ../../dev/composer/vendor:/home/charcoal/dev/composer/vendor:ro
+      - ../../dev/composer/vendor:/home/charcoal/dev/composer/vendor
       - ../../config:/home/charcoal/config:ro
       - ../../app/sapi/engine:/home/charcoal/app/sapi/engine:ro
       - ../../app/domain:/home/charcoal/app/domain:ro
