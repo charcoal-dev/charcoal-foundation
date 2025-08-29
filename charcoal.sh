@@ -330,46 +330,6 @@ cmd_logs() {
   fi
 }
 
-logs_cmd() {
-  local sapi="$1"; shift || true
-  local which="${1:-all}"
-
-  if [[ -z "$sapi" ]]; then
-    echo "❌  Usage: ./charcoal.sh logs <sapi> [error|access|all]" >&2
-    exit 1
-  fi
-
-  # Validate SAPI exists
-  if ! ./charcoal.sh services | awk '{print $1}' | grep -qx "$sapi"; then
-    echo "❌  Unknown SAPI '$sapi'" >&2
-    exit 1
-  fi
-
-  local log_root="var/log/$sapi"
-  if [[ ! -d "$log_root" ]]; then
-    echo "❌  Log dir missing: $log_root" >&2
-    exit 1
-  fi
-
-  case "$which" in
-    error)  files=( "$log_root/error.log" );;
-    access) files=( "$log_root/access.log" );;
-    all)    mapfile -t files < <(ls -1 "$log_root"/*.log 2>/dev/null);;
-    *) echo "❌  Use one of: error | access | all" >&2; exit 1;;
-  esac
-
-  if [[ "${#files[@]}" -eq 0 ]]; then
-    echo "ℹ️  No log files in $log_root yet." >&2
-    exit 0
-  fi
-
-  tail -n 200 -F "${files[@]}"
-}
-
-case "$1" in
-  logs) shift; logs_cmd "$@"; exit $? ;;
-esac
-
 cmd_services() {
   require_env
   # use JSON output to list service keys reliably
