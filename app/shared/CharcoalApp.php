@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace App\Shared;
 
+use App\Shared\Constants\AppConstants;
 use App\Shared\Core\Config\Snapshot\AppConfig;
 use App\Shared\Core\PathRegistry;
 use App\Shared\Foundation\CoreData\CoreDataModule;
@@ -17,6 +18,7 @@ use App\Shared\Foundation\Mailer\MailerModule;
 use Charcoal\App\Kernel\AbstractApp;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Internal\PathRegistry as Directories;
+use Charcoal\App\Kernel\Support\Errors\FileErrorLogger;
 
 /**
  * Class CharcoalApp
@@ -78,6 +80,15 @@ class CharcoalApp extends AbstractApp
     protected function resolveAppManifest(): DomainManifest
     {
         return new DomainManifest();
+    }
+
+    /**
+     * @return void
+     */
+    protected function errorHandlersDeployedHook(): void
+    {
+        $this->errors->subscribe(new FileErrorLogger(AppConstants::ERROR_SINK,
+            useAnsiEscapeSeq: AppConstants::ERROR_SINK_ANSI));
     }
 
     /**

@@ -14,5 +14,6 @@ namespace App\Shared\Constants;
 interface AppConstants
 {
     public const string ERROR_SINK = "logs/error.log";
+    public const bool ERROR_SINK_ANSI = true;
     public const string CRASH_HTML_TEMPLATE = "storage/defaults/crash.phtml";
 }
