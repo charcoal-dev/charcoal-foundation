@@ -27,20 +27,33 @@ load_manifest() {
 
   while IFS=$'\t' read -r id typ root port env_b64; do
     [[ -n "$id" ]] || continue
+
+    # normalize basics
+    typ="${typ:-cli}"
+    root="${root#/}"; root="${root%/}"   # strip leading/trailing slash
+    port="${port:-0}"
+
+    # registries
     SAPI_IDS+=("$id")
-    SAPI_TYPE["$id"]="${typ:-cli}"
+    SAPI_TYPE["$id"]="$typ"
     SAPI_SERVICE["$id"]="$id"
 
-    if [[ "${typ:-cli}" == "http" ]]; then
-      HTTP_SAPI+=("$id")
-      root="${root#/}"; root="${root%/}"
+    # docroot for ANY sapi that provided one
+    if [[ -n "$root" ]]; then
       SAPI_DOCROOT["$id"]="/home/charcoal/${root}"
-      [[ -n "${port:-}" && "$port" != "0" ]] && SAPI_PORT["$id"]="$port" || true
+    fi
+
+    # classify + optional port for HTTP sapis
+    if [[ "$typ" == "http" ]]; then
+      HTTP_SAPI+=("$id")
+      [[ -n "$port" && "$port" != "0" ]] && SAPI_PORT["$id"]="$port" || true
     else
       CLI_SAPI+=("$id")
     fi
 
+    # env payload (base64 of JSON)
     SAPI_ENV_B64["$id"]="$env_b64"
+
   done < <(
     jq -rc '.charcoal.sapi[]
             | select(.enabled != false)
