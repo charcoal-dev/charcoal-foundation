@@ -53,5 +53,5 @@ try {
     $build = CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["tmp"]);
     $stdout->write("{cyan}Snapshot Size: {green}" . round(filesize($build->absolute) / 1024, 2) . " KB", true);
 } catch (\Throwable $t) {
-    ErrorBoundary::terminate(SapiType::Cli, $t, true, false, strlen($rootDirectory?->path?->absolute ?? 0));
+    ErrorBoundary::terminate(SapiType::Cli, $t, true, true, strlen($rootDirectory?->path?->absolute ?? 0));
 }
