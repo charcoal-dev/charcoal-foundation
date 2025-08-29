@@ -81,4 +81,21 @@ class CharcoalApp extends AbstractApp
     {
         return new DomainManifest();
     }
+
+    /**
+     * @return class-string<CharcoalApp>
+     */
+    public static function getAppFqcn(): string
+    {
+        $appClassname = getenv("CHARCOAL_APP");
+        if (!$appClassname) {
+            throw new \RuntimeException("CHARCOAL_APP environment variable is not set");
+        }
+
+        $app = "\\App\\Domain\\" . $appClassname;
+        return match (class_exists($app)) {
+            true => $app,
+            false => static::class,
+        };
+    }
 }
