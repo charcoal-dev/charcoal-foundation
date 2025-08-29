@@ -80,6 +80,7 @@ write_manifest_overrides() {
       if [[ -n "${SAPI_DOCROOT[$id]:-}" ]]; then
         echo "      CHARCOAL_SAPI_ROOT: \"${SAPI_DOCROOT[$id]}\""
       fi
+      echo "      CHARCOAL_APP_ENV: \"${CHARCOAL_APP_ENV:-dev}\""
 
       env_b64="${SAPI_ENV_B64[$id]:-e30=}"   # e30= is '{}' in base64
       if [[ -n "$env_b64" ]]; then

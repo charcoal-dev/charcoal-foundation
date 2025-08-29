@@ -85,6 +85,7 @@ RUN composer install --no-dev --prefer-dist -o --no-interaction
 
 # App Environment: DEV
 FROM base AS dev
+ENV CHARCOAL_DOCKER_ENV=dev
 COPY --from=builder /usr/local/bin/composer /usr/local/bin/composer
 USER charcoal
 WORKDIR /home/charcoal
@@ -92,6 +93,7 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 # App Environment: PROD
 FROM base AS prod
+ENV CHARCOAL_DOCKER_ENV=prod
 USER charcoal
 WORKDIR /home/charcoal
 COPY config/ config/
