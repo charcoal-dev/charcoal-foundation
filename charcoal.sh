@@ -341,38 +341,69 @@ tail_bg() {
 cmd_logs() {
   require_env
 
+  # modes: default=foreground, --bg to background, --stop to kill running tails
+  local mode="fg"
+  case "${1-}" in
+    --stop)  shift; mode="stop" ;;
+    --bg)    shift; mode="bg"   ;;
+  esac
+
+  if [[ "$mode" == "stop" ]]; then
+    local target="${1-}"  # <sapi> or "all"
+    [[ -n "$target" ]] || err "Usage: ./charcoal.sh logs --stop <sapi|all>"
+    # kill matching pidfiles
+    shopt -s nullglob
+    for pf in "$LOGS_SEMA_DIR"/*.pid; do
+      [[ -f "$pf" ]] || continue
+      base="$(basename "$pf")"        # e.g. web.error.pid
+      if [[ "$target" == "all" || "$base" == "$target."* ]]; then
+        pid="$(cat "$pf" 2>/dev/null || echo)"
+        if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+          kill "$pid" || true
+        fi
+        rm -f "$pf"
+        ok "Stopped tail: $base"
+      fi
+    done
+    return 0
+  fi
+
   local sapi="${1-}"
   local kind="${2-all}"
 
-  [[ -n "${sapi:-}" ]] || err "Usage: ./charcoal.sh logs <sapi> [error|access|all]"
-  case "${kind:-all}" in
-    error|access|all) ;;
-    *) err "Use one of: error | access | all" ;;
-  esac
+  [[ -n "$sapi" ]] || err "Usage: ./charcoal.sh logs [--bg|--stop] <sapi> [error|access|all]"
+  case "${kind:-all}" in error|access|all) ;; *) err "Use one of: error | access | all" ;; esac
 
   local service
-  if ! service="$(svc "$sapi")"; then
-    err "Unknown SAPI '$sapi'"
-  fi
+  if ! service="$(svc "$sapi")"; then err "Unknown SAPI '$sapi'"; fi
 
   local base="$ROOT/var/log/$sapi"
   install -d -m 0750 "$LOGS_SEMA_DIR"
 
-  local tailed=0
+  # collect files
+  local files=()
   if [[ -d "$base" ]]; then
-    if [[ "$kind" == "error" || "$kind" == "all" ]]; then
-      local f="$base/error.log" p="$LOGS_SEMA_DIR/${sapi}.error.pid"
-      [[ -f "$f" ]] && { tail_bg "$f" "$p"; tailed=1; }
-    fi
-    if [[ "$kind" == "access" || "$kind" == "all" ]]; then
-      local f="$base/access.log" p="$LOGS_SEMA_DIR/${sapi}.access.pid"
-      [[ -f "$f" ]] && { tail_bg "$f" "$p"; tailed=1; }
-    fi
+    [[ "$kind" == "error"  || "$kind" == "all" ]] && [[ -f "$base/error.log"  ]] && files+=("$base/error.log")
+    [[ "$kind" == "access" || "$kind" == "all" ]] && [[ -f "$base/access.log" ]] && files+=("$base/access.log")
   fi
 
-  if [[ $tailed -eq 0 ]]; then
+  if ((${#files[@]})); then
+    if [[ "$mode" == "bg" ]]; then
+      # spawn background tails with pidfiles
+      for f in "${files[@]}"; do
+        local tag="$(basename "$f" .log)"
+        local pf="$LOGS_SEMA_DIR/${sapi}.${tag}.pid"
+        tail_bg "$f" "$pf"
+      done
+      ok "Background tail(s) started for $sapi ($kind). Use: ./charcoal.sh logs --stop $sapi"
+    else
+      # foreground: attach and exit on Ctrl-C
+      info "Tailing ${kind} logs for ${sapi} (Ctrl-C to stop)…"
+      exec tail -n 200 -F -- "${files[@]}"
+    fi
+  else
     info "No local log files under var/log/$sapi; falling back to: docker compose logs -f $service"
-    compose logs -f "$service"
+    exec compose logs -f "$service"
   fi
 }
 
