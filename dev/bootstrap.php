@@ -51,14 +51,16 @@ define("CHARCOAL_IN_DOCKER", defined("CHARCOAL_DOCKER") && @file_exists("/.docke
 if (!function_exists("charcoal_from_root")) {
     function charcoal_from_root(string $path = ""): string
     {
-        return rtrim(CHARCOAL_ROOT, "/") . "/" . ltrim($path, "/");
+        if (!$path || $path === ".") return CHARCOAL_ROOT;
+        return rtrim(CHARCOAL_ROOT, "/\\") . DIRECTORY_SEPARATOR . ltrim($path, "/\\");
     }
 }
 
 if (!function_exists("charcoal_from_sapi")) {
     function charcoal_from_sapi(string $path = ""): string
     {
-        return rtrim(CHARCOAL_SAPI_ROOT, "/") . "/" . ltrim($path, "/");
+        if (!$path || $path === ".") return CHARCOAL_SAPI_ROOT;
+        return rtrim(CHARCOAL_SAPI_ROOT, "/\\") . DIRECTORY_SEPARATOR . ltrim($path, "/\\");
     }
 }
 
