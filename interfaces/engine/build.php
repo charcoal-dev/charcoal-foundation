@@ -14,12 +14,11 @@ use App\Shared\CharcoalApp;
 use App\Shared\Core\ErrorBoundary;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
-use Charcoal\App\Kernel\Internal\Exceptions\AppCrashException;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 use Charcoal\Cli\Output\StdoutPrinter;
 use Charcoal\Filesystem\Path\DirectoryPath;
 
-ErrorBoundary::alignDockerStdError();
+ErrorBoundary::configStreams(true, false, strlen(charcoal_from_root()));
 
 $stdout = new StdoutPrinter();
 $stdout->useAnsiCodes(true);
@@ -37,23 +36,19 @@ $stdout->write("", true);
 $test = new \Charcoal\App\Kernel\Support\Errors\FileErrorLogger($rootDirectory->childPathInfo("log/error.log")->absolute);
 
 $timestamp = MonotonicTimestamp::now();
+$charcoal = new CharcoalApp(
+    \Charcoal\App\Kernel\Enums\AppEnv::tryFrom(getenv("APP_ENV") ?: "dev"),
+    $rootDirectory,
+    function (BuildStageEvents $events) use ($stdout) {
+        $stdout->write("{cyan}Build Stage:{/} {yellow}" . $events->name . "{/}", true);
+    }
+);
 
-try {
-    $charcoal = new CharcoalApp(
-        \Charcoal\App\Kernel\Enums\AppEnv::tryFrom(getenv("APP_ENV") ?: "dev"),
-        $rootDirectory,
-        function (BuildStageEvents $events) use ($stdout) {
-            $stdout->write("{cyan}Build Stage:{/} {yellow}" . $events->name . "{/}", true);
-        }
-    );
+$charcoal->bootstrap($timestamp);
+$startupTime = $charcoal->diagnostics->startupTime / 1e6;
+$stdout->write("", true);
+$stdout->write("{magenta}" . ObjectHelper::baseClassName($appFqcn) . " Initialized", true);
+$stdout->write("{cyan}Initialization Time: {green}" . $startupTime . "ms", true);
+$build = CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["tmp"]);
+$stdout->write("{cyan}Snapshot Size: {green}" . round(filesize($build->absolute) / 1024, 2) . " KB", true);
 
-    $charcoal->bootstrap($timestamp);
-    $startupTime = $charcoal->diagnostics->startupTime / 1e6;
-    $stdout->write("", true);
-    $stdout->write("{magenta}" . ObjectHelper::baseClassName($appFqcn) . " Initialized", true);
-    $stdout->write("{cyan}Initialization Time: {green}" . $startupTime . "ms", true);
-    $build = CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["tmp"]);
-    $stdout->write("{cyan}Snapshot Size: {green}" . round(filesize($build->absolute) / 1024, 2) . " KB", true);
-} catch (AppCrashException $t) {
-    ErrorBoundary::terminate($t, true, false, strlen($rootDirectory?->path?->absolute ?? 0));
-}

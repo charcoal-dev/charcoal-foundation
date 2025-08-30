@@ -15,7 +15,7 @@ use Charcoal\App\Kernel\Internal\Exceptions\AppCrashException;
  * A final, readonly class dedicated to handling application crash scenarios by rendering an HTML page.
  * Extends the core ErrorBoundary capabilities and enhances it with HTML template rendering.
  */
-final readonly class ErrorBoundary extends \Charcoal\App\Kernel\Support\Errors\ErrorBoundary
+final class ErrorBoundary extends \Charcoal\App\Kernel\Support\Errors\ErrorBoundary
 {
     use RenderHtmlTemplateTrait;
 

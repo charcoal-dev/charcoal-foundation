@@ -35,7 +35,7 @@ class ConstructTest extends TestCase
         try {
             $timestamp = MonotonicTimestamp::now();
             $charcoal = new CharcoalApp(
-                AppEnv::Test,
+                AppEnv::Dev,
                 $rootDirectory,
                 function (BuildStageEvents $events) {
                     fwrite(STDERR, "\033[36mBuild Stage:\033[0m \033[33m" . $events->name . "\033[0m\n");
