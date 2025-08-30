@@ -65,7 +65,13 @@ RUN set -e; \
 
 USER charcoal
 WORKDIR /home/charcoal
-RUN install -d -m 0750 /home/charcoal/log /home/charcoal/tmp /home/charcoal/shared /home/charcoal/storage
+RUN install -d -m 0750 /home/charcoal/var/log \
+    /home/charcoal/var/tmp \
+    /home/charcoal/var/tmp/semaphore \
+    /home/charcoal/var/shared  \
+    /home/charcoal/var/shared/semaphore  \
+    /home/charcoal/var/storage \
+
 WORKDIR /home/charcoal/dev
 COPY dev/bootstrap.php bootstrap.php
 
