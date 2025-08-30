@@ -322,13 +322,15 @@ cmd_engine() {
       ;;
     exec)
       if [ -t 1 ]; then
-        COMPOSE_TTY="";  TTY_VAL=1    # interactive → allow TTY, enable color
+        COMPOSE_TTY="";  TTY_VAL=1   # interactive → allow TTY, enable color
       else
-        COMPOSE_TTY="-T"; TTY_VAL=0   # non-interactive (CI) → no TTY
+        COMPOSE_TTY="-T"; TTY_VAL=0  # non-interactive → no TTY
       fi
 
       [[ $# -ge 1 ]] || err "Usage: ./charcoal.sh engine exec <script> [args...]"
-      compose exec -T "$(svc engine)" php /home/charcoal/engine/charcoal.php "$@" --ansi -tty=$TTY
+
+      compose exec $COMPOSE_TTY "$(svc engine)" \
+        php /home/charcoal/engine/charcoal.php "$@" --ansi --tty="${TTY_VAL}"
       ;;
     *)
       err "Usage: ./charcoal.sh engine {inspect|stop [all|name]|restart [all|name]|exec <script> [args...]}"
