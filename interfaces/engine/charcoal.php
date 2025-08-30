@@ -29,6 +29,13 @@ $charcoal->bootstrap($timestamp);
 $startupTime = $charcoal->diagnostics->startupTime / 1e6;
 $charcoal->errors->debugBacktraceOffset(0);
 
+if ($charcoal->context->env !== AppEnv::Prod) {
+    $scriptInject = getenv("SAPI_ENGINE_SCRIPT_INJECT");
+    if ($scriptInject) {
+        $argv = explode("|", $scriptInject);
+    }
+}
+
 $console = new AppCliHandler($charcoal,
     "App\\Sapi\\Engine\\Scripts",
     explode(";", substr($argv[1] ?? "", 1, -1)),
