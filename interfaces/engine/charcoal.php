@@ -42,6 +42,8 @@ $console = new AppCliHandler($charcoal,
     "fallback"
 );
 
+$console->stdout->useAnsiCodes(true);
+
 $console->print(sprintf("{grey}%s app bootstrapped in {green}%ss{/}",
     ObjectHelper::baseClassName($appFqcn), $startupTime));
 $console->exec();
