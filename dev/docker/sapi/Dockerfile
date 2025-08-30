@@ -1,6 +1,7 @@
 FROM php:8.3-__SAPI_BASE__-bookworm AS base
 ARG CHARCOAL_UID=1000
 ARG CHARCOAL_GID=1000
+ARG SAPI_BASE=__SAPI_BASE__
 
 # Create user/group for SAPI (match host IDs)
 RUN groupadd -g ${CHARCOAL_GID} charcoal \
@@ -26,7 +27,9 @@ RUN set -eux; \
     ; \
     docker-php-source extract; \
     docker-php-ext-configure gmp; \
-    for ext in bcmath mbstring sockets pdo_mysql pdo_sqlite gmp zip; do \
+    exts="bcmath mbstring sockets pdo_mysql pdo_sqlite gmp zip"; \
+    if [ "$SAPI_BASE" = "cli" ]; then exts="$exts pcntl"; fi; \
+    for ext in $exts; do \
       echo ">>> Building PHP extension: ${ext}"; \
       test -f "/usr/src/php/ext/${ext}/config.m4"; \
       docker-php-ext-install -j"$(nproc)" "${ext}"; \
@@ -40,7 +43,6 @@ RUN set -eux; \
       echo ">>> Building PHP extension: curl"; \
       docker-php-ext-install -j"$(nproc)" curl; \
     fi; \
-    # Add phpredis as if it were bundled, avoiding manual phpize \
     echo ">>> Adding phpredis 6.1.0"; \
     curl -fsSL -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/refs/tags/6.1.0.tar.gz; \
     mkdir -p /usr/src/php/ext/redis; \
