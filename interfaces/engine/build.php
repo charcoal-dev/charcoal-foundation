@@ -29,7 +29,7 @@ $stdout->write("Root Directory: ", false);
 $rootDirectory = (new DirectoryPath(charcoal_from_root()))->node();
 $stdout->write("{green}" . $rootDirectory->path->absolute, true);
 $stdout->write("Shared Context Path: ", false);
-$sharedContext = $rootDirectory->directory("shared", true, false);
+$sharedContext = $rootDirectory->directory("var/shared", true, false);
 $stdout->write("{green}" . $sharedContext->path->absolute, true);
 $stdout->write("", true);
 
