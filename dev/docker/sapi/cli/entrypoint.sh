@@ -4,14 +4,14 @@
 # @link https://github.com/charcoal-dev/charcoal-foundation
 #
 
-mkdir -p /home/charcoal/log \
- /home/charcoal/tmp \
- /home/charcoal/tmp/semaphore \
- /home/charcoal/shared \
- /home/charcoal/shared/semaphore \
- /home/charcoal/storage
+mkdir -p /home/charcoal/var/log \
+ /home/charcoal/var/tmp \
+ /home/charcoal/var/tmp/semaphore \
+ /home/charcoal/var/shared \
+ /home/charcoal/var/shared/semaphore \
+ /home/charcoal/var/storage
 
-touch /home/charcoal/log/error.log
+touch /home/charcoal/var/log/error.log
 
 test -f /home/charcoal/dev/composer/vendor/autoload.php || {
   echo "vendor/ missing. Run: ./charcoal.sh build app"; exit 1; }

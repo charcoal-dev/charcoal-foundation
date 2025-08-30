@@ -28,21 +28,21 @@ if [[ -f /etc/nginx/nginx.template.conf ]]; then
     > /home/charcoal/nginx/nginx.conf
 fi
 
-mkdir -p /home/charcoal/log \
- /home/charcoal/tmp \
- /home/charcoal/tmp/semaphore \
- /home/charcoal/shared \
- /home/charcoal/shared/semaphore \
- /home/charcoal/storage
+mkdir -p /home/charcoal/var/log \
+ /home/charcoal/var/tmp \
+ /home/charcoal/var/tmp/semaphore \
+ /home/charcoal/var/shared \
+ /home/charcoal/var/shared/semaphore \
+ /home/charcoal/var/storage
 
-touch /home/charcoal/log/error.log
+touch /home/charcoal/var/log/error.log
 
 install -d -m 0750 \
-  /home/charcoal/tmp/nginx \
-  /home/charcoal/tmp/nginx/body \
-  /home/charcoal/tmp/nginx/proxy \
-  /home/charcoal/tmp/nginx/fastcgi \
-  /home/charcoal/tmp/nginx/uwsgi \
-  /home/charcoal/tmp/nginx/scgi
+  /home/charcoal/var/tmp/nginx \
+  /home/charcoal/var/tmp/nginx/body \
+  /home/charcoal/var/tmp/nginx/proxy \
+  /home/charcoal/var/tmp/nginx/fastcgi \
+  /home/charcoal/var/tmp/nginx/uwsgi \
+  /home/charcoal/var/tmp/nginx/scgi
 
 exec /usr/bin/supervisord -c /etc/supervisord.conf

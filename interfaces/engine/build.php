@@ -33,8 +33,6 @@ $sharedContext = $rootDirectory->directory("var/shared", true, false);
 $stdout->write("{green}" . $sharedContext->path->absolute, true);
 $stdout->write("", true);
 
-$test = new \Charcoal\App\Kernel\Support\Errors\FileErrorLogger($rootDirectory->childPathInfo("error.log")->absolute);
-
 $timestamp = MonotonicTimestamp::now();
 $charcoal = new CharcoalApp(
     \Charcoal\App\Kernel\Enums\AppEnv::tryFrom(getenv("APP_ENV") ?: "dev"),
@@ -49,6 +47,6 @@ $startupTime = $charcoal->diagnostics->startupTime / 1e6;
 $stdout->write("", true);
 $stdout->write("{magenta}" . ObjectHelper::baseClassName($appFqcn) . " Initialized", true);
 $stdout->write("{cyan}Initialization Time: {green}" . $startupTime . "ms", true);
-$build = CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["tmp"]);
+$build = CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["shared"]);
 $stdout->write("{cyan}Snapshot Size: {green}" . round(filesize($build->absolute) / 1024, 2) . " KB", true);
 
