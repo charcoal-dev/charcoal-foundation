@@ -6,6 +6,7 @@
 
 declare(strict_types=1);
 
+
 $depth = (int)getenv("CHARCOAL_SAPI_DEPTH");
 if (!$depth) {
     throw new \Exception("CHARCOAL_SAPI_DEPTH environment variable is not set.");

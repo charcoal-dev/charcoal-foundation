@@ -2,6 +2,11 @@
   ~ Part of the "charcoal-dev/charcoal-foundation" package.
   ~ @link https://github.com/charcoal-dev/charcoal-foundation
   -->
+<?php
+/**
+ * @var array $exception
+ */
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,28 +36,31 @@
 <body>
 <div class="container mt-5">
     <div class="p-5 mb-4 bg-danger text-white rounded-3">
-        <h1 class="display-6">⚠️ <?= htmlspecialchars(\Charcoal\OOP\OOP::baseClassName($exception['class'])) ?></h1>
+        <h1 class="display-6">
+            ⚠️ <?= htmlspecialchars(\Charcoal\Base\Support\Helpers\ObjectHelper::baseClassName($exception['class'])) ?></h1>
         <p class="lead"><?= htmlspecialchars($exception['message']) ?></p>
         <hr>
         <p><strong>Exception Type:</strong> <?= htmlspecialchars($exception['class']) ?></p>
         <?php if (!empty($exception['file'])): ?>
             <p><strong>File:</strong> <?= htmlspecialchars($exception['file']) ?>
                 <?php if (!empty($exception['line'])): ?>
-                    :<?= (int) $exception['line'] ?>
+                    :<?= (int)$exception['line'] ?>
                 <?php endif; ?>
             </p>
         <?php endif; ?>
         <p class="mb-0"><strong>Error Code:</strong> <?= htmlspecialchars($exception['code']) ?></p>
     </div>
 
-    <?php if (!empty($exception['trace'])): ?>
-    <h4>Stack Trace:</h4>
-    <div class="stack-trace px-4 py-3"><?= htmlspecialchars(implode("\n", $exception['trace'])) ?></div><?php endif; ?>
-    <?php if (!empty($exception['previous'])): ?>
+    <?php if (isset($exception['trace']) && is_array($exception['trace'])): ?>
+        <h4>Stack Trace:</h4>)
+        <div class="stack-trace px-4 py-3"><?= htmlspecialchars(json_encode($exception['trace'], JSON_PRETTY_PRINT)) ?></div><?php endif; ?>
+    <?php if (isset($exception['previous']) && is_array($exception['previous'])): ?>
         <h4 class="mt-4">Previous Exception:</h4>
         <div class="stack-trace px-4 py-3 mb-4"><strong><?= htmlspecialchars($exception['previous']['class']) ?>
-:</strong> <?= htmlspecialchars($exception['previous']['message']) ?>
-<br><strong>Code:</strong> <?= htmlspecialchars($exception['previous']['code']) ?><br><?php if (!empty($exception['previous']['trace'])): ?><strong>Stack Trace:</strong><br><?= htmlspecialchars(implode("\n", $exception['previous']['trace'])) ?><?php endif; ?>
+                :</strong> <?= htmlspecialchars($exception['previous']['message']) ?>
+            <br><strong>Code:</strong> <?= htmlspecialchars($exception['previous']['code']) ?>
+            <br><?php if (!empty($exception['previous']['trace'])): ?><strong>Stack Trace:</strong>
+                <br><?= htmlspecialchars(json_encode($exception['previous']['trace'], JSON_PRETTY_PRINT)) ?><?php endif; ?>
         </div>
     <?php endif; ?>
 </div>

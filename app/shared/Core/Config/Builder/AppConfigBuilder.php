@@ -51,7 +51,7 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
 
         $this->cacheStoresFromFileConfig($configData["charcoal"]["cache"] ?? null);
         $this->databasesFromFileConfig($configData["charcoal"]["databases"] ?? null);
-        $this->httpInterfacesFromFileConfig($configData["charcoal"]["sapi"] ?? null);
+        $this->httpInterfacesFromFileConfig($configData["charcoal"]["http"]["sapi"] ?? null);
         $this->includeMailerConfig($configData["charcoal"]["mailer"] ?? null);
         if (!isset($this->mailer)) {
             $this->mailer = null;

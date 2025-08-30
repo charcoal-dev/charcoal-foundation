@@ -8,15 +8,14 @@ declare(strict_types=1);
 
 namespace App\Sapi\Web\Endpoints;
 
-
-use App\Sapi\Web\AbstractWebEndpoint;
+use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
 
 /**
  * Class Problem
  * @package App\Sapi\Web\Endpoints
  * @api
  */
-class Problem extends AbstractWebEndpoint
+class ProblemPage implements ControllerInterface
 {
     protected function entrypoint(): void
     {

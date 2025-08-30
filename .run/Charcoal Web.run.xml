@@ -5,14 +5,14 @@
 
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Charcoal Web" type="PhpBuiltInWebServerConfigurationType" factoryName="PHP Built-in Web Server" document_root="$PROJECT_DIR$/interfaces/web/public_html" port="7200">
-    <CommandLine workingDirectory="$PROJECT_DIR$/interfaces/web">
+    <CommandLine workingDirectory="$PROJECT_DIR$/interfaces/web/public_html">
       <envFiles>
-        <find>$PROJECT_DIR$/interfaces/web/.env</find>
+        <find>$PROJECT_DIR$/interfaces/web/public_html/.env</find>
       </envFiles>
     </CommandLine>
     <option name="envFilePaths">
       <list>
-        <option value="$PROJECT_DIR$/interfaces/web/.env" />
+        <option value="$PROJECT_DIR$/interfaces/web/public_html/.env" />
       </list>
     </option>
     <method v="2" />

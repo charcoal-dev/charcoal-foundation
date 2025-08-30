@@ -9,10 +9,12 @@ declare(strict_types=1);
 namespace App\Shared\Core\Http\Html;
 
 use Charcoal\Buffers\Buffer;
+use Charcoal\Filesystem\Enums\Assert;
 use Charcoal\Filesystem\Enums\PathType;
 use Charcoal\Filesystem\Exceptions\InvalidPathException;
 use Charcoal\Filesystem\Exceptions\PathTypeException;
 use Charcoal\Filesystem\Path\FilePath;
+use Charcoal\Filesystem\Path\PathInfo;
 use Charcoal\Filesystem\Path\SafePath;
 
 /**
@@ -26,15 +28,20 @@ trait RenderHtmlTemplateTrait
      * @throws InvalidPathException
      * @throws PathTypeException
      */
-    final protected static function renderTemplateFile(FilePath|SafePath|string $templateFilepath, array $data = []): Buffer
+    final protected static function renderTemplateFile(PathInfo|string $templateFilepath, array $data = []): Buffer
     {
-        if (!$templateFilepath instanceof FilePath) {
-            $templateFilepath = new FilePath($templateFilepath);
+        if (!$templateFilepath instanceof PathInfo) {
+            $templateFilepath = new PathInfo($templateFilepath);
         }
 
-        if ($templateFilepath->type !== PathType::File) {
-            throw new \RuntimeException("Template file not found");
+        if (!$templateFilepath->assertQuite(Assert::Exists, Assert::IsFile, Assert::Readable)) {
+            throw new \RuntimeException("Template file does not exist or is not readable");
         }
+
+        $templateFilepath = match (true) {
+            $templateFilepath instanceof PathInfo => $templateFilepath->absolute,
+            default => (string)$templateFilepath
+        };
 
         extract($data, EXTR_SKIP);
         if (!ob_start()) {

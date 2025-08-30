@@ -10,6 +10,7 @@ namespace App\Shared\Core;
 
 use App\Shared\Core\Http\Html\RenderHtmlTemplateTrait;
 use Charcoal\App\Kernel\Internal\Exceptions\AppCrashException;
+use Charcoal\App\Kernel\Support\ErrorHelper;
 
 /**
  * A final, readonly class dedicated to handling application crash scenarios by rendering an HTML page.
@@ -23,18 +24,14 @@ final class ErrorBoundary extends \Charcoal\App\Kernel\Support\Errors\ErrorBound
      * @noinspection PhpUnhandledExceptionInspection
      */
     public static function crashHtmlPage(
-        AppCrashException|\Throwable $exception,
+        AppCrashException|\Throwable $exIn,
         string                       $crashHtmlTemplate,
-        bool                         $errorLog = true,
-        bool                         $stdError = false,
-        int                          $pathOffset = 0,
     ): never
     {
-        $exceptionDto = self::toErrorStream($exception, $errorLog, $stdError, $pathOffset);
-
+        $exceptionDto = ErrorHelper::getExceptionDto($exIn);
         header("Content-Type: text/html", response_code: 500);
         header("Cache-Control: no-store, no-cache, must-revalidate");
-        print(self::renderTemplateFile($crashHtmlTemplate, ["exception" => $exceptionDto])->raw());
+        self::renderTemplateFile($crashHtmlTemplate, ["exception" => $exceptionDto])->len();
         exit(1);
     }
 }

@@ -53,8 +53,8 @@ trait SapiConfigBuilderTrait
             $listen = $server["listen"] ?? null;
             if (is_array($listen) && count($listen)) {
                 for ($i = 0; $i < count($listen); $i++) {
-                    if (isset($virtualHost[$i]["hostname"])) {
-                        $ports = $virtualHost[$i]["ports"] ?? null;
+                    if (isset($listen[$i]["hostname"])) {
+                        $ports = $listen[$i]["ports"] ?? null;
                         if (!is_null($ports) && !is_array($ports)) {
                             throw new \InvalidArgumentException(
                                 "Invalid ports configuration for virtual host at index: " . $i);
@@ -69,7 +69,7 @@ trait SapiConfigBuilderTrait
                             }
                         }
 
-                        $httpSapi->addServer($virtualHost[$i]["hostname"], ...($ports ?: [80]));
+                        $httpSapi->addServer($listen[$i]["hostname"], ...($ports ?: [80]));
                     }
                 }
             }
@@ -164,27 +164,25 @@ trait SapiConfigBuilderTrait
 
             $httpSapi->routerConfig(enforceTls: $enforceTls, wwwSupport: $wwwSupport);
 
+            $constraints = $server["perRequestConstraints"] ?? null;
+            if (!is_array($constraints) || !$constraints) {
+                throw new \InvalidArgumentException("Invalid per-request constraints configuration for interface: " .
+                    $interface->name);
+            }
+
             // Security
             $httpSapi->perRequestConstraints(
-                maxUriBytes: (int)($server["maxUriBytes"] ?? -1),
-                maxHeaders: (int)($server["maxHeaders"] ?? -1),
-                maxHeaderLength: (int)($server["maxHeaderLength"] ?? -1),
-                headerKeyValidation: match ((string)$server["headerKeyValidation"] ?? "") {
-                    "rfc7230" => HeaderKeyValidation::RFC7230,
-                    "strict" => HeaderKeyValidation::STRICT,
-                    default => throw new \InvalidArgumentException("Invalid header key validation for interface: " .
-                        $interface->name),
-                },
-                paramKeyValidation: match ((string)$server["paramKeyValidation"] ?? "") {
-                    "regular" => ParamKeyValidation::REGULAR,
-                    "strict" => HeaderKeyValidation::STRICT,
-                    default => throw new \InvalidArgumentException("Invalid param key validation for interface: " .
-                        $interface->name)
-                },
-                maxBodyBytes: (int)($server["maxBodyBytes"] ?? -1),
-                maxParams: (int)($server["maxParams"] ?? -1),
-                maxParamLength: (int)($server["maxParamLength"] ?? -1),
-                dtoMaxDepth: (int)($server["dtoMaxDepth"] ?? -1),
+                maxUriBytes: (int)($constraints["maxUriBytes"] ?? -1),
+                maxHeaders: (int)($constraints["maxHeaders"] ?? -1),
+                maxHeaderLength: (int)($constraints["maxHeaderLength"] ?? -1),
+                headerKeyValidation: HeaderKeyValidation::tryFrom(strval($constraints["headerKeyValidation"] ?? "")) ??
+                HeaderKeyValidation::RFC7230,
+                paramKeyValidation: ParamKeyValidation::tryFrom(strval($constraints["paramKeyValidation"] ?? "")) ??
+                ParamKeyValidation::STRICT,
+                maxBodyBytes: (int)($constraints["maxBodyBytes"] ?? -1),
+                maxParams: (int)($constraints["maxParams"] ?? -1),
+                maxParamLength: (int)($constraints["maxParamLength"] ?? -1),
+                dtoMaxDepth: (int)($constraints["dtoMaxDepth"] ?? -1),
             );
         }
     }

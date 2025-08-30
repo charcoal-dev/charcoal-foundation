@@ -6,23 +6,15 @@
 
 declare(strict_types=1);
 
-namespace App\Sapi\Web;
+namespace App\Sapi\Web\Endpoints;
 
 use Charcoal\Base\Support\Helpers\ObjectHelper;
-use Charcoal\Filesystem\Exceptions\FilesystemException;
-use Charcoal\Filesystem\Exceptions\InvalidPathException;
+use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
 use Composer\InstalledVersions;
 
-/**
- * Handles fallback rendering for the application.
- */
-class FallbackEndpoint extends AbstractWebEndpoint
+class FallbackPage implements ControllerInterface
 {
-    /**
-     * @throws InvalidPathException
-     * @throws FilesystemException
-     */
-    protected function entrypoint(): void
+    public function entrypoint(): void
     {
         $this->sendTemplate("fallback", [
             "appClassname" => ObjectHelper::baseClassName($this->app::class),

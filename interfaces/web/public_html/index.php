@@ -6,38 +6,33 @@
 
 declare(strict_types=1);
 
-/** @noinspection PhpIncludeInspection */
-require "../vendor/autoload.php";
+use App\Shared\CharcoalApp;
+use App\Shared\Constants\AppConstants;
+use App\Shared\Core\ErrorBoundary;
+use App\Shared\Enums\Interfaces;
+use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
+use Charcoal\App\Kernel\Enums\AppEnv;
+use Charcoal\Filesystem\Path\DirectoryPath;
 
-try {
-    // Instantiate router & define routes
-    $router = new Charcoal\Http\Router\Router();
-    $router->route('/*', 'App\Interfaces\Web\Endpoints\*')
-        ->fallbackController(\App\Interfaces\Web\FallbackEndpoint::class);
+require_once "bootstrap.php";
+charcoal_autoloader();
 
-    // Instantiate application
-    $rootDirectory = new \Charcoal\Filesystem\Directory(dirname(__FILE__, 2));
+ErrorBoundary::configStreams(true, false, strlen(charcoal_from_root()))
+    ::handle(function (\Throwable $e) {
+        ErrorBoundary::crashHtmlPage($e, charcoal_from_root(AppConstants::CRASH_HTML_TEMPLATE));
+    });
 
-    /** @var \App\Shared\CharcoalApp|string $appClass */
-    $appClass = \App\Shared\CharcoalApp::getAppClassname();
+$appFqcn = CharcoalApp::getAppFqcn();
+$rootDirectory = (new DirectoryPath(charcoal_from_root()))->node();
+$timestamp = MonotonicTimestamp::now();
 
-    // Bootstrap App
-    $startOn = microtime(true);
-    // $app = new $appClass($rootDirectory);
-    $app = $appClass::Load($rootDirectory, \App\Shared\Context\BuildContext::GLOBAL, ["tmp"]);
-    $app->lifecycle->startedOn = $startOn;
-    $app->bootstrap(); # Bootstrap all loaded modules & services
-    $bootstrappedOn = microtime(true);
+/** @var CharcoalApp $charcoal */
+$charcoal = $appFqcn::Load(AppEnv::tryFrom(getenv("APP_ENV") ?: "dev"), $rootDirectory, ["var", "shared"]);
+$charcoal->bootstrap($timestamp);
+$startupTime = $charcoal->diagnostics->startupTime / 1e6;
 
-    // Controllers Arguments
-    $router->setControllersArgs([$app, \Charcoal\App\Kernel\Interfaces\Http\RemoteClient::class]);
 
-    // Create request from _SERVER globals
-    \Charcoal\Http\Router\HttpServer::requestFromServerGlobals($router,
-        function (\App\Interfaces\Web\AbstractWebEndpoint $endpoint) {
-            $endpoint->sendResponse();
-        });
-} catch (Throwable $t) {
-    /** @noinspection PhpUnhandledExceptionInspection */
-    throw $t;
-}
+$httpServer = new \Charcoal\Http\Server\HttpServer(
+    $charcoal->config->sapi->interfaces[Interfaces::Web->name],
+
+);
