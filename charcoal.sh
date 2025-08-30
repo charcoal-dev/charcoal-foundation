@@ -216,6 +216,19 @@ ensure_service_up() {
   compose up -d --no-deps "$(svc "$sapi")" >/dev/null
 }
 
+ensure_db_init_ready() {
+  local d="dev/docker/utils/db/init"
+  umask 022
+  mkdir -p "$d"
+
+  # normalize line endings on scripts (safe if already LF)
+  find "$d" -type f -name '*.sh' -print0 | xargs -0 -r sed -i 's/\r$//'
+
+  chmod 755 "$d"
+  find "$d" -type f -name '*.sh'  -exec chmod 755 {} \;
+  find "$d" -type f -name '*.sql' -exec chmod 644 {} \;
+}
+
 gen_sapi_df() {
   local id="$1" base="$2" extras="$3"
   local out="$ROOT/dev/docker/sapi/app/$id/Dockerfile"
@@ -340,6 +353,7 @@ cmd_engine() {
 
 cmd_docker() {
   require_env
+  ensure_db_init_ready
   compose "$@"
 }
 
