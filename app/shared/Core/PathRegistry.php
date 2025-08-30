@@ -21,7 +21,6 @@ final readonly class PathRegistry extends \Charcoal\App\Kernel\Internal\PathRegi
     public DirectoryPath $tmp;
     public DirectoryPath $log;
     public DirectoryPath $shared;
-    public DirectoryPath $semaphore;
     public DirectoryPath $storage;
     public DirectoryPath $emails;
 

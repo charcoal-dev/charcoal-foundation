@@ -28,7 +28,12 @@ if [[ -f /etc/nginx/nginx.template.conf ]]; then
     > /home/charcoal/nginx/nginx.conf
 fi
 
-mkdir -p /home/charcoal/log /home/charcoal/tmp /home/charcoal/shared /home/charcoal/storage
+mkdir -p /home/charcoal/log \
+ /home/charcoal/tmp \
+ /home/charcoal/tmp/semaphore \
+ /home/charcoal/shared \
+ /home/charcoal/shared/semaphore \
+ /home/charcoal/storage
 
 touch /home/charcoal/log/error.log
 
