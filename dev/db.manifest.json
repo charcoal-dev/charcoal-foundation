@@ -1,7 +1,7 @@
 {
   "$schema": "schemas/db.manifest.schema.json",
   "schemas": [
-    "charcoal",
-    "charcoal_logs"
+    "primary",
+    "app_logs"
   ]
 }

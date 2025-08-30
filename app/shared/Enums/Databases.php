@@ -15,7 +15,7 @@ use Charcoal\App\Kernel\Contracts\Enums\DatabaseEnumInterface;
  */
 enum Databases: string implements DatabaseEnumInterface
 {
-    case Primary = "charcoal";
+    case Primary = "primary";
 
     /**
      * @return string
