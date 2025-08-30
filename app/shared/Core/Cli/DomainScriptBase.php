@@ -55,16 +55,6 @@ abstract class DomainScriptBase extends AppCliScript
         $this->semaphoreLock = $this->semaphoreLockId ?
             $this->obtainSemaphoreLock($this->semaphoreLockId, true) : null;
 
-        // Declared Depends On?
-        /*if ($this instanceof IpcDependentScriptInterface) {
-            $this->waitForIpcService(
-                $this->ipcDependsOn(),
-                $this->semaphoreLockId ?? $this->scriptClassname,
-                interval: 3,
-                maxAttempts: 100
-            );
-        }*/
-
         // Log Binding & ScriptExecutionLogger
         $this->logBinding = $this->declareExecutionLogging();
         if (!$this->logBinding->loggable) {
