@@ -322,7 +322,7 @@ cmd_engine() {
       ;;
     exec)
       [[ $# -ge 1 ]] || err "Usage: ./charcoal.sh engine exec <script> [args...]"
-      compose exec -T "$(svc engine)" php /home/charcoal/charcoal.php "$@"
+      compose exec -T "$(svc engine)" php /home/charcoal/engine/charcoal.php "$@"
       ;;
     *)
       err "Usage: ./charcoal.sh engine {inspect|stop [all|name]|restart [all|name]|exec <script> [args...]}"
