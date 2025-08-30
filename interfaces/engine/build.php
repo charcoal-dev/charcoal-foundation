@@ -33,7 +33,7 @@ $sharedContext = $rootDirectory->directory("var/shared", true, false);
 $stdout->write("{green}" . $sharedContext->path->absolute, true);
 $stdout->write("", true);
 
-$test = new \Charcoal\App\Kernel\Support\Errors\FileErrorLogger($rootDirectory->childPathInfo("log/error.log")->absolute);
+$test = new \Charcoal\App\Kernel\Support\Errors\FileErrorLogger($rootDirectory->childPathInfo("error.log")->absolute);
 
 $timestamp = MonotonicTimestamp::now();
 $charcoal = new CharcoalApp(
