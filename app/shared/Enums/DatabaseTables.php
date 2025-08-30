@@ -42,6 +42,9 @@ enum DatabaseTables: string implements TableRegistryEnumInterface
 
     public function getPriority(): int
     {
-        return 1;
+        return match ($this) {
+            self::HttpProxies => 100,
+            default => 200
+        };
     }
 }
