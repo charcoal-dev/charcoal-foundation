@@ -11,9 +11,9 @@ namespace App\Shared\Foundation\CoreData\BruteForceControl;
 use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
-use Charcoal\Database\ORM\Schema\Columns;
-use Charcoal\Database\ORM\Schema\Constraints;
-use Charcoal\Database\ORM\Schema\TableMigrations;
+use Charcoal\Database\Orm\Schema\Columns;
+use Charcoal\Database\Orm\Schema\Constraints;
+use Charcoal\Database\Orm\Schema\TableMigrations;
 
 /**
  * Represents the table structure and properties for managing brute force tracking data.

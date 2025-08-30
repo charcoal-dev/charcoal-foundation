@@ -13,9 +13,9 @@ use App\Shared\Foundation\Engine\EngineModule;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
 use Charcoal\Base\Enums\Charset;
 use Charcoal\Cli\Enums\ExecutionState;
-use Charcoal\Database\ORM\Schema\Columns;
-use Charcoal\Database\ORM\Schema\Constraints;
-use Charcoal\Database\ORM\Schema\TableMigrations;
+use Charcoal\Database\Orm\Schema\Columns;
+use Charcoal\Database\Orm\Schema\Constraints;
+use Charcoal\Database\Orm\Schema\TableMigrations;
 
 /**
  * Represents the Metrics table in the database.

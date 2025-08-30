@@ -14,7 +14,7 @@ use App\Shared\Enums\Databases;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
 use Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
-use Charcoal\Database\ORM\Migrations;
+use Charcoal\Database\Orm\Migrations;
 
 /**
  * Class Install
