@@ -35,7 +35,7 @@ class ConstructTest extends TestCase
         try {
             $timestamp = MonotonicTimestamp::now();
             $charcoal = new CharcoalApp(
-                AppEnv::Dev,
+                AppEnv::Test,
                 $rootDirectory,
                 function (BuildStageEvents $events) {
                     fwrite(STDERR, "\033[36mBuild Stage:\033[0m \033[33m" . $events->name . "\033[0m\n");
@@ -61,10 +61,12 @@ class ConstructTest extends TestCase
         // 2 Subscribers = One for this test, closure passed to constructor is bound to the event subscription,
         // and the other one is the ErrorManager from Foundation app waiting for PathRegistry to resolve so it can
         // load template.
-        $this->assertCount(2, $eventInspect->history[BuildStageEvents::class],
-            "Total 2 overall subscribers");
+        $this->assertCount(1, $eventInspect->history[BuildStageEvents::class],
+            "Total 1 overall subscribers");
+        $this->assertCount(0, $eventInspect->current[BuildStageEvents::class],
+            "No subscribers held for " . ObjectHelper::baseClassName(BuildStageEvents::class));
 
         // Serialize the application
-        CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["tmp"]);
+        CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["var","shared"]);
     }
 }
