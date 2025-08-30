@@ -2,17 +2,17 @@ services:
   engine:
     build: { target: prod }
     volumes:
-      - ../../var/log/engine:/home/charcoal/log
-      - ../../var/tmp/engine:/home/charcoal/tmp
-      - ../../var/shared:/home/charcoal/shared
-      - ../../var/storage:/home/charcoal/storage
+      - ../../var/log/engine:/home/charcoal/var/log
+      - ../../var/tmp/engine:/home/charcoal/var/tmp
+      - ../../var/shared:/home/charcoal/var/shared
+      - ../../var/storage:/home/charcoal/var/storage
   web:
     build: { target: prod }
     volumes:
-      - ../../var/log/web:/home/charcoal/log
-      - ../../var/tmp/web:/home/charcoal/tmp
-      - ../../var/shared:/home/charcoal/shared
-      - ../../var/storage:/home/charcoal/storage:ro
+      - ../../var/log/web:/home/charcoal/var/log
+      - ../../var/tmp/web:/home/charcoal/var/tmp
+      - ../../var/shared:/home/charcoal/var/shared
+      - ../../var/storage:/home/charcoal/var/storage:ro
   mysql:
     volumes:
       - ../../dev/docker/utils/db/init:/docker-entrypoint-initdb.d:ro
