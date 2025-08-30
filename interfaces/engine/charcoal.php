@@ -2,37 +2,39 @@
 /**
  * Part of the "charcoal-dev/charcoal-foundation" package.
  * @link https://github.com/charcoal-dev/charcoal-foundation
+ * @noinspection PhpUnhandledExceptionInspection
  */
 
 declare(strict_types=1);
 
-/** @noinspection PhpIncludeInspection */
-require "vendor/autoload.php";
+use App\Shared\CharcoalApp;
+use App\Shared\Core\ErrorBoundary;
+use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
+use Charcoal\App\Kernel\EntryPoint\Cli\AppCliHandler;
+use Charcoal\App\Kernel\Enums\AppEnv;
+use Charcoal\Base\Support\Helpers\ObjectHelper;
+use Charcoal\Filesystem\Path\DirectoryPath;
 
-try {
-    /** @var \App\Shared\CharcoalApp|string $appClass */
-    $appClass = \App\Shared\CharcoalApp::getAppClassname();
-    $appClassname = \Charcoal\OOP\OOP::baseClassName($appClass);
-    $rootDirectory = new \Charcoal\Filesystem\Directory(__DIR__);
+require_once "bootstrap.php";
+charcoal_autoloader();
 
-    $startOn = microtime(true);
-    $arguments = explode(";", substr($argv[1] ?? "", 1, -1));
-    $scriptName = $arguments[0] ?? null;
+$appFqcn = CharcoalApp::getAppFqcn();
+$rootDirectory = (new DirectoryPath(charcoal_from_root()))->node();
+ErrorBoundary::configStreams(true, false, strlen(charcoal_from_root()));
+$timestamp = MonotonicTimestamp::now();
 
-    $app = $appClass::Load($rootDirectory, \App\Shared\Context\BuildContext::GLOBAL, ["tmp"]);
-    //$app = new $appClass($rootDirectory);
+/** @var CharcoalApp $charcoal */
+$charcoal = $appFqcn::Load(AppEnv::tryFrom(getenv("APP_ENV") ?: "dev"), $rootDirectory, ["var", "shared"]);
+$charcoal->bootstrap($timestamp);
+$startupTime = $charcoal->diagnostics->startupTime / 1e6;
+$charcoal->errors->debugBacktraceOffset(0);
 
-    $app->lifecycle->startedOn = $startOn;
-    $app->bootstrap(); # Bootstrap all loaded modules & services
-    $bootstrappedOn = microtime(true);
+$console = new AppCliHandler($charcoal,
+    "App\\Sapi\\Engine\\Scripts",
+    explode(";", substr($argv[1] ?? "", 1, -1)),
+    "fallback"
+);
 
-    $cli = new \Charcoal\App\Kernel\Interfaces\Cli\AppCliHandler(
-        $app, 'App\Interfaces\Engine\Scripts', $arguments, defaultScriptName: "fallback"
-    );
-
-    $cli->print(sprintf("{grey}%s app bootstrapped in {green}%ss{/}", $appClassname, number_format($bootstrappedOn - $startOn, 4)));
-    $cli->burn();
-} catch (Throwable $t) {
-    /** @noinspection PhpUnhandledExceptionInspection */
-    throw $t;
-}
+$console->print(sprintf("{grey}%s app bootstrapped in {green}%ss{/}",
+    ObjectHelper::baseClassName($appFqcn), $startupTime));
+$console->exec();
