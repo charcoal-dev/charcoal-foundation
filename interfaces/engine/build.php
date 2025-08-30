@@ -14,6 +14,7 @@ use App\Shared\CharcoalApp;
 use App\Shared\Core\ErrorBoundary;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
+use Charcoal\App\Kernel\Internal\Exceptions\AppCrashException;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 use Charcoal\Cli\Output\StdoutPrinter;
 use Charcoal\Filesystem\Path\DirectoryPath;
@@ -33,6 +34,8 @@ $sharedContext = $rootDirectory->directory("shared", true, false);
 $stdout->write("{green}" . $sharedContext->path->absolute, true);
 $stdout->write("", true);
 
+$test = new \Charcoal\App\Kernel\Support\Errors\FileErrorLogger($rootDirectory->childPathInfo("log/error.log")->absolute);
+
 $timestamp = MonotonicTimestamp::now();
 
 try {
@@ -51,6 +54,6 @@ try {
     $stdout->write("{cyan}Initialization Time: {green}" . $startupTime . "ms", true);
     $build = CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["tmp"]);
     $stdout->write("{cyan}Snapshot Size: {green}" . round(filesize($build->absolute) / 1024, 2) . " KB", true);
-} catch (\Throwable $t) {
+} catch (AppCrashException $t) {
     ErrorBoundary::terminate($t, true, false, strlen($rootDirectory?->path?->absolute ?? 0));
 }
