@@ -4,14 +4,23 @@
 # @link https://github.com/charcoal-dev/charcoal-foundation
 #
 
+#!/usr/bin/env bash
 set -euo pipefail
 : "${MYSQL_PASSWORD:?}"
 
-cat > /docker-entrypoint-initdb.d/02-users.sql <<'SQL'
+OUT="dev/docker/utils/db/init/02-users.sql"
+
+umask 022
+mkdir -p "$(dirname "$OUT")"
+
+cat > "$OUT" <<'SQL'
 CREATE USER IF NOT EXISTS 'charcoal'@'%' IDENTIFIED BY '__APP_PW__';
-GRANT ALL PRIVILEGES ON charcoal\_%.* TO 'charcoal'@'%';
+GRANT ALL PRIVILEGES ON `charcoal\_%`.* TO 'charcoal'@'%';
 FLUSH PRIVILEGES;
 SQL
 
-# substitute password safely
-sed -i "s#__APP_PW__#${MYSQL_PASSWORD//\//\\/}#g" /docker-entrypoint-initdb.d/02-users.sql
+# substitute password (escape single quotes)
+PW_ESC=${MYSQL_PASSWORD//\'/\'\'}
+sed -i "s#__APP_PW__#${PW_ESC}#g" "$OUT"
+
+chmod 0644 "$OUT"
