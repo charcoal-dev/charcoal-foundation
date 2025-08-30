@@ -1,6 +1,7 @@
 {
   "$schema": "schemas/db.manifest.schema.json",
   "schemas": [
-    "charcoal"
+    "charcoal",
+    "charcoal_logs"
   ]
 }

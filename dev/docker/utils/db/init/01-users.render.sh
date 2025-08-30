@@ -14,7 +14,7 @@ umask 022
 mkdir -p "$(dirname "$OUT")"
 
 cat > "$OUT" <<'SQL'
-CREATE USER IF NOT EXISTS 'charcoal'@'%' IDENTIFIED BY '__APP_PW__';
+CREATE USER IF NOT EXISTS 'charcoal'@'%' IDENTIFIED WITH mysql_native_password BY '__APP_PW__';
 GRANT ALL PRIVILEGES ON `charcoal\_%`.* TO 'charcoal'@'%';
 FLUSH PRIVILEGES;
 SQL
