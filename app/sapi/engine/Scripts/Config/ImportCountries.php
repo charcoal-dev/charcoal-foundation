@@ -49,7 +49,7 @@ class ImportCountries extends DomainScriptBase
         $this->print('Looking for {yellow}{b}countries.csv{/} file...');
 
         try {
-            $earthCsvPath = $this->getAppBuild()->paths->storage->join("./countries.csv");
+            $earthCsvPath = $this->getAppBuild()->paths->storage->join("seed/countries.csv");
             $this->inline(sprintf('Path: {cyan}%s{/} ... ', $earthCsvPath->path));
             $earthCsvPath = $earthCsvPath->isFile()->node();
             $this->print("{green}OK{/}");
