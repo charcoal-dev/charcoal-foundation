@@ -47,6 +47,6 @@ $startupTime = $charcoal->diagnostics->startupTime / 1e6;
 $stdout->write("", true);
 $stdout->write("{magenta}" . ObjectHelper::baseClassName($appFqcn) . " Initialized", true);
 $stdout->write("{cyan}Initialization Time: {green}" . $startupTime . "ms", true);
-$build = CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["shared"]);
+$build = CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["var", "shared"]);
 $stdout->write("{cyan}Snapshot Size: {green}" . round(filesize($build->absolute) / 1024, 2) . " KB", true);
 

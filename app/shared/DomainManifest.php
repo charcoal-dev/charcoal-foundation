@@ -50,8 +50,8 @@ final class DomainManifest extends AppManifest
     public static function provideAppConfig(AppEnv $env, \Charcoal\App\Kernel\Internal\PathRegistry $paths): AppConfig
     {
         $appConfig = new AppConfigBuilder($env, $paths);
-        $appConfig->security->setSemaphoreDirectory(SemaphoreType::Filesystem_Private, "./tmp/semaphore");
-        $appConfig->security->setSemaphoreDirectory(SemaphoreType::Filesystem_Shared, "./shared/semaphore");
+        $appConfig->security->setSemaphoreDirectory(SemaphoreType::Filesystem_Private, "./var/tmp/semaphore");
+        $appConfig->security->setSemaphoreDirectory(SemaphoreType::Filesystem_Shared, "./var/shared/semaphore");
         return $appConfig->build();
     }
 
