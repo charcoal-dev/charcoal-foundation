@@ -330,7 +330,7 @@ cmd_engine() {
       [[ $# -ge 1 ]] || err "Usage: ./charcoal.sh engine exec <script> [args...]"
 
       compose exec $COMPOSE_TTY "$(svc engine)" \
-        php /home/charcoal/engine/charcoal.php "$@" --ansi --tty="${TTY_VAL}"
+        php /home/charcoal/engine/charcoal.sh "$@" --ansi --tty="${TTY_VAL}"
       ;;
     *)
       err "Usage: ./charcoal.sh engine {inspect|stop [all|name]|restart [all|name]|exec <script> [args...]}"
