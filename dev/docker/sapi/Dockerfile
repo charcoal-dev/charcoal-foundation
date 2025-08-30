@@ -72,7 +72,7 @@ RUN install -d -m 0750 /home/charcoal/var/log \
     /home/charcoal/var/tmp/semaphore \
     /home/charcoal/var/shared  \
     /home/charcoal/var/shared/semaphore  \
-    /home/charcoal/var/storage \
+    /home/charcoal/var/storage
 
 WORKDIR /home/charcoal/dev
 COPY dev/bootstrap.php bootstrap.php
