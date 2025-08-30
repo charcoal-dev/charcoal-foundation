@@ -41,12 +41,7 @@ trait SapiConfigBuilderTrait
             return;
         }
 
-        $sapi = $config["sapi"] ?? null;
-        if (!is_array($sapi) || !$sapi) {
-            return;
-        }
-
-        foreach ($sapi as $name => $server) {
+        foreach ($config as $name => $server) {
             $interface = Interfaces::tryFrom(strval($name));
             if (!$interface) {
                 continue;
@@ -85,7 +80,7 @@ trait SapiConfigBuilderTrait
                     "Invalid cors configuration for interface: " . $interface->name);
             }
 
-            $corsEnabled = $server["cors"]["enabled"] ?? null;
+            $corsEnabled = $server["cors"]["enforced"] ?? null;
             if (!is_bool($corsEnabled)) {
                 throw new \InvalidArgumentException("CORS enforced should be a boolean true/false");
             }
