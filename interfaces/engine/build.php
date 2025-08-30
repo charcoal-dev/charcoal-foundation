@@ -14,11 +14,18 @@ use App\Shared\CharcoalApp;
 use App\Shared\Core\ErrorBoundary;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
+use Charcoal\App\Kernel\Internal\Exceptions\AppCrashException;
+use Charcoal\App\Kernel\Support\Errors\ConsoleErrorDecorator;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 use Charcoal\Cli\Output\StdoutPrinter;
 use Charcoal\Filesystem\Path\DirectoryPath;
 
-ErrorBoundary::configStreams(true, false, strlen(charcoal_from_root()));
+ErrorBoundary::configStreams(true, false, strlen(charcoal_from_root()))
+    ::handle(function (\Throwable $e) {
+        (new ConsoleErrorDecorator())->handleException(
+            $e instanceof AppCrashException ? $e->getPrevious() : $e,
+        );
+    });
 
 $stdout = new StdoutPrinter();
 $stdout->useAnsiCodes(true);

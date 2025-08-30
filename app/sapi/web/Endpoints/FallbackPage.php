@@ -12,7 +12,7 @@ use Charcoal\Base\Support\Helpers\ObjectHelper;
 use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
 use Composer\InstalledVersions;
 
-class FallbackPage implements ControllerInterface
+final class FallbackPage implements ControllerInterface
 {
     public function entrypoint(): void
     {

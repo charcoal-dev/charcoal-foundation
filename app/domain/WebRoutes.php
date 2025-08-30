@@ -29,10 +29,8 @@ final readonly class WebRoutes extends AppRoutes implements AppRoutesProviderInt
     {
         $this->sapi = Interfaces::Web;
         parent::__construct(function (RouteGroupBuilder $group): void {
-            $group->group("/", function (RouteGroupBuilder $group): void {
-                $group->route("/", FallbackPage::class);
-                $group->route("/problem", ProblemPage::class)->methods(HttpMethod::GET, HttpMethod::HEAD);
-            });
+            $group->route("/", FallbackPage::class);
+            $group->route("/problem", ProblemPage::class)->methods(HttpMethod::GET, HttpMethod::HEAD);
         });
     }
 

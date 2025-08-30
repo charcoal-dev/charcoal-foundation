@@ -65,6 +65,10 @@ RUN set -e; \
   done; \
   rm -rf /opt/sapi
 
+# Global PHP logging: no display, log to stderr
+RUN printf "display_errors=Off\nlog_errors=On\nerror_log=/proc/self/fd/2\n" \
+  > /usr/local/etc/php/conf.d/99-logs.ini
+
 USER charcoal
 WORKDIR /home/charcoal
 RUN install -d -m 0750 /home/charcoal/var/log \
