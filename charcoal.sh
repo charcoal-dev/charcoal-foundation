@@ -319,13 +319,13 @@ cmd_build_app() {
   ensure_engine_up
   local do_composer="${1-}"  # use --composer to run a local install
   info "Checking dependencies…"
-  compose exec -T "$(svc engine)" bash -lc "${ENGINE_SNAPSHOT_CMD:-php -f /home/charcoal/engine/build.php}"
+  compose exec -T "$(svc engine)" supervisorctl tail -f composer-update stdout
 
   # CharcoalApp Builder
   if has_profile engine; then
     info "Initializing Charcoal App…"
     >&2 echo
-    compose exec -T "$(svc engine)" bash -lc "${ENGINE_SNAPSHOT_CMD:-php -f /home/charcoal/engine/build.php}"
+    compose exec -T "$(svc engine)" supervisorctl tail -f build-app stdout
   else
     info "Engine profile disabled; skipping snapshot."
   fi
