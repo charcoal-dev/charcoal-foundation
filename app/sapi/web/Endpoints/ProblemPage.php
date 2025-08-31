@@ -20,7 +20,7 @@ use Charcoal\Http\Server\Request\Controller\RequestFacade;
 #[DefaultEntrypoint("entrypoint")]
 final class ProblemPage implements ControllerInterface
 {
-    protected function entrypoint(): void
+    public function entrypoint(): void
     {
         throw new \RuntimeException("This exception has been intentionally triggered so you can enjoy this attractive page",
             previous: new \LogicException("Nope! There doesn't seem to be anything wrong here."));
@@ -28,6 +28,5 @@ final class ProblemPage implements ControllerInterface
 
     public function __invoke(RequestFacade $context): void
     {
-        // TODO: Implement __invoke() method.
     }
 }
