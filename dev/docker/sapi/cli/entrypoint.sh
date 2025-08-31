@@ -12,6 +12,8 @@ mkdir -p /home/charcoal/var/log \
  /home/charcoal/var/storage
 
 touch /home/charcoal/var/log/error.log
+touch /home/charcoal/var/log/composer.log
+touch /home/charcoal/var/log/build.out.log
 
 test -f /home/charcoal/dev/composer/vendor/autoload.php || {
   echo "vendor/ missing. Run: ./charcoal.sh build app"; exit 1; }
