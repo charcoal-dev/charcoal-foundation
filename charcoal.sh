@@ -294,33 +294,33 @@ cmd_build_docker() {
 }
 
 run_supervisor_script() {
-  local svc="$1" prog="$2" t="${3:-600}" chan="${4:-stdout}"
+  local svc="$1" prog="$2" t="${3:-600}"
 
   compose exec -T "$(svc "$svc")" bash -lc '
     set -euo pipefail
     p='"$prog"'
     t='"$t"'
-    chan='"$chan"'
 
     supervisorctl clear "$p" >/dev/null 2>&1 || true
     supervisorctl start "$p"
 
-    # backlog (bytes) + follow live; stop tail on exit/timeout/ctrl-c
-    supervisorctl tail -f -1600 "$p" "$chan" & TPID=$!
-    cleanup(){ kill "$TPID" >/dev/null 2>&1 || true; }
-    trap cleanup EXIT INT TERM
+    # try to show some backlog first (no -f); ignore if not ready yet
+    supervisorctl tail -1600 "$p" stdout >/dev/null 2>&1 || true
 
-    # wait until EXITED or timeout
+    # now follow live (NO byte arg alongside -f; your version doesn’t support it)
+    supervisorctl tail -f "$p" stdout & TPID=$!
+    trap "kill $TPID >/dev/null 2>&1 || true" EXIT INT TERM
+
+    # wait until program exits or timeout
     start=$(date +%s)
     while :; do
-      s=$(supervisorctl status "$p" | awk "{print \$2}")
-      [ "$s" = "EXITED" ] && break
-      # guard against runaway
-      now=$(date +%s); [ $((now-start)) -ge "$t" ] && { echo "Timeout: $p" >&2; break; }
+      st=$(supervisorctl status "$p" | awk "{print \$2}")
+      [ "$st" = "EXITED" ] && break
+      [ $(( $(date +%s) - start )) -ge '"$t"' ] && { echo "Timeout: $p" >&2; break; }
       sleep 0.3
     done
 
-    cleanup
+    kill $TPID >/dev/null 2>&1 || true
     line=$(supervisorctl status "$p" || true)
     code=$(printf "%s" "$line" | sed -n "s/.*exit status \([0-9]\+\).*/\1/p")
     [ -z "$code" ] && code=0
