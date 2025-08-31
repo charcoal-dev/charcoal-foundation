@@ -293,22 +293,51 @@ cmd_build_docker() {
   fi
 }
 
+run_supervisor_script() {
+  local svc="$1" prog="$2"
+
+  compose exec -T "$(svc "$svc")" bash -lc '
+    set -euo pipefail
+    p='"$prog"'
+
+    # fresh log, start program
+    supervisorctl clear "$p" >/dev/null 2>&1 || true
+    supervisorctl start "$p"
+
+    # start following logs (print last 1000 lines then follow)
+    supervisorctl tail -f -1000 "$p" &
+    tpid=$!
+
+    # wait for program to exit, then stop tail and return its exit code
+    code=""
+    while :; do
+      line=$(supervisorctl status "$p")
+      state=$(printf "%s" "$line" | awk "{print \$2}")
+      if [ "$state" = "EXITED" ]; then
+        code=$(printf "%s" "$line" | sed -n "s/.*exit status \([0-9]\+\).*/\1/p")
+        break
+      fi
+      sleep 0.3
+    done
+
+    kill "$tpid" >/dev/null 2>&1 || true
+    [ -z "$code" ] && code=0
+    exit "$code"
+  '
+}
+
 cmd_build_app() {
   require_env
   ensure_engine_up
   local do_composer="${1-}"  # use --composer to run a local install
   info "Checking dependencies…"
-  compose exec -T "$(svc engine)" supervisorctl clear composer-update || true
-  compose exec -T "$(svc engine)" supervisorctl start composer-update
-  compose exec -T "$(svc engine)" supervisorctl tail -10000 composer-update stdout
+  run_supervisor_script engine composer-update || true
 
   # CharcoalApp Builder
   if has_profile engine; then
     info "Initializing Charcoal App…"
     >&2 echo
-    compose exec -T "$(svc engine)" supervisorctl clear build-app || true
-    compose exec -T "$(svc engine)" supervisorctl start build-app
-    compose exec -T "$(svc engine)" supervisorctl tail -f build-app stdout
+    run_supervisor_script engine build-app || true
   else
     info "Engine profile disabled; skipping snapshot."
   fi
