@@ -277,16 +277,15 @@ cmd_build_docker() {
   generate_db_init_sql
   resolve_profiles
 
-
   info "Compose up (profiles: ${EFFECTIVE:-none}) …"
   local UIDGID=(--build-arg CHARCOAL_UID="$(id -u)" --build-arg CHARCOAL_GID="$(id -g)")
   [[ "${CHARCOAL_DRYRUN:-0}" = "1" ]] && { ok "Dry-run: skipping docker."; return 0; }
 
-  # 4) Build and start your stack as before
+  # 3) Build and start your stack as before
   compose build "${UIDGID[@]}"
   compose up -d
 
-  # 5) Health check
+  # 4) Health check
   if engine_healthy 60; then
     ok "Engine is healthy."
   else

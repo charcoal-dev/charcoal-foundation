@@ -11,6 +11,7 @@ services:
     networks:
       charcoal-app-internal:
         ipv4_address: "${SAPI_ENGINE_IP}"
+      charcoal-app-edge: {}
     healthcheck:
       test: ["CMD", "php", "-v"]
       interval: 10s
