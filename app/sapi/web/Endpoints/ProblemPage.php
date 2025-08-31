@@ -10,7 +10,6 @@ namespace App\Sapi\Web\Endpoints;
 
 use Charcoal\Http\Server\Attributes\DefaultEntrypoint;
 use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
-use Charcoal\Http\Server\Contracts\Controllers\InvokableControllerInterface;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
 
 /**
@@ -19,7 +18,7 @@ use Charcoal\Http\Server\Request\Controller\RequestFacade;
  * @api
  */
 #[DefaultEntrypoint("entrypoint")]
-final class ProblemPage implements ControllerInterface, InvokableControllerInterface
+final class ProblemPage implements ControllerInterface
 {
     protected function entrypoint(): void
     {

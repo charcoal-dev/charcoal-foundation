@@ -2,18 +2,24 @@ FROM php:8.3-__SAPI_BASE__-bookworm AS base
 ARG CHARCOAL_UID=1000
 ARG CHARCOAL_GID=1000
 ARG SAPI_BASE=__SAPI_BASE__
+ARG REDIS_PECL_VER=6.1.0
 
 # Create user/group for SAPI (match host IDs)
 RUN groupadd -g ${CHARCOAL_GID} charcoal \
  && useradd -m -u ${CHARCOAL_UID} -g ${CHARCOAL_GID} -s /bin/bash charcoal
 
-# SAPI Environment Setup
-RUN apt-get update \
- && apt-get install -y --no-install-recommends supervisor __DEPS__ ca-certificates \
- && rm -rf /var/lib/apt/lists/*
+# Core tools + your extra deps (__DEPS__) + supervisor
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt \
+    set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends supervisor __DEPS__ ca-certificates; \
+    rm -rf /var/lib/apt/lists/*
 
-# PHP extensions (shared by cli/fpm images)
-RUN set -eux; \
+# Build deps for PHP extensions (separate layer, cached)
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt \
+    set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
       $PHPIZE_DEPS \
@@ -22,38 +28,35 @@ RUN set -eux; \
       libzip-dev \
       libcurl4-openssl-dev \
       libsqlite3-dev \
-      libonig-dev \
-      zlib1g-dev \
-    ; \
-    docker-php-source extract; \
-    docker-php-ext-configure gmp; \
-    exts="bcmath mbstring sockets pdo_mysql pdo_sqlite gmp zip"; \
-    if [ "$SAPI_BASE" = "cli" ]; then exts="$exts pcntl"; fi; \
-    for ext in $exts; do \
-      echo ">>> Building PHP extension: ${ext}"; \
-      test -f "/usr/src/php/ext/${ext}/config.m4"; \
-      docker-php-ext-install -j"$(nproc)" "${ext}"; \
-    done; \
-    # Build sqlite3 and curl separately to isolate any issue \
-    if [ -f "/usr/src/php/ext/sqlite3/config.m4" ]; then \
-      echo ">>> Building PHP extension: sqlite3"; \
-      docker-php-ext-install -j"$(nproc)" sqlite3; \
-    fi; \
-    if [ -f "/usr/src/php/ext/curl/config.m4" ]; then \
-      echo ">>> Building PHP extension: curl"; \
-      docker-php-ext-install -j"$(nproc)" curl; \
-    fi; \
-    echo ">>> Adding phpredis 6.1.0"; \
-    curl -fsSL -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/refs/tags/6.1.0.tar.gz; \
-    mkdir -p /usr/src/php/ext/redis; \
-    tar -xzf /tmp/phpredis.tar.gz -C /usr/src/php/ext/redis --strip-components=1; \
-    test -f /usr/src/php/ext/redis/config.m4; \
-    docker-php-ext-install -j"$(nproc)" redis; \
-    docker-php-source delete; \
-    rm -rf /tmp/phpredis.tar.gz /tmp/pear; \
-    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $PHPIZE_DEPS \
-    && rm -rf /var/lib/apt/lists/*
+      zlib1g-dev; \
+    rm -rf /var/lib/apt/lists/*
 
+# PHP extensions — group 1 (highly stable)
+RUN set -eux; \
+    docker-php-ext-configure gmp; \
+    docker-php-ext-install -j"$(nproc)" bcmath mbstring sockets gmp zip
+
+# PHP extensions — group 2 (DB)
+RUN set -eux; \
+    docker-php-ext-install -j"$(nproc)" pdo_mysql pdo_sqlite
+
+# PHP extensions — group 3 (sqlite3, curl) isolated for cache clarity
+RUN set -eux; \
+    docker-php-ext-install -j"$(nproc)" sqlite3; \
+    docker-php-ext-install -j"$(nproc)" curl
+
+# Optional CLI-only extension
+RUN set -eux; \
+    if [ "$SAPI_BASE" = "cli" ]; then docker-php-ext-install -j"$(nproc)" pcntl; fi
+
+# Redis via PECL (pinned) with cache for pear/pecl artifacts
+RUN --mount=type=cache,target=/tmp/pear \
+    set -eux; \
+    pecl install -o -f "redis-${REDIS_PECL_VER}"; \
+    docker-php-ext-enable redis; \
+    rm -rf /tmp/pear
+
+# Apply SAPI overrides (entrypoint, supervisord.conf, nginx/php-fpm templates)
 COPY dev/docker/sapi/__SAPI_BASE__/ /opt/sapi/base
 COPY dev/docker/sapi/app/__SAPI_ID__/ /opt/sapi/override
 RUN set -e; \
@@ -68,6 +71,13 @@ RUN set -e; \
 # Global PHP logging: no display, log to stderr
 RUN printf "display_errors=Off\nlog_errors=On\nerror_log=/proc/self/fd/2\n" \
   > /usr/local/etc/php/conf.d/99-logs.ini
+
+# (Optional) remove build deps to slim image — do this AFTER ext installs to keep cache usefulness
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt \
+    set -eux; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $PHPIZE_DEPS; \
+    rm -rf /var/lib/apt/lists/*
 
 USER charcoal
 WORKDIR /home/charcoal
