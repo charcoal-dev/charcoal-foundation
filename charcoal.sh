@@ -293,48 +293,45 @@ cmd_build_docker() {
   fi
 }
 
+# run_supervisor_script <service> <program> [timeout_secs]
 run_supervisor_script() {
-  local svc="$1" prog="$2" t="${3:-600}" logp errp=""
+  local svc="$1" prog="$2" t="${3:-600}" logp errp
   case "$prog" in
-    composer-update) logp="/home/charcoal/var/log/composer.log" ;;
-    build-app)       logp="/home/charcoal/var/log/build.out.log"; errp="/home/charcoal/var/log/error.log" ;;
-    *) echo "Unknown program: $prog" >&2; return 2 ;;
+    composer-update) logp="/home/charcoal/var/log/composer.log"; errp="";;
+    build-app)       logp="/home/charcoal/var/log/build.out.log"; errp="/home/charcoal/var/log/error.log";;
+    *) echo "Unknown program: $prog" >&2; return 2;;
   esac
 
-  compose exec -T "$(svc "$svc")" bash -lc '
+  local comp_svc; comp_svc="$(svc "$svc")"
+
+  compose exec -T "$comp_svc" env P="$prog" LOGP="$logp" ERRP="$errp" T="$t" bash -lc '
     set -euo pipefail
-    p='"$prog"'
-    logp='"$logp"'
-    errp='"$errp"'
-    t='"$t"'
 
-    # fresh log + stop any prior run
-    supervisorctl stop "$p"  >/dev/null 2>&1 || true
-    supervisorctl clear "$p" >/dev/null 2>&1 || true
-    : > "$logp" || true
+    supervisorctl stop "$P"  >/dev/null 2>&1 || true
+    supervisorctl clear "$P" >/dev/null 2>&1 || true
+    : > "$LOGP" || true
+    if [ -n "${ERRP:-}" ]; then : > "$ERRP" || true; fi
 
-    supervisorctl start "$p"
+    supervisorctl start "$P"
 
-    # follow actual files (robust)
-    tail -n +1 -F "$logp" &
-    T1=$!
-    if [ -n "$errp" ]; then tail -n +1 -F "$errp" >&2 & T2=$!; else T2=""; fi
-    cleanup(){ kill $T1 >/dev/null 2>&1 || true; [ -n "$T2" ] && kill $T2 >/dev/null 2>&1 || true; }
+    # follow actual files
+    tail -n +1 -F "$LOGP" &
+    TPID=$!
+    if [ -n "${ERRP:-}" ]; then tail -n +1 -F "$ERRP" >&2 & EPID=$!; else EPID=""; fi
+
+    cleanup(){ kill "$TPID" >/dev/null 2>&1 || true; [ -n "$EPID" ] && kill "$EPID" >/dev/null 2>&1 || true; }
     trap cleanup EXIT INT TERM
 
-    # wait for EXITED or STOPPED or timeout
     start=$(date +%s)
     while :; do
-      st=$(supervisorctl status "$p" | awk "{print \$2}")
-      case "$st" in
-        EXITED|STOPPED) break ;;
-      esac
-      [ $(( $(date +%s) - start )) -ge '"$t"' ] && { echo "Timeout: $p" >&2; break; }
+      st=$(supervisorctl status "$P" | awk "{print \$2}")
+      [ "$st" != "RUNNING" ] && [ "$st" != "STARTING" ] && break
+      [ $(( $(date +%s) - start )) -ge "${T:-600}" ] && { echo "Timeout: $P" >&2; break; }
       sleep 0.3
     done
 
     cleanup
-    line=$(supervisorctl status "$p" || true)
+    line=$(supervisorctl status "$P" || true)
     code=$(printf "%s" "$line" | sed -n "s/.*exit status \([0-9]\+\).*/\1/p")
     [ -z "$code" ] && code=0
     exit "$code"
