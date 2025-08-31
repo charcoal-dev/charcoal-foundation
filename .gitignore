@@ -7,6 +7,7 @@ Thumbs.db
 
 # Development and Builds
 dev/.env
+dev/docker/utils/db/init/*.sql
 # Composer (Packagist)
 dev/composer/**
 dev/composer/vendor/

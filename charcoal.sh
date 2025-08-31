@@ -150,35 +150,51 @@ engine_healthy() {
 }
 
 ensure_engine_up() {
-  compose up -d --no-deps "$(svc engine)" >/dev/null
+  if ! compose ps --services 2>/dev/null | grep -qx "$(svc engine)"; then
+    info "Engine service missing → building docker (engine)…"
+    compose build "$(svc engine)" || err "Docker build failed for engine"
+    compose up -d --no-deps "$(svc engine)" || err "Failed to start engine"
+  fi
 }
 
 export COMPOSE_PROFILES="${COMPOSE_PROFILES:-${CHARCOAL_DOCKER:-engine,web}}"
 
 generate_db_init_sql() {
-  [[ -f "$DB_INIT_JSON" ]] || { info "No db.init.json, skipping DB bootstrap."; return 0; }
+  [[ -f "$DB_INIT_JSON" ]] || { info "No dev/db.manifest.json, skipping DB bootstrap."; return 0; }
   has_profile mysql || { info "Profile 'mysql' disabled, skipping DB bootstrap."; return 0; }
 
-  info "Generating MySQL init SQL from dev/db.manifest.json …"
+  local tmp out dir owner
+  out="$DB_INIT_OUT"
+  dir="$(dirname "$out")"
+  owner="charcoal"
 
-  # parse schemas only
+  info "Generating MySQL init SQL from dev/db.manifest.json …"
+  install -d -m 0755 "$dir"
+
+  # read schemas[]
+  local schemas=()
   if command -v jq >/dev/null 2>&1; then
-    mapfile -t schemas < <(jq -r '.schemas[]' "$DB_INIT_JSON")
+    mapfile -t schemas < <(jq -r '.schemas[]? // empty' "$DB_INIT_JSON")
   elif command -v python3 >/dev/null 2>&1; then
-    readarray -t schemas < <(python3 - <<'PY'
+    mapfile -t schemas < <(python3 - <<'PY' "$DB_INIT_JSON"
 import json,sys
 j=json.load(open(sys.argv[1]))
-for s in j.get("schemas",[]): print(s)
+for s in j.get("schemas",[]):
+    if isinstance(s,str) and s.strip(): print(s)
 PY
-"$DB_INIT_JSON")
+)
   else
-    err "Need either 'jq' or 'python3' to parse dev/docker/db.init.json"
+    err "Need 'jq' or 'python3' to parse dev/db.manifest.json"
   fi
 
-  # hardcode owner
-  local owner="charcoal"
+  # nothing to write?
+  if ((${#schemas[@]}==0)); then
+    info "No schemas in manifest; skipping SQL render."
+    return 0
+  fi
 
-  install -d -m 0755 "$(dirname "$DB_INIT_OUT")"
+  # render to temp, replace only if changed
+  tmp="$(mktemp "${TMPDIR:-/tmp}/init.sql.XXXXXX")"
   {
     echo "-- Auto-generated. Runs only on fresh MySQL volume."
     echo "SET @@session.sql_log_bin=0;"
@@ -188,9 +204,17 @@ PY
       printf "GRANT ALL PRIVILEGES ON \`%s\`.* TO '%s'@'%%';\n" "$db" "$owner"
     done
     echo "FLUSH PRIVILEGES;"
-  } > "$DB_INIT_OUT"
+  } >"$tmp"
 
-  ok "Wrote $(realpath --relative-to="$ROOT" "$DB_INIT_OUT")"
+  # normalize perms; only replace if different
+  chmod 0644 "$tmp"
+  if [[ -f "$out" ]] && cmp -s "$tmp" "$out"; then
+    rm -f "$tmp"
+    info "MySQL init unchanged (skipped)."
+  else
+    mv -f "$tmp" "$out"
+    ok "Wrote $(realpath --relative-to="$ROOT" "$out")"
+  fi
 }
 
 ensure_http_env_overrides() {
@@ -295,18 +319,7 @@ cmd_build_app() {
   ensure_engine_up
   local do_composer="${1-}"  # use --composer to run a local install
   info "Checking dependencies…"
-
-  # Composer — always update (DEV flow)
-  if [[ -d "dev/composer" ]]; then
-    info "Composer: updating dependencies in dev/composer …"
-    if ! command -v composer >/dev/null 2>&1; then
-      err "Composer not found on host. Install Composer or run './charcoal.sh build docker --dev-vendor'."
-    fi
-    ( cd dev/composer && composer update --no-interaction -o ) || err "Composer update failed"
-    ok "Composer update complete."
-  else
-    warn "dev/composer directory not found; skipping composer."
-  fi
+  compose exec -T "$(svc engine)" bash -lc "${ENGINE_SNAPSHOT_CMD:-php -f /home/charcoal/engine/build.php}"
 
   # CharcoalApp Builder
   if has_profile engine; then
@@ -471,65 +484,16 @@ cmd_ssh() {
 }
 
 cmd_update() {
-  require_env
-  local force=0 show_changelog=1 clean_untracked=0
-  # flags: --force, --no-changelog, --clean
-  while [[ $# -gt 0 ]]; do
-    case "${1-}" in
-      --force)        force=1 ;;
-      --no-changelog) show_changelog=0 ;;
-      --clean)        clean_untracked=1 ;;
-      *) break ;;
-    esac
-    shift || true
-  done
+  # refuse if tracked changes exist (keeps ignored configs)
+  git diff --quiet && git diff --cached --quiet \
+    || err "Working tree has tracked changes. Move local edits to ignored files."
 
-  command -v git >/dev/null 2>&1 || err "git not found on PATH"
-  [[ -d "$ROOT/.git" ]] || err "Not a git repository: $ROOT"
+  before="$(git rev-parse HEAD)"
+  git pull --ff-only --prune || err "git pull failed"
+  after="$(git rev-parse HEAD)"
 
-  pushd "$ROOT" >/dev/null
-
-  # Refuse if tracked files are modified or staged (deploy clones must be pristine)
-  if ! git diff --quiet || ! git diff --cached --quiet; then
-    popd >/dev/null
-    err "Working tree has tracked changes. Move local edits to ignored files or commit elsewhere."
-  fi
-
-  # Optionally clean untracked files (keeps ignored files; use -x if you want to wipe ignored too)
-  if (( clean_untracked )); then
-    info "Cleaning untracked files/dirs…"
-    git clean -fd || { popd >/dev/null; err "git clean failed"; }
-  fi
-
-  local before after
-  before="$(git rev-parse HEAD 2>/dev/null || echo)"
-
-  info "Pulling (ff-only, prune)…"
-  git pull --ff-only --prune || { popd >/dev/null; err "git pull failed"; }
-
-  after="$(git rev-parse HEAD 2>/dev/null || echo)"
-
-  if [[ "$after" != "$before" ]]; then
-    if (( show_changelog )); then
-      local n; n="$(git rev-list --count "$before..$after" 2>/dev/null || echo 0)"
-      local s; [[ $n -eq 1 ]] && s="" || s="s"
-      ok "Repository updated: ${before:0:7} → ${after:0:7}  (${n} commit${s})"
-      info "Changelog:"
-      git --no-pager log --no-color --pretty=format:'  - %h %s (%cr · %an)' "$before..$after"
-    else
-      ok "Repository updated: ${before:0:7} → ${after:0:7}"
-    fi
-    popd >/dev/null
-    cmd_build_app
-  else
-    popd >/dev/null
-    if (( force )); then
-      info "Already up to date at ${before:0:7}, but --force given → building app…"
-      cmd_build_app
-    else
-      ok "Already up to date at ${before:0:7}. Skipping build. Use ./charcoal.sh update --force to rebuild anyway."
-    fi
-  fi
+  # if changed → build app
+  [[ "$after" != "$before" ]] && cmd_build_app || info "Already up to date."
 }
 
 usage() {
