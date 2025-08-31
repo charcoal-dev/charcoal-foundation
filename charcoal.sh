@@ -294,20 +294,37 @@ cmd_build_docker() {
 }
 
 run_supervisor_script() {
-  local svc="$1" prog="$2"
+  local svc="$1" prog="$2" t="${3:-600}" chan="${4:-stdout}"
+
   compose exec -T "$(svc "$svc")" bash -lc '
-    set -euo pipefail; p='"$prog"'
+    set -euo pipefail
+    p='"$prog"'
+    t='"$t"'
+    chan='"$chan"'
+
     supervisorctl clear "$p" >/dev/null 2>&1 || true
     supervisorctl start "$p"
-    supervisorctl tail -f -1000 "$p" & TPID=$!
+
+    # backlog (bytes) + follow live; stop tail on exit/timeout/ctrl-c
+    supervisorctl tail -f -1600 "$p" "$chan" & TPID=$!
+    cleanup(){ kill "$TPID" >/dev/null 2>&1 || true; }
+    trap cleanup EXIT INT TERM
+
+    # wait until EXITED or timeout
+    start=$(date +%s)
     while :; do
       s=$(supervisorctl status "$p" | awk "{print \$2}")
       [ "$s" = "EXITED" ] && break
+      # guard against runaway
+      now=$(date +%s); [ $((now-start)) -ge "$t" ] && { echo "Timeout: $p" >&2; break; }
       sleep 0.3
     done
-    kill "$TPID" >/dev/null 2>&1 || true
-    code=$(supervisorctl status "$p" | sed -n "s/.*exit status \([0-9]\+\).*/\1/p")
-    [ -z "$code" ] && code=0; exit "$code"
+
+    cleanup
+    line=$(supervisorctl status "$p" || true)
+    code=$(printf "%s" "$line" | sed -n "s/.*exit status \([0-9]\+\).*/\1/p")
+    [ -z "$code" ] && code=0
+    exit "$code"
   '
 }
 
