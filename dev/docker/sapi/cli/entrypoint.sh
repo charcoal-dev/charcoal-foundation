@@ -13,6 +13,8 @@ mkdir -p /home/charcoal/var/log \
 
 touch /home/charcoal/var/log/error.log
 
+find /home/charcoal/var/log -type f -name "*.log" -exec sh -c '> "$1"' _ {} \; 2>/dev/null || true
+
 test -f /home/charcoal/dev/composer/vendor/autoload.php || {
   echo "vendor/ missing. Run: ./charcoal.sh build app"; exit 1; }
 

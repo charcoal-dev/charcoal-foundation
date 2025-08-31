@@ -11,8 +11,10 @@ mkdir -p /home/charcoal/var/log \
  /home/charcoal/var/shared/semaphore \
  /home/charcoal/var/storage
 
-touch /home/charcoal/var/log/error.log
-touch /home/charcoal/var/log/composer.log
-touch /home/charcoal/var/log/build.out.log
+touch /home/charcoal/var/log/error.log \
+  /home/charcoal/var/log/composer.log \
+  /home/charcoal/var/log/build.out.log
+
+find /home/charcoal/var/log -type f -name "*.log" -exec sh -c '> "$1"' _ {} \; 2>/dev/null || true
 
 exec /usr/bin/supervisord -c /etc/supervisord.conf

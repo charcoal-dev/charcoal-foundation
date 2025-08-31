@@ -35,7 +35,10 @@ mkdir -p /home/charcoal/var/log \
  /home/charcoal/var/shared/semaphore \
  /home/charcoal/var/storage
 
-touch /home/charcoal/var/log/error.log
+touch /home/charcoal/var/log/error.log \
+  /home/charcoal/var/log/access.log
+
+find /home/charcoal/var/log -type f -name "*.log" -exec sh -c '> "$1"' _ {} \; 2>/dev/null || true
 
 install -d -m 0750 \
   /home/charcoal/var/tmp/nginx \
@@ -44,5 +47,8 @@ install -d -m 0750 \
   /home/charcoal/var/tmp/nginx/fastcgi \
   /home/charcoal/var/tmp/nginx/uwsgi \
   /home/charcoal/var/tmp/nginx/scgi
+
+test -f /home/charcoal/dev/composer/vendor/autoload.php || {
+  echo "vendor/ missing. Run: ./charcoal.sh build app"; exit 1; }
 
 exec /usr/bin/supervisord -c /etc/supervisord.conf
