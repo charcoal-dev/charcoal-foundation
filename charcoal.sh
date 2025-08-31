@@ -300,7 +300,7 @@ cmd_build_app() {
   local do_composer="${1-}"  # use --composer to run a local install
   info "Checking dependencies…"
   compose exec -T "$(svc engine)" supervisorctl clear composer-update || true
-  compose exec -T "$(svc engine)" supervisorctl start -w composer-update
+  compose exec -T "$(svc engine)" supervisorctl start composer-update
   compose exec -T "$(svc engine)" supervisorctl tail -f composer-update stdout
 
   # CharcoalApp Builder
@@ -308,7 +308,7 @@ cmd_build_app() {
     info "Initializing Charcoal App…"
     >&2 echo
     compose exec -T "$(svc engine)" supervisorctl clear build-app || true
-    compose exec -T "$(svc engine)" supervisorctl start -w build-app
+    compose exec -T "$(svc engine)" supervisorctl start build-app
     compose exec -T "$(svc engine)" supervisorctl tail -f build-app stdout
   else
     info "Engine profile disabled; skipping snapshot."
