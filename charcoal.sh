@@ -297,21 +297,14 @@ run_supervisor_script() {
   local svc="$1" prog="$2" t="${3:-600}"
 
   compose exec -T "$(svc "$svc")" bash -lc '
-    set -euo pipefail
-    p='"$prog"'
-    t='"$t"'
+    set -euo pipefail; p='"$prog"' ; t='"$t"'
 
     supervisorctl clear "$p" >/dev/null 2>&1 || true
     supervisorctl start "$p"
 
-    # try to show some backlog first (no -f); ignore if not ready yet
-    supervisorctl tail -1600 "$p" stdout >/dev/null 2>&1 || true
-
-    # now follow live (NO byte arg alongside -f; your version doesn’t support it)
     supervisorctl tail -f "$p" stdout & TPID=$!
     trap "kill $TPID >/dev/null 2>&1 || true" EXIT INT TERM
 
-    # wait until program exits or timeout
     start=$(date +%s)
     while :; do
       st=$(supervisorctl status "$p" | awk "{print \$2}")
@@ -321,8 +314,7 @@ run_supervisor_script() {
     done
 
     kill $TPID >/dev/null 2>&1 || true
-    line=$(supervisorctl status "$p" || true)
-    code=$(printf "%s" "$line" | sed -n "s/.*exit status \([0-9]\+\).*/\1/p")
+    code=$(supervisorctl status "$p" | sed -n "s/.*exit status \([0-9]\+\).*/\1/p")
     [ -z "$code" ] && code=0
     exit "$code"
   '
