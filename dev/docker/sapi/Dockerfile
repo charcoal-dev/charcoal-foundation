@@ -91,7 +91,7 @@ RUN curl -sS https://getcomposer.org/installer | php \
 
 USER charcoal
 WORKDIR /home/charcoal/dev/composer
-COPY dev/composer/composer.json composer.json
+#COPY dev/composer/composer.json composer.json
 #COPY dev/composer/composer.lock composer.lock
 RUN composer install --no-dev --prefer-dist -o --no-interaction
 
