@@ -316,13 +316,13 @@ cmd_build_app() {
   ensure_engine_up
   local do_composer="${1-}"  # use --composer to run a local install
   info "Checking dependencies…"
-  run_supervisor_script engine composer-update || true
+  run_supervisor_script engine composer-update || exit 1
 
   # CharcoalApp Builder
   if has_profile engine; then
     info "Initializing Charcoal App…"
     >&2 echo
-    run_supervisor_script engine build-app || true
+    run_supervisor_script engine build-app || exit 1
   else
     info "Engine profile disabled; skipping snapshot."
   fi
