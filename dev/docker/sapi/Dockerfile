@@ -12,7 +12,7 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends supervisor __DEPS__ ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
-# PHP extensions (shared by cli/fpm images)
+# PHP extensions (single RUN to avoid config.m4 issues)
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
@@ -27,14 +27,13 @@ RUN set -eux; \
     ; \
     docker-php-source extract; \
     docker-php-ext-configure gmp; \
-    docker-php-ext-install -j"$(nproc)" bcmath mbstring sockets gmp zip
-
-RUN set -eux; \
-    docker-php-ext-install -j"$(nproc)" pdo_mysql pdo_sqlite
-
-RUN set -eux; \
-    docker-php-ext-install -j"$(nproc)" sqlite3 curl; \
-    if [ "$SAPI_BASE" = "cli" ]; then docker-php-ext-install -j"$(nproc)" pcntl; fi; \
+    exts="bcmath mbstring sockets pdo_mysql pdo_sqlite gmp zip sqlite3 curl"; \
+    if [ "$SAPI_BASE" = "cli" ]; then exts="$exts pcntl"; fi; \
+    for ext in $exts; do \
+      echo ">>> Building PHP extension: ${ext}"; \
+      test -f "/usr/src/php/ext/${ext}/config.m4"; \
+      docker-php-ext-install -j"$(nproc)" "${ext}"; \
+    done; \
     echo ">>> Adding phpredis 6.1.0"; \
     curl -fsSL -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/refs/tags/6.1.0.tar.gz; \
     mkdir -p /usr/src/php/ext/redis; \
