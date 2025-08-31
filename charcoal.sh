@@ -402,14 +402,16 @@ cmd_logs() {
   local service
   if ! service="$(svc "$sapi")"; then err "Unknown SAPI '$sapi'"; fi
 
+  local dir="$ROOT/var/log/$sapi"
+
   if [[ -n "$name" ]]; then
-    # sanitize and ensure .log
+    # ensure .log and keep basename only
     local base="${name##*/}"
     base="${base%.log}.log"
-    local file="$ROOT/var/log/$base"
+    local file="$dir/$base"
 
-    [[ -f "$file" ]] || err "No such log: var/log/$base"
-    info "Tailing var/log/$base (Ctrl-C to stop)…"
+    [[ -f "$file" ]] || err "No such log: var/log/$sapi/$base"
+    info "Tailing var/log/$sapi/$base (Ctrl-C to stop)…"
     exec tail -n 200 -F -- "$file"
   else
     info "No log specified; streaming container logs for $service (Ctrl-C to stop)…"
