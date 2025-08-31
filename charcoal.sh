@@ -277,26 +277,6 @@ cmd_build_docker() {
   generate_db_init_sql
   resolve_profiles
 
-  info "Building Composer deps (builder stage)…"
-  # Use the engine Dockerfile (has the builder target with Composer)
-  docker build \
-    -f dev/docker/sapi/app/engine/Dockerfile \
-    --target builder \
-    -t charcoal/builder:latest \
-    .
-
-  # 3) Seed host vendors for DEV mounts so engine/web start healthy
-  #    (safe no-op if already present)
-  if [[ ! -f "dev/composer/vendor/autoload.php" ]]; then
-    info "Seeding host dev/composer/vendor from builder image…"
-    local _cid; _cid="$(docker create charcoal/builder:latest)"
-    mkdir -p dev/composer/vendor
-    docker cp "${_cid}":/home/charcoal/dev/composer/vendor/. dev/composer/vendor/
-    docker rm -f "${_cid}" >/dev/null
-    ok "Host vendors ready."
-  else
-    info "Host vendors already present; skipping seed."
-  fi
 
   info "Compose up (profiles: ${EFFECTIVE:-none}) …"
   local UIDGID=(--build-arg CHARCOAL_UID="$(id -u)" --build-arg CHARCOAL_GID="$(id -g)")
