@@ -319,16 +319,9 @@ cmd_build_app() {
   ensure_engine_up
   local do_composer="${1-}"  # use --composer to run a local install
   info "Checking dependencies…"
-
-  # Run composer-update in all enabled SAPIs
-  for id in "${SAPI_IDS[@]}"; do
-    if has_profile "$id"; then
-      info "Composer update in $id…"
-      compose exec -T "$(svc "$id")" supervisorctl clear composer-update || true
-      compose exec -T "$(svc "$id")" supervisorctl start composer-update
-      compose exec -T "$(svc "$id")" supervisorctl tail -f composer-update
-    fi
-  done
+  compose exec -T "$(svc engine)" supervisorctl clear composer-update || true
+  compose exec -T "$(svc engine)" supervisorctl start -w composer-update
+  compose exec -T "$(svc engine)" supervisorctl tail -f composer-update
 
   # CharcoalApp Builder
   if has_profile engine; then
