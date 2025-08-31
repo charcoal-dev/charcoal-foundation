@@ -302,14 +302,14 @@ run_in_engine() {
 set -euo pipefail
 NAME="$1"; OUT="$2"; ERR="$3"; shift 3
 
-mkdir -p "$(dirname "$OUT")"
-: > "$OUT" || true
+mkdir -p "$(dirname "$OUT")"; : > "$OUT" || true
 
 if [ "$ERR" != "-" ] && [ -n "$ERR" ]; then
-  mkdir -p "$(dirname "$ERR")"
-  : > "$ERR" || true
-  "$@" > >(tee -a "$OUT") 2> >(tee -a "$ERR" >&2)
+  mkdir -p "$(dirname "$ERR")"; : > "$ERR" || true
+  # stdout → console+OUT, stderr → ERR (not echoed)
+  "$@" > >(tee -a "$OUT") 2>>"$ERR"
 else
+  # merged stdout+stderr → console+OUT
   "$@" 2>&1 | tee -a "$OUT"
 fi
 BASH
