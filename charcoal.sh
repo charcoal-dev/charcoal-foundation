@@ -294,34 +294,48 @@ cmd_build_docker() {
 }
 
 run_supervisor_script() {
-  local svc="$1" prog="$2" logp
-
+  local svc="$1" prog="$2" t="${3:-600}" logp errp=""
   case "$prog" in
     composer-update) logp="/home/charcoal/var/log/composer.log" ;;
-    build-app)       logp="/home/charcoal/var/log/build.out.log" ;;
+    build-app)       logp="/home/charcoal/var/log/build.out.log"; errp="/home/charcoal/var/log/error.log" ;;
     *) echo "Unknown program: $prog" >&2; return 2 ;;
   esac
 
   compose exec -T "$(svc "$svc")" bash -lc '
-    set -euo pipefail; p='"$prog"'; logp='"$logp"'
+    set -euo pipefail
+    p='"$prog"'
+    logp='"$logp"'
+    errp='"$errp"'
+    t='"$t"'
+
+    # fresh log + stop any prior run
     supervisorctl stop "$p"  >/dev/null 2>&1 || true
     supervisorctl clear "$p" >/dev/null 2>&1 || true
     : > "$logp" || true
 
     supervisorctl start "$p"
-    # follow actual file; stops when we kill it
-    tail -n +1 -F "$logp" & TPID=$!
-    trap "kill $TPID >/dev/null 2>&1 || true" EXIT INT TERM
 
-    # wait for program to exit
+    # follow actual files (robust)
+    tail -n +1 -F "$logp" &
+    T1=$!
+    if [ -n "$errp" ]; then tail -n +1 -F "$errp" >&2 & T2=$!; else T2=""; fi
+    cleanup(){ kill $T1 >/dev/null 2>&1 || true; [ -n "$T2" ] && kill $T2 >/dev/null 2>&1 || true; }
+    trap cleanup EXIT INT TERM
+
+    # wait for EXITED or STOPPED or timeout
+    start=$(date +%s)
     while :; do
-      s=$(supervisorctl status "$p" | awk "{print \$2}")
-      [ "$s" = "EXITED" ] && break
+      st=$(supervisorctl status "$p" | awk "{print \$2}")
+      case "$st" in
+        EXITED|STOPPED) break ;;
+      esac
+      [ $(( $(date +%s) - start )) -ge '"$t"' ] && { echo "Timeout: $p" >&2; break; }
       sleep 0.3
     done
 
-    kill $TPID >/dev/null 2>&1 || true
-    code=$(supervisorctl status "$p" | sed -n "s/.*exit status \([0-9]\+\).*/\1/p")
+    cleanup
+    line=$(supervisorctl status "$p" || true)
+    code=$(printf "%s" "$line" | sed -n "s/.*exit status \([0-9]\+\).*/\1/p")
     [ -z "$code" ] && code=0
     exit "$code"
   '
