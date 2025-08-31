@@ -298,22 +298,18 @@ run_supervisor_script() {
 
   compose exec -T "$(svc "$svc")" bash -lc '
     set -euo pipefail; p='"$prog"'; t='"$t"'
-
+    supervisorctl stop  "$p" >/dev/null 2>&1 || true
     supervisorctl clear "$p" >/dev/null 2>&1 || true
     supervisorctl start "$p"
-
-    # Follow live (no channel, no byte count on your supervisorctl)
     supervisorctl tail -f "$p" & TPID=$!
     trap "kill $TPID >/dev/null 2>&1 || true" EXIT INT TERM
-
     start=$(date +%s)
     while :; do
-      st=$(supervisorctl status "$p" | awk "{print \$2}")
-      [ "$st" = "EXITED" ] && break
+      s=$(supervisorctl status "$p" | awk "{print \$2}")
+      [ "$s" = "EXITED" ] && break
       [ $(( $(date +%s) - start )) -ge '"$t"' ] && { echo "Timeout: $p" >&2; break; }
       sleep 0.3
     done
-
     kill $TPID >/dev/null 2>&1 || true
     code=$(supervisorctl status "$p" | sed -n "s/.*exit status \([0-9]\+\).*/\1/p")
     [ -z "$code" ] && code=0
