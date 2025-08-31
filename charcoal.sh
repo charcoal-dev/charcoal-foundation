@@ -328,7 +328,7 @@ cmd_build_app() {
 
   info "Initializing Charcoal App…"
   run_in_engine "php build.php" \
-    /home/charcoal/var/log/build.out.log \
+    /home/charcoal/var/log/build.log \
     /home/charcoal/var/log/error.log \
     /usr/local/bin/php \
       -d log_errors=1 \

@@ -13,7 +13,7 @@ mkdir -p /home/charcoal/var/log \
 
 touch /home/charcoal/var/log/error.log \
   /home/charcoal/var/log/composer.log \
-  /home/charcoal/var/log/build.out.log
+  /home/charcoal/var/log/build.log
 
 find /home/charcoal/var/log -type f -name "*.log" -exec sh -c '> "$1"' _ {} \; 2>/dev/null || true
 
