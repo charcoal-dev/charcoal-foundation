@@ -297,12 +297,13 @@ run_supervisor_script() {
   local svc="$1" prog="$2" t="${3:-600}"
 
   compose exec -T "$(svc "$svc")" bash -lc '
-    set -euo pipefail; p='"$prog"' ; t='"$t"'
+    set -euo pipefail; p='"$prog"'; t='"$t"'
 
     supervisorctl clear "$p" >/dev/null 2>&1 || true
     supervisorctl start "$p"
 
-    supervisorctl tail -f "$p" stdout & TPID=$!
+    # Follow live (no channel, no byte count on your supervisorctl)
+    supervisorctl tail -f "$p" & TPID=$!
     trap "kill $TPID >/dev/null 2>&1 || true" EXIT INT TERM
 
     start=$(date +%s)
