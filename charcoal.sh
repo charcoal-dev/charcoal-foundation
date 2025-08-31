@@ -321,7 +321,7 @@ cmd_build_app() {
   info "Checking dependencies…"
   compose exec -T "$(svc engine)" supervisorctl clear composer-update || true
   compose exec -T "$(svc engine)" supervisorctl start -w composer-update
-  compose exec -T "$(svc engine)" supervisorctl tail -f composer-update
+  compose exec -T "$(svc engine)" supervisorctl tail -f composer-update stdout
 
   # CharcoalApp Builder
   if has_profile engine; then
@@ -329,7 +329,7 @@ cmd_build_app() {
     >&2 echo
     compose exec -T "$(svc engine)" supervisorctl clear build-app || true
     compose exec -T "$(svc engine)" supervisorctl start -w build-app
-    compose exec -T "$(svc engine)" supervisorctl tail -f build-app
+    compose exec -T "$(svc engine)" supervisorctl tail -f build-app stdout
   else
     info "Engine profile disabled; skipping snapshot."
   fi
