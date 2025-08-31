@@ -298,22 +298,21 @@ run_in_engine() {
   local name="$1" out="$2" err="$3"; shift 3
   local svc; svc="$(svc engine)"
 
-  compose exec -T "$svc" bash -lc '
-    set -euo pipefail
-    NAME="$0"; OUT="$1"; ERR="$2"; shift 3
+  compose exec -T "$svc" bash -s -- "$name" "$out" "$err" "$@" <<'BASH'
+set -euo pipefail
+NAME="$1"; OUT="$2"; ERR="$3"; shift 3
 
-    mkdir -p "$(dirname "$OUT")"
-    : > "$OUT" || true
-    if [ "$ERR" != "-" ] && [ -n "$ERR" ]; then
-      mkdir -p "$(dirname "$ERR")"
-      : > "$ERR" || true
-      # run with split stdout/stderr
-      "$@" > >(tee -a "$OUT") 2> >(tee -a "$ERR" >&2)
-    else
-      # run with merged streams
-      "$@" 2>&1 | tee -a "$OUT"
-    fi
-  ' "$name" "$out" "$err" "$@"
+mkdir -p "$(dirname "$OUT")"
+: > "$OUT" || true
+
+if [ "$ERR" != "-" ] && [ -n "$ERR" ]; then
+  mkdir -p "$(dirname "$ERR")"
+  : > "$ERR" || true
+  "$@" > >(tee -a "$OUT") 2> >(tee -a "$ERR" >&2)
+else
+  "$@" 2>&1 | tee -a "$OUT"
+fi
+BASH
 }
 
 cmd_build_app() {
@@ -328,7 +327,6 @@ cmd_build_app() {
   || exit 1
 
   info "Initializing Charcoal App…"
-  >&2 echo
   run_in_engine "php build.php" \
     /home/charcoal/var/log/build.out.log \
     /home/charcoal/var/log/error.log \
