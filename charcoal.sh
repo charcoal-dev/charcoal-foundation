@@ -472,12 +472,13 @@ cmd_ssh() {
 
 cmd_update() {
   require_env
-  local force=0 show_changelog=1
-  # flags: --force, --no-changelog
+  local force=0 show_changelog=1 clean_untracked=0
+  # flags: --force, --no-changelog, --clean
   while [[ $# -gt 0 ]]; do
     case "${1-}" in
       --force)        force=1 ;;
       --no-changelog) show_changelog=0 ;;
+      --clean)        clean_untracked=1 ;;
       *) break ;;
     esac
     shift || true
@@ -487,60 +488,38 @@ cmd_update() {
   [[ -d "$ROOT/.git" ]] || err "Not a git repository: $ROOT"
 
   pushd "$ROOT" >/dev/null
+
+  # Refuse if tracked files are modified or staged (deploy clones must be pristine)
+  if ! git diff --quiet || ! git diff --cached --quiet; then
+    popd >/dev/null
+    err "Working tree has tracked changes. Move local edits to ignored files or commit elsewhere."
+  fi
+
+  # Optionally clean untracked files (keeps ignored files; use -x if you want to wipe ignored too)
+  if (( clean_untracked )); then
+    info "Cleaning untracked files/dirs…"
+    git clean -fd || { popd >/dev/null; err "git clean failed"; }
+  fi
+
   local before after
   before="$(git rev-parse HEAD 2>/dev/null || echo)"
-  # determine upstream (fallback: origin/<current-branch>)
 
-  local upstream
-  upstream="$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || true)"
-  if [[ -z "${upstream}" ]]; then
-    upstream="origin/$(git rev-parse --abbrev-ref HEAD)"
-    git branch --set-upstream-to="${upstream}" >/dev/null 2>&1 || true
-  fi
-
-  # auto-stash tracked + untracked to avoid aborts
-  local had_stash=0
-  if ! git diff --quiet || ! git diff --quiet --cached || [[ -n "$(git ls-files --others --exclude-standard)" ]]; then
-    info "Auto-stashing local changes…"
-    git stash push -u -m "charcoal update autostash $(date -u +%FT%TZ)" >/dev/null || true
-    had_stash=1
-  fi
-
-  info "Running: {grey}git fetch --quiet && git merge --ff-only ${upstream}{/}"
-  git fetch --quiet || { popd >/dev/null; err "git fetch failed"; }
-  if ! git merge --ff-only "${upstream}"; then
-    popd >/dev/null
-    err "Fast-forward merge not possible (divergent history). Try: git pull --rebase"
-  fi
+  info "Pulling (ff-only, prune)…"
+  git pull --ff-only --prune || { popd >/dev/null; err "git pull failed"; }
 
   after="$(git rev-parse HEAD 2>/dev/null || echo)"
 
-  # reapply local changes if we stashed earlier
-  if (( had_stash )); then
-    info "Reapplying local changes…"
-    if ! git stash pop; then
-      warn "Reapplied with conflicts. Resolve, then: git add -A && git commit"
-    fi
-  fi
-
   if [[ "$after" != "$before" ]]; then
-    # show a short changelog
     if (( show_changelog )); then
-      local n
+      local n; n="$(git rev-list --count "$before..$after" 2>/dev/null || echo 0)"
       local s; [[ $n -eq 1 ]] && s="" || s="s"
       ok "Repository updated: ${before:0:7} → ${after:0:7}  (${n} commit${s})"
       info "Changelog:"
-      # one-line, no color, relative time + author
       git --no-pager log --no-color --pretty=format:'  - %h %s (%cr · %an)' "$before..$after"
-      # optional brief file summary (uncomment if you want)
-      # info "Files changed summary:"
-      # git --no-pager diff --stat --compact-summary "$before..$after"
     else
       ok "Repository updated: ${before:0:7} → ${after:0:7}"
     fi
-
     popd >/dev/null
-    # build app snapshot
     cmd_build_app
   else
     popd >/dev/null
@@ -548,7 +527,7 @@ cmd_update() {
       info "Already up to date at ${before:0:7}, but --force given → building app…"
       cmd_build_app
     else
-      ok "Already up to date at ${before:0:7}. Skipping build. Use {yellow}./charcoal.sh update --force{/} to rebuild anyway."
+      ok "Already up to date at ${before:0:7}. Skipping build. Use ./charcoal.sh update --force to rebuild anyway."
     fi
   fi
 }
