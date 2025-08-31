@@ -25,6 +25,8 @@ ErrorBoundary::configStreams(true, false, strlen(charcoal_from_root()))
         (new ConsoleErrorWriter())->handleException(
             $e instanceof AppCrashException ? $e->getPrevious() : $e,
         );
+
+        exit(1);
     });
 
 $stdout = new StdoutPrinter();
