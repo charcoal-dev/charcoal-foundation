@@ -295,34 +295,19 @@ cmd_build_docker() {
 
 run_supervisor_script() {
   local svc="$1" prog="$2"
-
   compose exec -T "$(svc "$svc")" bash -lc '
-    set -euo pipefail
-    p='"$prog"'
-
-    # fresh log, start program
+    set -euo pipefail; p='"$prog"'
     supervisorctl clear "$p" >/dev/null 2>&1 || true
     supervisorctl start "$p"
-
-    # start following logs (print last 1000 lines then follow)
-    supervisorctl tail -f -1000 "$p" &
-    tpid=$!
-
-    # wait for program to exit, then stop tail and return its exit code
-    code=""
+    supervisorctl tail -f -1000 "$p" & TPID=$!
     while :; do
-      line=$(supervisorctl status "$p")
-      state=$(printf "%s" "$line" | awk "{print \$2}")
-      if [ "$state" = "EXITED" ]; then
-        code=$(printf "%s" "$line" | sed -n "s/.*exit status \([0-9]\+\).*/\1/p")
-        break
-      fi
+      s=$(supervisorctl status "$p" | awk "{print \$2}")
+      [ "$s" = "EXITED" ] && break
       sleep 0.3
     done
-
-    kill "$tpid" >/dev/null 2>&1 || true
-    [ -z "$code" ] && code=0
-    exit "$code"
+    kill "$TPID" >/dev/null 2>&1 || true
+    code=$(supervisorctl status "$p" | sed -n "s/.*exit status \([0-9]\+\).*/\1/p")
+    [ -z "$code" ] && code=0; exit "$code"
   '
 }
 
