@@ -300,7 +300,7 @@ cmd_build_app() {
   info "Checking dependencies…"
   compose exec -T "$(svc engine)" supervisorctl clear composer-update || true
   compose exec -T "$(svc engine)" supervisorctl start composer-update
-  compose exec -T "$(svc engine)" supervisorctl tail -f -10000 composer-update stdout
+  compose exec -T "$(svc engine)" supervisorctl tail -10000 composer-update stdout
 
   # CharcoalApp Builder
   if has_profile engine; then
