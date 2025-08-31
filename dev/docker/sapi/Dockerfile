@@ -69,6 +69,12 @@ RUN set -e; \
 RUN printf "display_errors=Off\nlog_errors=On\nerror_log=/proc/self/fd/2\n" \
   > /usr/local/etc/php/conf.d/99-logs.ini
 
+# Install Composer
+RUN apt-get update && apt-get install -y --no-install-recommends curl git unzip ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+RUN curl -sS https://getcomposer.org/installer | php \
+ && mv composer.phar /usr/local/bin/composer
+
 USER charcoal
 WORKDIR /home/charcoal
 RUN install -d -m 0750 /home/charcoal/var/log \
@@ -81,24 +87,9 @@ RUN install -d -m 0750 /home/charcoal/var/log \
 WORKDIR /home/charcoal/dev
 COPY dev/bootstrap.php bootstrap.php
 
-# Preinstall composer repositories:
-FROM base AS builder
-USER root
-RUN apt-get update && apt-get install -y --no-install-recommends curl git unzip ca-certificates \
- && rm -rf /var/lib/apt/lists/*
-RUN curl -sS https://getcomposer.org/installer | php \
- && mv composer.phar /usr/local/bin/composer
-
-USER charcoal
-WORKDIR /home/charcoal/dev/composer
-#COPY dev/composer/composer.json composer.json
-#COPY dev/composer/composer.lock composer.lock
-RUN composer install --no-dev --prefer-dist -o --no-interaction
-
 # App Environment: DEV
 FROM base AS dev
 ENV CHARCOAL_DOCKER_ENV=dev
-COPY --from=builder /usr/local/bin/composer /usr/local/bin/composer
 USER charcoal
 WORKDIR /home/charcoal
 ENTRYPOINT ["/entrypoint.sh"]
@@ -113,5 +104,5 @@ COPY app/sapi/__SAPI_ID__/ app/sapi/__SAPI_ID__/
 COPY app/domain/ app/domain/
 COPY app/shared/ app/shared/
 COPY interfaces/__SAPI_ID__/ __SAPI_ID__/
-COPY --from=builder /home/charcoal/dev/composer/vendor/ /home/charcoal/dev/composer/vendor/
+COPY dev/composer/composer.json dev/composer/composer.json
 ENTRYPOINT ["/entrypoint.sh"]

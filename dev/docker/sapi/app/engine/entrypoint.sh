@@ -12,8 +12,7 @@ mkdir -p /home/charcoal/var/log \
  /home/charcoal/var/storage
 
 touch /home/charcoal/var/log/error.log
-
-test -f /home/charcoal/dev/composer/vendor/autoload.php || {
-  echo "vendor/ missing. Run: ./charcoal.sh build app"; exit 1; }
+touch /home/charcoal/var/log/composer.log
+touch /home/charcoal/var/log/build.out.log
 
 exec /usr/bin/supervisord -c /etc/supervisord.conf
