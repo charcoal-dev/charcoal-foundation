@@ -28,6 +28,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
       libzip-dev \
       libcurl4-openssl-dev \
       libsqlite3-dev \
+      libonig-dev \
       zlib1g-dev; \
     rm -rf /var/lib/apt/lists/*
 
