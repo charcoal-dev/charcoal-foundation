@@ -77,15 +77,9 @@ class CharcoalApp extends AbstractApp
 
     /**
      * @return void
-     * @throws InvalidPathException
      */
     protected function errorServiceDeployedHook(): void
     {
-        $this->errors->subscribe(new FileErrorLogger(
-            $this->paths->log->join(AppConstants::ERROR_SINK),
-            useAnsiEscapeSeq: AppConstants::ERROR_SINK_ANSI,
-            eolChar: PHP_EOL
-        ));
     }
 
     /**
