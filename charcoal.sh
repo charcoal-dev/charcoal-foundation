@@ -293,66 +293,47 @@ cmd_build_docker() {
   fi
 }
 
-# run_supervisor_script <service> <program> [timeout_secs]
-run_supervisor_script() {
-  local svc="$1" prog="$2" t="${3:-600}" logp errp
-  case "$prog" in
-    composer-update) logp="/home/charcoal/var/log/composer.log"; errp="";;
-    build-app)       logp="/home/charcoal/var/log/build.out.log"; errp="/home/charcoal/var/log/error.log";;
-    *) echo "Unknown program: $prog" >&2; return 2;;
-  esac
+# run_in_engine <display_name> <stdout_log> <stderr_log|-> <cmd...>
+run_in_engine() {
+  local name="$1" out="$2" err="$3"; shift 3
+  local svc; svc="$(svc engine)"
 
-  local comp_svc; comp_svc="$(svc "$svc")"
-
-  compose exec -T "$comp_svc" env P="$prog" LOGP="$logp" ERRP="$errp" T="$t" bash -lc '
+  compose exec -T "$svc" bash -lc '
     set -euo pipefail
+    NAME="$0"; OUT="$1"; ERR="$2"; shift 3
 
-    supervisorctl stop "$P"  >/dev/null 2>&1 || true
-    supervisorctl clear "$P" >/dev/null 2>&1 || true
-    : > "$LOGP" || true
-    if [ -n "${ERRP:-}" ]; then : > "$ERRP" || true; fi
-
-    supervisorctl start "$P"
-
-    # follow actual files
-    tail -n +1 -F "$LOGP" &
-    TPID=$!
-    if [ -n "${ERRP:-}" ]; then tail -n +1 -F "$ERRP" >&2 & EPID=$!; else EPID=""; fi
-
-    cleanup(){ kill "$TPID" >/dev/null 2>&1 || true; [ -n "$EPID" ] && kill "$EPID" >/dev/null 2>&1 || true; }
-    trap cleanup EXIT INT TERM
-
-    start=$(date +%s)
-    while :; do
-      st=$(supervisorctl status "$P" | awk "{print \$2}")
-      [ "$st" != "RUNNING" ] && [ "$st" != "STARTING" ] && break
-      [ $(( $(date +%s) - start )) -ge "${T:-600}" ] && { echo "Timeout: $P" >&2; break; }
-      sleep 0.3
-    done
-
-    cleanup
-    line=$(supervisorctl status "$P" || true)
-    code=$(printf "%s" "$line" | sed -n "s/.*exit status \([0-9]\+\).*/\1/p")
-    [ -z "$code" ] && code=0
-    exit "$code"
-  '
+    mkdir -p "$(dirname "$OUT")"
+    : > "$OUT" || true
+    if [ "$ERR" != "-" ] && [ -n "$ERR" ]; then
+      mkdir -p "$(dirname "$ERR")"
+      : > "$ERR" || true
+      # run with split stdout/stderr
+      "$@" > >(tee -a "$OUT") 2> >(tee -a "$ERR" >&2)
+    else
+      # run with merged streams
+      "$@" 2>&1 | tee -a "$OUT"
+    fi
+  ' "$name" "$out" "$err" "$@"
 }
 
 cmd_build_app() {
   require_env
   ensure_engine_up
-  local do_composer="${1-}"  # use --composer to run a local install
-  info "Checking dependencies…"
-  run_supervisor_script engine composer-update || exit 1
 
-  # CharcoalApp Builder
-  if has_profile engine; then
-    info "Initializing Charcoal App…"
-    >&2 echo
-    run_supervisor_script engine build-app || exit 1
-  else
-    info "Engine profile disabled; skipping snapshot."
-  fi
+  info "Checking dependencies…"
+  run_in_engine "composer update" \
+    /home/charcoal/var/log/composer.log \
+    - \
+    /usr/local/bin/composer -d /home/charcoal/dev/composer update --no-interaction -o \
+  || exit 1
+
+  info "Initializing Charcoal App…"
+  >&2 echo
+  run_in_engine "php build.php" \
+    /home/charcoal/var/log/build.out.log \
+    /home/charcoal/var/log/error.log \
+    /usr/local/bin/php /home/charcoal/engine/build.php \
+  || exit 1
 }
 
 cmd_engine() {
