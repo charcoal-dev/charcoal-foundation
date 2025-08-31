@@ -4,7 +4,7 @@ services:
     volumes:
       - ../../dev/composer/vendor:/home/charcoal/dev/composer/vendor
       - ../../config:/home/charcoal/config:ro
-      - ../../app/sapi/engine:/home/charcoal/app/sapi/engine:ro
+      - ../../app/sapi:/home/charcoal/app/sapi:ro
       - ../../app/domain:/home/charcoal/app/domain:ro
       - ../../app/shared:/home/charcoal/app/shared:ro
       - ../../interfaces/engine:/home/charcoal/engine:ro
