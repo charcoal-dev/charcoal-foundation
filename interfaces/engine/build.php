@@ -10,6 +10,7 @@ declare(strict_types=1);
 require_once "bootstrap.php";
 charcoal_autoloader();
 
+use App\Shared\Constants\AppConstants;
 use App\Shared\CharcoalApp;
 use App\Shared\Core\ErrorBoundary;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
@@ -22,7 +23,7 @@ use Charcoal\Filesystem\Path\DirectoryPath;
 
 ErrorBoundary::configStreams(true, false, strlen(charcoal_from_root()))
     ::handle(function (\Throwable $e) {
-        (new ConsoleErrorWriter())->handleException(
+        (new ConsoleErrorWriter(AppConstants::CONSOLE_ANSI, PHP_EOL))->handleException(
             $e instanceof AppCrashException ? $e->getPrevious() : $e,
         );
 

@@ -21,7 +21,7 @@ ErrorBoundary::configStreams(true, false, strlen(charcoal_from_root()))
     ::handle(function (\Throwable $e) {
         ErrorBoundary::crashHtmlPage($e instanceof AppCrashException ?
             $e->getPrevious() : $e,
-            charcoal_from_root(AppConstants::CRASH_HTML_TEMPLATE));
+            charcoal_from_root(AppConstants::HTTP_CRASH_TEMPLATE));
         exit(1);
     });
 
