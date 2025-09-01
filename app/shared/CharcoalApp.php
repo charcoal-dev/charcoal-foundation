@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace App\Shared;
 
-use App\Domain\Core\DomainManifest;
+use App\Domain\Core\AppManifest;
 use App\Shared\Core\Config\Snapshot\AppConfig;
 use App\Shared\Core\PathRegistry;
 use App\Shared\Foundation\CoreData\CoreDataModule;
@@ -70,7 +70,7 @@ readonly class CharcoalApp extends AbstractApp
      */
     protected function resolveAppConfig(AppEnv $env, Directories $paths): AppConfig
     {
-        return DomainManifest::provideAppConfig($env, $paths);
+        return AppManifest::provideAppConfig($env, $paths);
     }
 
     /**
@@ -81,11 +81,11 @@ readonly class CharcoalApp extends AbstractApp
     }
 
     /**
-     * @return DomainManifest
+     * @return AppManifest
      */
-    protected function resolveAppManifest(): DomainManifest
+    protected function resolveAppManifest(): AppManifest
     {
-        return new DomainManifest();
+        return new AppManifest();
     }
 
     /**

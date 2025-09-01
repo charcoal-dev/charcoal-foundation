@@ -19,7 +19,6 @@ use App\Shared\Foundation\CoreData\CoreDataModule;
 use App\Shared\Foundation\Engine\EngineModule;
 use App\Shared\Foundation\Http\HttpModule;
 use App\Shared\Foundation\Mailer\MailerModule;
-use Charcoal\App\Kernel\AppManifest;
 use Charcoal\App\Kernel\Domain\AbstractModule;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Enums\SemaphoreType;
@@ -29,7 +28,7 @@ use Charcoal\Filesystem\Node\DirectoryNode;
  * Represents the domain-specific application manifest.
  * Provides module binding, configuration provisioning, path resolution, and error service initialization.
  */
-final class DomainManifest extends AppManifest
+final class AppManifest extends \Charcoal\App\Kernel\AppManifest
 {
     /**
      *  DomainManifest constructor.
