@@ -8,10 +8,11 @@ declare(strict_types=1);
 
 namespace App\Shared;
 
-use App\Domain\WebRoutes;
+use App\Domain\Core\Sapi\WebRouter;
 use App\Shared\Core\Config\Builder\AppConfigBuilder;
 use App\Shared\Core\Config\Snapshot\AppConfig;
 use App\Shared\Core\PathRegistry;
+use App\Shared\Enums\Interfaces;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use App\Shared\Foundation\Engine\EngineModule;
 use App\Shared\Foundation\Http\HttpModule;
@@ -20,7 +21,6 @@ use Charcoal\App\Kernel\AppManifest;
 use Charcoal\App\Kernel\Domain\AbstractModule;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Enums\SemaphoreType;
-use Charcoal\App\Kernel\Internal\AppRoutesBundle;
 use Charcoal\Filesystem\Node\DirectoryNode;
 
 /**
@@ -42,6 +42,8 @@ final class DomainManifest extends AppManifest
             fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::http, $app));
         $this->bind(AppBindings::mailer,
             fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::mailer, $app));
+
+        $this->httpServer(new WebRouter(Interfaces::Web));
     }
 
     /**
@@ -80,13 +82,5 @@ final class DomainManifest extends AppManifest
     public function resolvePathsRegistry(AppEnv $env, DirectoryNode $root): PathRegistry
     {
         return new PathRegistry($env, $root->path);
-    }
-
-    /**
-     * Resolves and returns the HTTP servers configuration.
-     */
-    public function resolveHttpServers(): AppRoutesBundle
-    {
-        return new AppRoutesBundle(new WebRoutes());
     }
 }

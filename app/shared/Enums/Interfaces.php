@@ -8,14 +8,14 @@ declare(strict_types=1);
 
 namespace App\Shared\Enums;
 
-use Charcoal\App\Kernel\Contracts\Enums\SapiEnumInterface;
-use Charcoal\App\Kernel\Enums\SapiType;
+use Charcoal\Contracts\Enums\SapiType;
+use Charcoal\Contracts\ServerApi\ServerApiEnumInterface;
 
 /**
  * Defines the Interfaces enumeration which represents different types of SAPI (Server API) interfaces.
  * Implements the SapiEnumInterface for standardization.
  */
-enum Interfaces: string implements SapiEnumInterface
+enum Interfaces: string implements ServerApiEnumInterface
 {
     case Engine = "engine";
     case Web = "web";
@@ -23,7 +23,7 @@ enum Interfaces: string implements SapiEnumInterface
     /**
      * Determines the SAPI (Server API) type based on the current instance.
      */
-    public function getType(): SapiType
+    public function type(): SapiType
     {
         return match ($this) {
             self::Web => SapiType::Http,

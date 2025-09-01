@@ -34,3 +34,6 @@ $timestamp = MonotonicTimestamp::now();
 $charcoal = $appFqcn::Load(AppEnv::tryFrom(getenv("APP_ENV") ?: "dev"), $rootDirectory, ["var", "shared"]);
 $charcoal->bootstrap($timestamp);
 $startupTime = $charcoal->diagnostics->startupTime / 1e6;
+
+
+
