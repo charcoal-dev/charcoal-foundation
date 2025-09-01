@@ -6,9 +6,11 @@
 
 declare(strict_types=1);
 
-namespace App\Shared;
+namespace App\Domain\Core;
 
 use App\Domain\Core\Sapi\WebRouter;
+use App\Shared\AppBindings;
+use App\Shared\CharcoalApp;
 use App\Shared\Core\Config\Builder\AppConfigBuilder;
 use App\Shared\Core\Config\Snapshot\AppConfig;
 use App\Shared\Core\PathRegistry;

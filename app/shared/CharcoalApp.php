@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace App\Shared;
 
+use App\Domain\Core\DomainManifest;
 use App\Shared\Core\Config\Snapshot\AppConfig;
 use App\Shared\Core\PathRegistry;
 use App\Shared\Foundation\CoreData\CoreDataModule;
