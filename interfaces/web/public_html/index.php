@@ -2,6 +2,7 @@
 /**
  * Part of the "charcoal-dev/charcoal-foundation" package.
  * @link https://github.com/charcoal-dev/charcoal-foundation
+ * @noinspection PhpUnhandledExceptionInspection
  */
 
 declare(strict_types=1);
@@ -42,9 +43,7 @@ $charcoal = $appFqcn::Load(
 
 $web = $charcoal->bootstrap($timestamp, Interfaces::Web);
 assert($web instanceof HttpServer);
-$response = $web->handle(SapiRequest::fromGlobals());
-
-var_dump($response);
+SapiRequest::serveResult($web->handle(SapiRequest::fromGlobals()));
 
 
 
