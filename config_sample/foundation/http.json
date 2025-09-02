@@ -5,7 +5,8 @@
         "listen": [
           {
             "hostname": "localhost",
-            "ports": [80, 443]
+            "tls": false,
+            "ports": [80]
           }
         ],
         "cors": {

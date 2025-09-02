@@ -60,6 +60,12 @@ trait SapiConfigBuilderTrait
                                 "Invalid ports configuration for virtual host at index: " . $i);
                         }
 
+                        $tls = $listen[$i]["tls"] ?? null;
+                        if (!is_bool($tls)) {
+                            throw new \InvalidArgumentException(
+                                "Invalid TLS configuration for virtual host at index: " . $i);
+                        }
+
                         if (is_array($ports)) {
                             foreach ($ports as $port) {
                                 if (!is_int($port) || $port < 0 || $port > 65535) {
@@ -69,7 +75,7 @@ trait SapiConfigBuilderTrait
                             }
                         }
 
-                        $httpSapi->addServer($listen[$i]["hostname"], ...($ports ?: [80]));
+                        $httpSapi->addServer($listen[$i]["hostname"], $tls, ...($ports ?: [80]));
                     }
                 }
             }
