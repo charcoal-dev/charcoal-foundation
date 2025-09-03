@@ -9,10 +9,9 @@ declare(strict_types=1);
 namespace App\Domain\Core\Sapi;
 
 use App\Domain\Core\Http\GlobalPipelines;
-use App\Sapi\Web\Endpoints\FallbackPage;
+use App\Sapi\Web\Endpoints\HomePage;
 use App\Sapi\Web\Endpoints\ProblemPage;
 use Charcoal\App\Kernel\ServerApi\Http\AppRouter;
-use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Server\Middleware\MiddlewareRegistry;
 use Charcoal\Http\Server\Routing\Group\RouteGroupBuilder;
 use Charcoal\Http\Server\Routing\HttpRoutes;
@@ -28,8 +27,8 @@ final readonly class WebRouter extends AppRouter
     protected function declareRoutes(): HttpRoutes
     {
         return new HttpRoutes(function (RouteGroupBuilder $group): void {
-            $group->route("/", FallbackPage::class);
-            $group->route("/problem", ProblemPage::class)->methods(HttpMethod::GET, HttpMethod::HEAD);
+            $group->route("/", HomePage::class);
+            $group->route("/problem", ProblemPage::class);
         });
     }
 

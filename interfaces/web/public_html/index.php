@@ -17,15 +17,25 @@ use App\Shared\Enums\Interfaces;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Internal\Exceptions\AppCrashException;
+use Charcoal\Base\Exceptions\WrappedException;
 use Charcoal\Filesystem\Path\DirectoryPath;
+use Charcoal\Http\Server\Exceptions\RequestGatewayException;
 use Charcoal\Http\Server\HttpServer;
 use Charcoal\Http\Server\Support\SapiRequest;
 
 ErrorBoundary::configStreams(true, false, strlen(charcoal_from_root()))
     ::handle(function (\Throwable $e) {
-        ErrorBoundary::crashHtmlPage($e instanceof AppCrashException ?
-            $e->getPrevious() : $e,
-            charcoal_from_root(AppConstants::HTTP_CRASH_TEMPLATE));
+        $exception = match (true) {
+            $e instanceof AppCrashException,
+            $e instanceof WrappedException,
+            $e instanceof RequestGatewayException => match(true) {
+                $e->getPrevious() instanceof \Throwable => $e->getPrevious(),
+                default => $e,
+            },
+            default => $e
+        };
+
+        ErrorBoundary::crashHtmlPage($exception, charcoal_from_root(AppConstants::HTTP_CRASH_TEMPLATE));
         exit(1);
     });
 
@@ -44,7 +54,4 @@ $charcoal = $appFqcn::Load(
 $web = $charcoal->bootstrap($timestamp, Interfaces::Web);
 assert($web instanceof HttpServer);
 SapiRequest::serveResult($web->handle(SapiRequest::fromGlobals()));
-
-
-
 

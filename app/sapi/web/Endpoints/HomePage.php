@@ -14,13 +14,11 @@ use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
 use Composer\InstalledVersions;
 
 /**
- * The `FallbackPage` class is responsible for rendering a fallback template
- * when no specific page or controller can handle the request. It gathers
- * information such as the application's class name, the kernel build version,
- * and the list of loaded modules to populate the fallback template.
+ * The HomePage class handles the rendering of a fallback template
+ * with contextual information about the application.
  */
 #[DefaultEntrypoint("entrypoint")]
-final class FallbackPage implements ControllerInterface
+final class HomePage implements ControllerInterface
 {
     public function entrypoint(): void
     {
