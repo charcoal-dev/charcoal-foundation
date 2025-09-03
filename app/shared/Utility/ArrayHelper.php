@@ -9,10 +9,9 @@ declare(strict_types=1);
 namespace App\Shared\Utility;
 
 /**
- * Class ArrayHelper
- * @package App\Shared\Utility
+ * Provides utility methods for working with arrays.
  */
-final readonly class ArrayHelper
+final readonly class ArrayHelper extends \Charcoal\Base\Support\Helpers\ArrayHelper
 {
     /**
      * @param array $data
@@ -37,31 +36,6 @@ final readonly class ArrayHelper
 
     /**
      * @param array $data
-     * @return array
-     */
-    public static function canonicalizeLexicographic(array $data): array
-    {
-        if (!self::isSequential($data)) {
-            uksort($data, function ($a, $b) {
-                if (ctype_digit((string)$a) && ctype_digit((string)$b)) {
-                    return strnatcmp((string)$a, (string)$b);
-                }
-
-                return strcmp((string)$a, (string)$b);
-            });
-        }
-
-        foreach ($data as $key => $value) {
-            if (is_array($value)) {
-                $data[$key] = self::canonicalizeLexicographic($value);
-            }
-        }
-
-        return self::isSequential($data) ? $data : (count($data) === 0 ? [] : $data);
-    }
-
-    /**
-     * @param array $data
      * @return string
      * @api
      */
@@ -69,15 +43,6 @@ final readonly class ArrayHelper
     {
         return json_encode(self::canonicalizeLexicographic($data),
             JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    }
-
-    /**
-     * @param array $data
-     * @return bool
-     */
-    public static function isSequential(array $data): bool
-    {
-        return array_keys($data) === range(0, count($data) - 1);
     }
 
     /**
