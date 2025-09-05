@@ -13,6 +13,7 @@ use App\Shared\Core\Http\Html\RenderHtmlTemplateTrait;
 use Charcoal\Base\Objects\ObjectHelper;
 use Charcoal\Http\Server\Attributes\DefaultEntrypoint;
 use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
+use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 use Composer\InstalledVersions;
 
 /**
@@ -24,12 +25,14 @@ final class HomePage implements ControllerInterface
 {
     use RenderHtmlTemplateTrait;
 
-    public function entrypoint(): void
+    public function entrypoint(GatewayFacade $request): void
     {
-        $this->sendTemplate("fallback", [
-            "appClassname" => ObjectHelper::baseClassName(CharcoalApp::getAppFqcn()),
-            "appKernelBuild" => InstalledVersions::getVersion("charcoal-dev/app-kernel"),
-            "modulesLoaded" => array_keys($this->app->context->domain)
-        ]);
+
+        var_dump($request->request());
+//        $this->sendTemplate("fallback", [
+//            "appClassname" => ObjectHelper::baseClassName(CharcoalApp::getAppFqcn()),
+//            "appKernelBuild" => InstalledVersions::getVersion("charcoal-dev/app-kernel"),
+//            "modulesLoaded" => array_keys($this->app->context->domain)
+//        ]);
     }
 }
