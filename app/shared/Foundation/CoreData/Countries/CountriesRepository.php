@@ -12,7 +12,7 @@ use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
 use Charcoal\App\Kernel\Orm\Repository\Traits\EntityUpsertTrait;
-use Charcoal\Base\Vectors\StringVector;
+use Charcoal\Vectors\Strings\StringVector;
 
 /**
  * Repository class responsible for handling CountryEntity objects in the data storage layer.

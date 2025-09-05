@@ -14,14 +14,14 @@ use App\Shared\Foundation\CoreData\CoreDataModule;
 use Charcoal\App\Kernel\Diagnostics\Diagnostics;
 use Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException;
 use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
-use Charcoal\Base\Enums\ExceptionAction;
-use Charcoal\Base\Enums\FetchOrigin;
-use Charcoal\Base\Vectors\StringVector;
 use Charcoal\Buffers\Buffer;
-use Charcoal\Cache\Exceptions\CacheDriverException;
 use Charcoal\Cache\Exceptions\CacheException;
+use Charcoal\Cache\Exceptions\CacheStoreOpException;
 use Charcoal\Cipher\EncryptedEntity;
 use Charcoal\Cipher\Exceptions\CipherException;
+use Charcoal\Contracts\Errors\ExceptionAction;
+use Charcoal\Contracts\Storage\Enums\FetchOrigin;
+use Charcoal\Vectors\Strings\StringVector;
 
 /**
  * Provides functionality for storing, retrieving, caching, and managing encrypted or serialized objects
@@ -47,7 +47,7 @@ final class ObjectStoreService extends OrmRepositoryBase
         try {
             $storedObject = $object::ENCRYPTION->isEnabled() ?
                 $this->module->getCipherFor($this)
-                    ->encryptSerialize(clone $object)->raw() : serialize(clone $object);
+                    ->encryptSerialize(clone $object)->bytes() : serialize(clone $object);
         } catch (CipherException $e) {
             throw new \RuntimeException('CipherException caught ' . $e->error->name);
         }
@@ -62,7 +62,7 @@ final class ObjectStoreService extends OrmRepositoryBase
 
     /**
      * @param class-string<StoredObjectInterface> $objectClasspath
-     * @throws CacheDriverException
+     * @throws CacheStoreOpException
      * @api
      */
     public function cachePurge(string $objectClasspath): void

@@ -11,8 +11,8 @@ namespace App\Shared\Foundation\CoreData\BruteForceControl;
 use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
-use Charcoal\Database\Orm\Schema\Columns;
-use Charcoal\Database\Orm\Schema\Constraints;
+use Charcoal\Database\Orm\Schema\Builder\ColumnsBuilder;
+use Charcoal\Database\Orm\Schema\Builder\ConstraintsBuilder;
 use Charcoal\Database\Orm\Schema\TableMigrations;
 
 /**
@@ -26,7 +26,7 @@ final class BruteForceTable extends OrmTableBase
         parent::__construct($module, DatabaseTables::BruteForceControl, entityClass: null);
     }
 
-    protected function structure(Columns $cols, Constraints $constraints): void
+    protected function structure(ColumnsBuilder $cols, ConstraintsBuilder $constraints): void
     {
         $cols->int("id")->bytes(8)->unSigned()->autoIncrement();
         $cols->string("action")->length(64);

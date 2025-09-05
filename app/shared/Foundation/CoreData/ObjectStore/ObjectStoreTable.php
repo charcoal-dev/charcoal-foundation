@@ -11,9 +11,9 @@ namespace App\Shared\Foundation\CoreData\ObjectStore;
 use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
-use Charcoal\Base\Enums\Charset;
-use Charcoal\Database\Orm\Schema\Columns;
-use Charcoal\Database\Orm\Schema\Constraints;
+use Charcoal\Contracts\Charsets\Charset;
+use Charcoal\Database\Orm\Schema\Builder\ColumnsBuilder;
+use Charcoal\Database\Orm\Schema\Builder\ConstraintsBuilder;
 use Charcoal\Database\Orm\Schema\TableMigrations;
 
 /**
@@ -27,7 +27,7 @@ final class ObjectStoreTable extends OrmTableBase
         parent::__construct($module, DatabaseTables::ObjectStore, entityClass: null);
     }
 
-    protected function structure(Columns $cols, Constraints $constraints): void
+    protected function structure(ColumnsBuilder $cols, ConstraintsBuilder $constraints): void
     {
         $cols->setDefaultCharset(Charset::ASCII);
 
