@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Core\Http;
 
-use Charcoal\Base\Traits\InstanceOnStaticScopeTrait;
+use Charcoal\Base\Objects\Traits\InstanceOnStaticScopeTrait;
 use Charcoal\Http\Server\Middleware\MiddlewareRegistry;
 
 /**

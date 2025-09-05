@@ -11,7 +11,7 @@ namespace App\Sapi\Engine\Scripts\Config;
 use App\Shared\Core\Cli\DomainScriptBase;
 use App\Shared\Core\Cli\LogPolicy;
 use App\Shared\Exceptions\CliScriptException;
-use Charcoal\Base\Support\Helpers\ObjectHelper;
+use Charcoal\Base\Objects\ObjectHelper;
 use Charcoal\Database\Exceptions\QueryExecuteException;
 use Charcoal\Filesystem\Exceptions\FilesystemException;
 

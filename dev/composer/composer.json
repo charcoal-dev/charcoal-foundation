@@ -2,10 +2,10 @@
   "require": {
     "php": "^8.3",
     "charcoal-dev/app-kernel": "dev-main",
-    "charcoal-dev/http-server": "dev-main#e25cc58",
-    "charcoal-dev/http-client": "^0.2.7",
+    "charcoal-dev/http-server": "dev-main#74d6ea4",
+    "charcoal-dev/http-client": "^0.2.11",
+    "charcoal-dev/charsets-sanitizer": "^0.2.0",
     "charcoal-dev/mailer": "^0.2.1",
-    "charcoal-dev/events": "^0.1.9",
     "ext-pdo": "*",
     "ext-curl": "*",
     "ext-sockets": "*",

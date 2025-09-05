@@ -10,7 +10,7 @@ namespace App\Shared\Concerns;
 
 use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
 use Charcoal\Cipher\Cipher;
-use Charcoal\Semaphore\Filesystem\FilesystemSemaphore;
+use Charcoal\Semaphore\Contracts\SemaphoreProviderInterface;
 
 /**
  * Todo: Pending Implementation
@@ -28,7 +28,7 @@ trait PendingModuleComponents
     /**
      * @throws \RuntimeException
      */
-    public function getSemaphore(): FilesystemSemaphore
+    public function getSemaphore(): SemaphoreProviderInterface
     {
         throw new \RuntimeException("Not implemented");
     }

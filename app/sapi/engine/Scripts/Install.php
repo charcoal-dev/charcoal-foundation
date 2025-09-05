@@ -13,7 +13,7 @@ use App\Shared\Core\Cli\LogPolicy;
 use App\Shared\Enums\Databases;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
 use Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException;
-use Charcoal\Base\Support\Helpers\ObjectHelper;
+use Charcoal\Base\Objects\ObjectHelper;
 use Charcoal\Database\Orm\Migrations;
 
 /**
@@ -152,7 +152,7 @@ class Install extends DomainScriptBase
                 $this->print("{goUp3}{atLineStart}{clearRight}{clearRight}");
                 $this->print(sprintf("{grey}Progress: {/}%d{grey}/{yellow}%d", $progressIndex, $tablesCount));
                 $this->print(sprintf("{grey}CREATE TABLE `{green}%s{/}{grey}` IF NOT EXISTS", $tableInstance->name), 200);
-                $stmt = Migrations::createTable($dbInstance, $tableInstance, true);
+                $stmt = Migrations::createTable($tableInstance, true);
                 $dbInstance->exec(implode("", $stmt));
 
                 unset($dbInstance, $tableInstance, $stmt);
