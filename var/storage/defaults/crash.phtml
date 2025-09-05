@@ -37,7 +37,7 @@
 <div class="container mt-5">
     <div class="p-5 mb-4 bg-danger text-white rounded-3">
         <h1 class="display-6">
-            ⚠️ <?= htmlspecialchars(\Charcoal\Base\Support\Helpers\ObjectHelper::baseClassName($exception['class'])) ?></h1>
+            ⚠️ <?= htmlspecialchars(\Charcoal\Base\Objects\ObjectHelper::baseClassName($exception['class'])) ?></h1>
         <p class="lead"><?= htmlspecialchars($exception['message']) ?></p>
         <hr>
         <p><strong>Exception Type:</strong> <?= htmlspecialchars($exception['class']) ?></p>
