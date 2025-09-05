@@ -12,12 +12,11 @@ use App\Shared\Core\Http\AbstractAppEndpoint;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Filesystem\Exceptions\InvalidPathException;
 use Charcoal\Filesystem\Path\DirectoryPath;
-use Charcoal\Http\Commons\Header\WritableHeaders;
-use Charcoal\Http\Router\Response\BodyResponse;
 
 /**
  * Class AbstractHtmlEndpoint
  * @package App\Shared\Core\Http\Html
+ * @deprecated
  */
 abstract class AbstractHtmlEndpointAbstract extends AbstractAppEndpoint
 {

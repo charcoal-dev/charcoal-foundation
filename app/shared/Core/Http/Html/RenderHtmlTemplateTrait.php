@@ -10,12 +10,9 @@ namespace App\Shared\Core\Http\Html;
 
 use Charcoal\Buffers\Buffer;
 use Charcoal\Filesystem\Enums\Assert;
-use Charcoal\Filesystem\Enums\PathType;
 use Charcoal\Filesystem\Exceptions\InvalidPathException;
 use Charcoal\Filesystem\Exceptions\PathTypeException;
-use Charcoal\Filesystem\Path\FilePath;
 use Charcoal\Filesystem\Path\PathInfo;
-use Charcoal\Filesystem\Path\SafePath;
 
 /**
  * Provides functionality to render an HTML template file with injected data.

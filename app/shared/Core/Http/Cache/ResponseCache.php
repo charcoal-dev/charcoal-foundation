@@ -15,7 +15,6 @@ use Charcoal\Base\Exceptions\WrappedException;
 use Charcoal\Filesystem\Exceptions\PathNotFoundException;
 use Charcoal\Filesystem\Exceptions\PathTypeException;
 use Charcoal\Filesystem\Node\DirectoryNode;
-use Charcoal\Http\Router\Response\AbstractResponse;
 
 /**
  * Class ResponseCache
