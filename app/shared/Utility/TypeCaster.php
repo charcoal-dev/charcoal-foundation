@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Utility;
 
-use Charcoal\Buffers\Frames\Bytes32;
+use Charcoal\Buffers\Types\Bytes32;
 
 /**
  * Class TypeCaster

@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Utility;
 
-use Charcoal\Buffers\AbstractByteArray;
+use Charcoal\Contracts\Buffers\ReadableBufferInterface;
 
 /**
  * Class PasswordHelper
@@ -18,7 +18,7 @@ use Charcoal\Buffers\AbstractByteArray;
 final class PasswordHelper
 {
     /**
-     * @param string|AbstractByteArray $password
+     * @param string|ReadableBufferInterface $password
      * @param int $memoryCost
      * @param int $timeCost
      * @param int $threads
@@ -26,14 +26,14 @@ final class PasswordHelper
      * @api
      */
     public static function hashArgon2(
-        string|AbstractByteArray $password,
+        string|ReadableBufferInterface $password,
         int                      $memoryCost = 65536,
         int                      $timeCost = 4,
         int                      $threads = 2
     ): string
     {
-        if ($password instanceof AbstractByteArray) {
-            $password = $password->raw();
+        if ($password instanceof ReadableBufferInterface) {
+            $password = $password->bytes();
         }
 
         return password_hash($password, PASSWORD_ARGON2ID, [
@@ -44,15 +44,15 @@ final class PasswordHelper
     }
 
     /**
-     * @param string|AbstractByteArray $password
+     * @param string|ReadableBufferInterface $password
      * @param string $hash
      * @return bool
      * @api
      */
-    public static function verifyArgon2(string|AbstractByteArray $password, string $hash): bool
+    public static function verifyArgon2(string|ReadableBufferInterface $password, string $hash): bool
     {
-        if ($password instanceof AbstractByteArray) {
-            $password = $password->raw();
+        if ($password instanceof ReadableBufferInterface) {
+            $password = $password->bytes();
         }
 
         return password_verify($password, $hash);
@@ -60,29 +60,29 @@ final class PasswordHelper
 
     /**
      * NULL-safe password hashing with BCRYPT
-     * @param string|AbstractByteArray $password
+     * @param string|ReadableBufferInterface $password
      * @return string
      * @api
      */
-    public static function hashBcrypt(string|AbstractByteArray $password): string
+    public static function hashBcrypt(string|ReadableBufferInterface $password): string
     {
-        if ($password instanceof AbstractByteArray) {
-            $password = str_replace("\0", "\1", $password->raw());
+        if ($password instanceof ReadableBufferInterface) {
+            $password = str_replace("\0", "\1", $password->bytes());
         }
 
         return password_hash($password, PASSWORD_BCRYPT);
     }
 
     /**
-     * @param string|AbstractByteArray $password
+     * @param string|ReadableBufferInterface $password
      * @param string $hash
      * @return bool
      * @api
      */
-    public static function verifyBcrypt(string|AbstractByteArray $password, string $hash): bool
+    public static function verifyBcrypt(string|ReadableBufferInterface $password, string $hash): bool
     {
-        if ($password instanceof AbstractByteArray) {
-            $password = str_replace("\0", "\1", $password->raw());
+        if ($password instanceof ReadableBufferInterface) {
+            $password = str_replace("\0", "\1", $password->bytes());
         }
 
         return password_verify($password, $hash);

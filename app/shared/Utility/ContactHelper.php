@@ -8,12 +8,12 @@ declare(strict_types=1);
 
 namespace App\Shared\Utility;
 
-use Charcoal\Base\Charsets\Sanitizer\AsciiSanitizer;
-use Charcoal\Base\Charsets\Sanitizer\Modifiers\ChangeCase;
-use Charcoal\Base\Charsets\Sanitizer\Modifiers\CleanSpaces;
-use Charcoal\Base\Charsets\Sanitizer\Modifiers\TrimStr;
-use Charcoal\Base\Charsets\Sanitizer\Utf8Sanitizer;
-use Charcoal\Base\Contracts\Charsets\UnicodeLanguageRangeInterface;
+use Charcoal\Charsets\Contracts\UnicodeLanguageRangeInterface;
+use Charcoal\Charsets\Sanitizer\AsciiSanitizer;
+use Charcoal\Charsets\Sanitizer\Modifiers\ChangeCase;
+use Charcoal\Charsets\Sanitizer\Modifiers\CleanSpaces;
+use Charcoal\Charsets\Sanitizer\Modifiers\TrimStr;
+use Charcoal\Charsets\Sanitizer\Utf8Sanitizer;
 
 /**
  * Utility class for validating and processing contact information such as phone numbers,

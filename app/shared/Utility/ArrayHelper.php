@@ -11,7 +11,7 @@ namespace App\Shared\Utility;
 /**
  * Provides utility methods for working with arrays.
  */
-final readonly class ArrayHelper extends \Charcoal\Base\Support\Helpers\ArrayHelper
+final readonly class ArrayHelper extends \Charcoal\Base\Arrays\ArrayHelper
 {
     /**
      * @param array $data
