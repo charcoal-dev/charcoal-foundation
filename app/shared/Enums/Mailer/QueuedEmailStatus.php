@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Enums\Mailer;
 
-use Charcoal\Base\Traits\EnumMappingTrait;
+use Charcoal\Base\Enums\Traits\EnumMappingTrait;
 
 /**
  * Represents the various statuses an email can have during its lifecycle in the queue.

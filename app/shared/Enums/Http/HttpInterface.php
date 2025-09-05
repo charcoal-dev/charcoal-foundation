@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace App\Shared\Enums\Http;
 
 use Charcoal\App\Kernel\Internal\Config\ConfigEnumInterface;
-use Charcoal\Base\Traits\EnumMappingTrait;
+use Charcoal\Base\Enums\Traits\EnumMappingTrait;
 
 /**
  * Defines an HTTP interface enumeration used to represent different types of HTTP interfaces.

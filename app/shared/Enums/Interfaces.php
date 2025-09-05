@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Enums;
 
-use Charcoal\Contracts\Enums\SapiType;
-use Charcoal\Contracts\ServerApi\ServerApiEnumInterface;
+use Charcoal\App\Kernel\Contracts\ServerApi\ServerApiEnumInterface;
+use Charcoal\Contracts\Sapi\SapiType;
 
 /**
  * Defines the Interfaces enumeration which represents different types of SAPI (Server API) interfaces.

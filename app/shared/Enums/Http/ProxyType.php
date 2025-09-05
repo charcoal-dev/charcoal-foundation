@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Enums\Http;
 
-use Charcoal\Base\Traits\EnumMappingTrait;
+use Charcoal\Base\Enums\Traits\EnumMappingTrait;
 use Charcoal\Http\Client\Response;
 
 /**

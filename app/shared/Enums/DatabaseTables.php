@@ -10,6 +10,7 @@ namespace App\Shared\Enums;
 
 use Charcoal\App\Kernel\Contracts\Enums\DatabaseEnumInterface;
 use Charcoal\App\Kernel\Contracts\Enums\TableRegistryEnumInterface;
+use Charcoal\Database\Enums\DbDriver;
 
 /**
  * Each constant defines a specific database table name as a string value. The constants
@@ -46,5 +47,10 @@ enum DatabaseTables: string implements TableRegistryEnumInterface
             self::HttpProxies => 100,
             default => 200
         };
+    }
+
+    public function getDriver(): DbDriver
+    {
+        return DbDriver::MYSQL;
     }
 }
