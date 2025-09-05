@@ -11,10 +11,10 @@ namespace App\Shared\Foundation\Engine\Metrics;
 use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\Engine\EngineModule;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
-use Charcoal\Base\Enums\Charset;
 use Charcoal\Cli\Enums\ExecutionState;
-use Charcoal\Database\Orm\Schema\Columns;
-use Charcoal\Database\Orm\Schema\Constraints;
+use Charcoal\Contracts\Charsets\Charset;
+use Charcoal\Database\Orm\Schema\Builder\ColumnsBuilder;
+use Charcoal\Database\Orm\Schema\Builder\ConstraintsBuilder;
 use Charcoal\Database\Orm\Schema\TableMigrations;
 
 /**
@@ -28,7 +28,7 @@ final class MetricsTable extends OrmTableBase
         parent::__construct($module, DatabaseTables::EngineExecMetrics, entityClass: null);
     }
 
-    protected function structure(Columns $cols, Constraints $constraints): void
+    protected function structure(ColumnsBuilder $cols, ConstraintsBuilder $constraints): void
     {
         $cols->setDefaultCharset(Charset::ASCII);
 

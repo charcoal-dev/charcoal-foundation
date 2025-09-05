@@ -69,7 +69,7 @@ final class LogEntity extends OrmEntityBase
             return $this->contextObject;
         }
 
-        $contextObject = unserialize($this->context->raw(), ["allowed_classes" => [LogContext::class]]);
+        $contextObject = unserialize($this->context->bytes(), ["allowed_classes" => [LogContext::class]]);
         if (!$contextObject instanceof LogContext) {
             throw new \RuntimeException(
                 sprintf('%s encountered value of type "%s"',

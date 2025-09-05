@@ -14,10 +14,10 @@ use App\Shared\Foundation\Engine\EngineModule;
 use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
 use Charcoal\App\Kernel\Orm\Repository\Traits\EntityInsertableTrait;
 use Charcoal\App\Kernel\Orm\Repository\Traits\EntityUpdatableTrait;
-use Charcoal\Base\Support\Helpers\ObjectHelper;
-use Charcoal\Base\Vectors\StringVector;
+use Charcoal\Base\Objects\ObjectHelper;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Cli\Enums\ExecutionState;
+use Charcoal\Vectors\Strings\StringVector;
 
 /**
  * Service class responsible for handling execution logs in the database.
