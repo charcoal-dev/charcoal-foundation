@@ -114,7 +114,7 @@ trait SapiConfigBuilderTrait
 
             // Trust Proxy
             $trustProxies = $server["proxies"] ?? null;
-            if (!is_array($trustProxies) || !$trustProxies) {
+            if (!is_array($trustProxies)) {
                 throw new \InvalidArgumentException("Invalid proxies configuration for interface: " . $interface->name);
             }
 
