@@ -9,9 +9,9 @@ declare(strict_types=1);
 namespace App\Shared\Core\Orm;
 
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
-use Charcoal\Base\Enums\Sort;
 use Charcoal\Base\Exceptions\WrappedException;
-use Charcoal\Base\Support\Helpers\ObjectHelper;
+use Charcoal\Base\Objects\ObjectHelper;
+use Charcoal\Contracts\Dataset\Sort;
 
 /**
  * Class EntityPaginatedFetch

@@ -12,14 +12,14 @@ use App\Shared\CharcoalApp;
 use App\Shared\Enums\SemaphoreScopes;
 use App\Shared\Exceptions\CliScriptException;
 use App\Shared\Utility\TypeCaster;
-use Charcoal\App\Kernel\EntryPoint\Cli\AppCliHandler;
-use Charcoal\App\Kernel\EntryPoint\Cli\AppCliScript;
 use Charcoal\App\Kernel\Enums\SemaphoreType;
+use Charcoal\App\Kernel\ServerApi\Cli\AppCliHandler;
+use Charcoal\App\Kernel\ServerApi\Cli\AppCliScript;
 use Charcoal\Cli\Enums\ExecutionState;
 use Charcoal\Cli\Events\Terminate\ExceptionCaught;
 use Charcoal\Cli\Events\Terminate\PcntlSignalClose;
+use Charcoal\Filesystem\Semaphore\FileLock;
 use Charcoal\Semaphore\Exceptions\SemaphoreLockException;
-use Charcoal\Semaphore\Filesystem\FileLock;
 
 /**
  * Class DomainScriptBase

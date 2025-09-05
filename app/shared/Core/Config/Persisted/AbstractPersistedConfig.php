@@ -11,8 +11,8 @@ namespace App\Shared\Core\Config\Persisted;
 use App\Shared\Contracts\Foundation\StoredObjectInterface;
 use Charcoal\App\Kernel\Contracts\Orm\Entity\StorageHooksInterface;
 use Charcoal\App\Kernel\Entity\AbstractEntity;
-use Charcoal\Base\Enums\FetchOrigin;
-use Charcoal\Base\Support\Helpers\ObjectHelper;
+use Charcoal\Base\Objects\ObjectHelper;
+use Charcoal\Contracts\Storage\Enums\FetchOrigin;
 
 /**
  * Represents an abstract class for a persisted configuration.

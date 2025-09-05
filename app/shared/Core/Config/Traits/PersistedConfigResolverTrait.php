@@ -11,7 +11,7 @@ namespace App\Shared\Core\Config\Traits;
 use App\Shared\CharcoalApp;
 use App\Shared\Contracts\Foundation\StoredObjectInterface;
 use App\Shared\Core\Config\Persisted\AbstractPersistedConfig;
-use Charcoal\Base\Support\Helpers\ObjectHelper;
+use Charcoal\Base\Objects\ObjectHelper;
 
 /**
  * Provides functionality for resolving persisted configuration objects.

@@ -12,7 +12,7 @@ use App\Shared\Enums\Mailer\MailDispatchMode;
 use App\Shared\Enums\Mailer\MailProvider;
 use App\Shared\Utility\ContactHelper;
 use Charcoal\App\Kernel\Internal\Config\ConfigSnapshotInterface;
-use Charcoal\Base\Charsets\Ascii;
+use Charcoal\Charsets\Support\AsciiHelper;
 
 /**
  * This class contains configuration details for setting up email dispatching
@@ -34,7 +34,7 @@ final readonly class MailerConfig implements ConfigSnapshotInterface
     )
     {
         // Sender Validations
-        if (!Ascii::isPrintableOnly($this->senderName) ||
+        if (!AsciiHelper::isPrintableOnly($this->senderName) ||
             strlen($this->senderName) < 2 ||
             strlen($this->senderName) > 40
         ) {

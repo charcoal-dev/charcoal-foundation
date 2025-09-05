@@ -11,10 +11,10 @@ namespace App\Shared\Core\Cli;
 use App\Shared\CharcoalApp;
 use App\Shared\Foundation\Engine\Logs\LogContext;
 use App\Shared\Foundation\Engine\Logs\LogEntity;
-use Charcoal\App\Kernel\EntryPoint\Cli\AppCliHandler;
-use Charcoal\Base\Traits\NoDumpTrait;
-use Charcoal\Base\Traits\NotCloneableTrait;
-use Charcoal\Base\Traits\NotSerializableTrait;
+use Charcoal\App\Kernel\ServerApi\Cli\AppCliHandler;
+use Charcoal\Base\Objects\Traits\NoDumpTrait;
+use Charcoal\Base\Objects\Traits\NotCloneableTrait;
+use Charcoal\Base\Objects\Traits\NotSerializableTrait;
 use Charcoal\Cli\Enums\ExecutionState;
 use Charcoal\Cli\Output\FileWriter;
 

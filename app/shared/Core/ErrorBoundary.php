@@ -31,6 +31,6 @@ final class ErrorBoundary extends \Charcoal\App\Kernel\Support\Errors\ErrorBound
         $exceptionDto = ErrorHelper::getExceptionDto($exIn);
         header("Content-Type: text/html", response_code: 500);
         header("Cache-Control: no-store, no-cache, must-revalidate");
-        print self::renderTemplateFile($crashHtmlTemplate, ["exception" => $exceptionDto]);
+        print self::renderTemplateFile($crashHtmlTemplate, ["exception" => $exceptionDto])->bytes();
     }
 }
