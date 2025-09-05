@@ -9,9 +9,9 @@ declare(strict_types=1);
 namespace App\Shared\Foundation\Http\CallLog;
 
 use Charcoal\App\Kernel\Orm\Entity\OrmEntityBase;
-use Charcoal\Base\Support\DsvString;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Http\Commons\Enums\HttpMethod;
+use Charcoal\Vectors\Support\DsvTokens;
 
 /**
  * Class CallLogEntity
@@ -21,7 +21,7 @@ final class CallLogEntity extends OrmEntityBase
 {
     public int $id;
     public ?string $proxyId;
-    public ?DsvString $flags;
+    public ?DsvTokens $flags;
     public HttpMethod $method;
     public string $urlServer;
     public string $urlPath;

@@ -16,10 +16,9 @@ use Charcoal\App\Kernel\Contracts\Domain\ModuleBindableInterface;
 use Charcoal\App\Kernel\Diagnostics\Diagnostics;
 use Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException;
 use Charcoal\App\Kernel\Support\DtoHelper;
-use Charcoal\Base\Support\DsvString;
-use Charcoal\Base\Traits\NoDumpTrait;
-use Charcoal\Base\Traits\NotCloneableTrait;
-use Charcoal\Base\Traits\NotSerializableTrait;
+use Charcoal\Base\Objects\Traits\NoDumpTrait;
+use Charcoal\Base\Objects\Traits\NotCloneableTrait;
+use Charcoal\Base\Objects\Traits\NotSerializableTrait;
 use Charcoal\Http\Client\ClientConfig;
 use Charcoal\Http\Client\Contracts\RequestObserverInterface;
 use Charcoal\Http\Client\HttpClient;
@@ -28,6 +27,7 @@ use Charcoal\Http\Client\Response;
 use Charcoal\Http\Commons\Contracts\HeadersInterface;
 use Charcoal\Http\Commons\Contracts\PayloadInterface;
 use Charcoal\Http\Commons\Enums\HttpMethod;
+use Charcoal\Vectors\Support\DsvTokens;
 
 /**
  * This class is responsible for sending HTTP requests with various configurations and behaviors.
@@ -81,7 +81,7 @@ final class HttpService implements ModuleBindableInterface, RequestObserverInter
         HeadersInterface|array|null $headers = null,
         PayloadInterface|array|null $payload = null,
         HttpLogLevel                $logLevel = HttpLogLevel::None,
-        ?DsvString                  $flags = null,
+        ?DsvTokens                  $flags = null,
     ): Request
     {
         return (new Request(
@@ -142,7 +142,7 @@ final class HttpService implements ModuleBindableInterface, RequestObserverInter
 
         // Flags
         $flags = $context[2] ?? null;
-        if (!is_null($flags) && !$flags instanceof DsvString) {
+        if (!is_null($flags) && !$flags instanceof DsvTokens) {
             Diagnostics::app()->warning("HTTP request " . $request->method->value . " " .
                 $request->url->host . " observed without proper context [2]",
                 context: [

@@ -11,7 +11,7 @@ namespace App\Shared\Foundation\Http\ProxyServers;
 use App\Shared\Enums\Http\ProxyType;
 use Charcoal\App\Kernel\Contracts\Orm\Entity\StorageHooksInterface;
 use Charcoal\App\Kernel\Orm\Entity\OrmEntityBase;
-use Charcoal\Base\Enums\FetchOrigin;
+use Charcoal\Contracts\Storage\Enums\FetchOrigin;
 
 /**
  * Represents a proxy server configuration entity with methods for managing

@@ -46,7 +46,7 @@ class CallLogSnapshot
             if ($request->payload->count()) {
                 $this->requestPayload = $request->payload->getArray();
             } else {
-                $this->requestBody = $request->body->raw();
+                $this->requestBody = $request->body->bytes();
             }
         }
     }

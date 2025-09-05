@@ -15,8 +15,8 @@ use App\Shared\Foundation\Http\HttpModule;
 use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
 use Charcoal\App\Kernel\Orm\Repository\Traits\EntityInsertableTrait;
 use Charcoal\App\Kernel\Orm\Repository\Traits\EntityUpdatableTrait;
-use Charcoal\Base\Vectors\StringVector;
 use Charcoal\Buffers\Buffer;
+use Charcoal\Vectors\Strings\StringVector;
 
 /**
  * Class handling interface logging operations.
