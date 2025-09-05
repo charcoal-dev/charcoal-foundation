@@ -10,9 +10,9 @@ declare(strict_types=1);
 use App\Shared\CharcoalApp;
 use App\Shared\Core\ErrorBoundary;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
-use Charcoal\App\Kernel\EntryPoint\Cli\AppCliHandler;
 use Charcoal\App\Kernel\Enums\AppEnv;
-use Charcoal\Base\Support\Helpers\ObjectHelper;
+use Charcoal\App\Kernel\ServerApi\Cli\AppCliHandler;
+use Charcoal\Base\Objects\ObjectHelper;
 use Charcoal\Filesystem\Path\DirectoryPath;
 
 require_once "bootstrap.php";
