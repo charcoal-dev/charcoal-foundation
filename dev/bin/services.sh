@@ -118,10 +118,11 @@ collect_tls_inventory_for_sapi() {
   local sapi="$1"
   local cfg="$ROOT/config/http/${sapi}.sapi.json"
   local storage="$ROOT/var/storage"
+  local errors=0
 
-  command -v jq >/dev/null 2>&1 || { err2 "jq is required."; exit 1; }
-  [[ -f "$cfg" ]] || { err2 "HTTP config for SAPI \"$sapi\" not found at config/http/${sapi}.sapi.json."; exit 1; }
-  [[ -d "$storage" ]] || { err2 "Missing var/storage/ directory at $storage."; exit 1; }
+  command -v jq >/dev/null 2>&1 || { err2 "jq is required."; return 1; }
+  [[ -f "$cfg" ]] || { err2 "HTTP config for SAPI \"$sapi\" not found at config/http/${sapi}.sapi.json."; return 1; }
+  [[ -d "$storage" ]] || { err2 "Missing var/storage/ directory at $storage."; return 1; }
 
   _normalize_identity() {
     local host="$1"
@@ -130,86 +131,87 @@ collect_tls_inventory_for_sapi() {
 
   _reject_bad_relpath() {
     local rel="$1"
-    [[ "$rel" == /* ]] && { err2 "Absolute path not allowed: $rel (must be relative to var/storage)."; exit 1; }
-    [[ "$rel" == *"../"* || "$rel" == "./"* ]] && { err2 "Invalid relative path: $rel (no ../ or ./ allowed)."; exit 1; }
+    if [[ "$rel" == /* ]]; then err2 "[$sapi] Absolute path not allowed: $rel (must be relative to var/storage/)"; return 1; fi
+    if [[ "$rel" == *"../"* || "$rel" == "./"* ]]; then err2 "[$sapi] Invalid relative path: $rel (no ../ or ./)"; return 1; fi
+    return 0
   }
 
+  # portable resolver; no readlink -f traps
   _resolve_inside_storage() {
     local rel="$1"
     local abs="$storage/$rel"
-    [[ -e "$abs" ]] || { err2 "File not found under var/storage: $rel"; exit 1; }
-
-    # resolve without readlink/realpath quirks
+    if [[ ! -e "$abs" ]]; then err2 "[$sapi] File not found: var/storage/$rel"; return 1; fi
     local dir base real
-    dir="$(dirname -- "$rel")"
-    base="$(basename -- "$rel")"
-    ( cd "$storage/$dir" 2>/dev/null && real="$(pwd -P)/$base" ) \
-      || { err2 "Failed to resolve path: $rel"; exit 1; }
-
-    case "$real" in
-      "$storage"/*) ;;                       # stays inside var/storage
-      *) err2 "Path escapes var/storage: $rel → $real"; exit 1;;
-    esac
-
-    [[ -e "$real" ]] || { err2 "File vanished during resolve: $rel"; exit 1; }
+    dir="$(dirname -- "$rel")"; base="$(basename -- "$rel")"
+    if ! ( cd "$storage/$dir" 2>/dev/null && real="$(pwd -P)/$base" ); then
+      err2 "[$sapi] Failed to resolve: var/storage/$rel"; return 1
+    fi
+    case "$real" in "$storage"/*) ;; *) err2 "[$sapi] Path escapes var/storage/: $rel → $real"; return 1;; esac
+    [[ -e "$real" ]] || { err2 "[$sapi] File vanished during resolve: var/storage/$rel"; return 1; }
     printf "%s" "$real"
+    return 0
   }
 
-  _owner_uid() {
-    # Linux: stat -c %u; macOS: stat -f %u
-    stat -c %u -- "$1" 2>/dev/null || stat -f %u -- "$1"
-  }
-
+  _owner_uid() { stat -c %u -- "$1" 2>/dev/null || stat -f %u -- "$1"; }
   _check_ownership() {
-    local p="$1"
-    local want; want="$(id -u)"
-    local have; have="$(_owner_uid "$p")" || { err2 "Cannot read owner for: $p"; exit 1; }
-    [[ "$have" == "$want" ]] || { err2 "Owner mismatch for $p (uid $have), expected current user (uid $want)."; exit 1; }
+    local p="$1" want have
+    want="$(id -u)"; have="$(_owner_uid "$p")" || { err2 "[$sapi] Cannot read owner: $p"; return 1; }
+    if [[ "$have" != "$want" ]]; then err2 "[$sapi] Owner mismatch: $p (uid $have), expected uid $want"; return 1; fi
+    return 0
   }
 
   _check_ext_cert() { [[ "$1" == *.crt || "$1" == *.pem ]]; }
   _check_ext_key()  { [[ "$1" == *.key || "$1" == *.pem ]]; }
 
-  # iterate hosts
+  local saw_tls=0
   while IFS= read -r row; do
-    # skip hosts without tls object
     local has_tls; has_tls="$(jq -r 'has("tls") and (.tls|type=="object")' <<< "$row")"
     [[ "$has_tls" != "true" ]] && continue
+    saw_tls=1
 
-    local host crt key
+    local host crt key ident crt_abs key_abs ok=1
     host="$(jq -r '.hostname' <<< "$row")"
     crt="$(jq -r '.tls.cert' <<< "$row")"
     key="$(jq -r '.tls.key'  <<< "$row")"
 
-    [[ -n "$host" && -n "$crt" && -n "$key" ]] || { err2 "Host entry missing hostname/crt/key."; exit 1; }
+    if [[ -z "$host" || -z "$crt" || -z "$key" ]]; then
+      err2 "[$sapi] Host entry missing hostname/cert/key"; errors=$((errors+1)); continue
+    fi
 
-    # normalize identity (wildcard "*.example.com" → ".example.com")
-    local ident; ident="$(_normalize_identity "$host")"
+    ident="$(_normalize_identity "$host")"
 
-    # path policy (relative to var/storage; no ../ or ./)
-    _reject_bad_relpath "$crt"
-    _reject_bad_relpath "$key"
+    _check_ext_cert "$crt" || { err2 "[$sapi][$host] Unexpected cert extension: $crt"; ok=0; }
+    _check_ext_key  "$key" || { err2 "[$sapi][$host] Unexpected key extension:  $key"; ok=0; }
 
-    # extensions
-    _check_ext_cert "$crt" || { err2 "Unexpected cert extension for: $crt"; exit 1; }
-    _check_ext_key  "$key" || { err2 "Unexpected key extension for: $key"; exit 1; }
+    _reject_bad_relpath "$crt" || ok=0
+    _reject_bad_relpath "$key" || ok=0
 
-    # resolve to absolute inside var/storage (symlinks allowed if they stay inside)
-    local crt_abs key_abs
-    crt_abs="$(_resolve_inside_storage "$crt")"
-    key_abs="$(_resolve_inside_storage "$key")"
-
-    # ownership
-    _check_ownership "$crt_abs"
-    _check_ownership "$key_abs"
-
-    # quiet perms tighten (do not fail if chmod cannot change)
-    [[ -f "$key_abs" ]] && chmod 0400 "$key_abs" >/dev/null 2>&1 || true
-    [[ -f "$crt_abs" ]] && chmod 0444 "$crt_abs" >/dev/null 2>&1 || true
-
-    # emit one JSON object per line (combine with jq -s later)
-    jq -n --arg id "$ident" --arg crt "$crt_abs" --arg key "$key_abs" '{identity:$id, crt:$crt, key:$key}'
+    if [[ $ok -eq 1 ]]; then
+      crt_abs="$(_resolve_inside_storage "$crt")" || ok=0
+      key_abs="$(_resolve_inside_storage "$key")" || ok=0
+    fi
+    if [[ $ok -eq 1 ]]; then
+      _check_ownership "$crt_abs" || ok=0
+      _check_ownership "$key_abs" || ok=0
+    fi
+    if [[ $ok -eq 1 ]]; then
+      chmod 0444 "$crt_abs" >/dev/null 2>&1 || true
+      chmod 0400 "$key_abs" >/dev/null 2>&1 || true
+      jq -n --arg id "$ident" --arg crt "$crt_abs" --arg key "$key_abs" '{identity:$id, crt:$crt, key:$key}'
+    else
+      errors=$((errors+1))
+      err2 "[$sapi][$host] TLS validation failed; expected cert/key under var/storage/"
+    fi
   done < <(jq -c '.hosts[]? // empty' "$cfg")
+
+  # If config had TLS but we emitted nothing, fail with a clear summary
+  if [[ $saw_tls -eq 1 && $errors -gt 0 ]]; then
+    err2 "[$sapi] One or more TLS entries invalid. Fix the above issues under var/storage/ and retry."
+    return 1
+  fi
+
+  # If no TLS blocks at all, that's fine: output nothing (caller may write [])
+  return 0
 }
 
 svc() {

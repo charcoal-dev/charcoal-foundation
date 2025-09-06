@@ -401,7 +401,18 @@ cmd_build_docker() {
   while IFS= read -r id; do
     outdir="$ROOT/dev/docker/sapi/app/$id"
     mkdir -p "$outdir"
-    collect_tls_inventory_for_sapi "$id" | jq -s . > "$outdir/tls.manifest.json"
+    collect_tls_inventory_for_sapi "$id" | jq -s . > "$outdir/tls.manifest.json" || {
+      err2 "[${id}] TLS inventory generation failed. Ensure cert/key paths in config/http/${id}.sapi.json exist under var/storage/ (relative paths, correct owner/perms).";
+      exit 1;
+    }
+
+    if jq -e '.hosts[]? | select(.tls|type=="object")' "$ROOT/config/http/${id}.sapi.json" >/dev/null; then
+      if jq -e 'length==0' "$outdir/tls.manifest.json" >/dev/null; then
+        err2 "[${id}] TLS configured but no valid cert/key found under var/storage/. See errors above.";
+        exit 1;
+      fi
+    fi
+    ok "[${id}] TLS inventory written to $outdir/tls.manifest.json"
     generate_nginx_from_inventory "$id"
   done < <(
     jq -r '.charcoal.sapi[]
