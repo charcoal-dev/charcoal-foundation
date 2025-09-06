@@ -278,13 +278,111 @@ select_nginx_base_template() {
   printf "%s" "$fpm_base"
 }
 
-generate_nginx_scaffold() {
+render_ssl_maps_inline() {
+  local sapi="$1"
+  local inv="$ROOT/dev/docker/sapi/app/$sapi/tls.manifest.json"
+  [[ -f "$inv" ]] || { err2 "TLS manifest missing for $sapi at $inv"; exit 1; }
+
+  # Optional default (_default.crt/_default.key) under var/storage/ssl/<sapi>/
+  local default_dir="$ROOT/var/storage/ssl/$sapi"
+  local default_crt="$default_dir/_default.crt"
+  local default_key="$default_dir/_default.key"
+  local have_default=0
+  if [[ -f "$default_crt" && -f "$default_key" ]]; then
+    have_default=1
+  fi
+
+  echo ""
+  echo "    # --- BEGIN auto-generated SSL maps for $sapi ---"
+  echo "    map \$ssl_server_name \$ssl_crt {"
+  echo "        hostnames;"
+  [[ $have_default -eq 1 ]] && echo "        default $default_crt;"
+  # exact + wildcard identities
+  jq -r '.[] | "\(.identity) \(.crt)"' "$inv" | while read -r id path; do
+    if [[ "$id" == .* ]]; then
+      # wildcard identity stored as .example.com  => regex suffix match
+      suf="${id:1}"; suf_escaped="${suf//./\\.}"
+      echo "        ~\\.${suf_escaped}\$ $path;"
+    else
+      echo "        $id $path;"
+    fi
+  done
+  echo "    }"
+  echo ""
+  echo "    map \$ssl_server_name \$ssl_key {"
+  echo "        hostnames;"
+  [[ $have_default -eq 1 ]] && echo "        default $default_key;"
+  jq -r '.[] | "\(.identity) \(.key)"' "$inv" | while read -r id path; do
+    if [[ "$id" == .* ]]; then
+      suf="${id:1}"; suf_escaped="${suf//./\\.}"
+      echo "        ~\\.${suf_escaped}\$ $path;"
+    else
+      echo "        $id $path;"
+    fi
+  done
+  echo "    }"
+  echo "    # --- END auto-generated SSL maps ---"
+  echo ""
+}
+
+generate_nginx_from_inventory() {
   local sapi="$1"
   local outdir="$ROOT/dev/docker/sapi/app/$sapi"
-  mkdir -p "$outdir"
-  local base; base="$(select_nginx_base_template "$sapi")" || { err2 "No base nginx.conf for $sapi"; exit 1; }
-  cp -f "$base" "$outdir/nginx.generated.conf"
-  ok "Scaffolded nginx.generated.conf for $sapi (from $(basename "$base"))."
+  local base="$(select_nginx_base_template "$sapi")"
+  local scaffold="$outdir/nginx.generated.conf"
+  local tmp="$outdir/.nginx.gen.tmp"
+
+  [[ -f "$base" ]] || { err2 "No base nginx.conf for $sapi"; exit 1; }
+  cp -f "$base" "$scaffold"
+
+  # 1) Change listens: 6000 → 6002 (default_server), and add 6001 ssl listens once
+  # Replace any existing default_server 6000 (v4/v6) to 6002
+  sed -i 's/listen[[:space:]]\+\[::\]:6000[[:space:]]\+default_server;/listen [::]:6002 default_server;/' "$scaffold"
+  sed -i 's/listen[[:space:]]\+6000[[:space:]]\+default_server;/listen 6002 default_server;/' "$scaffold"
+  # After the first "listen 6002 default_server;" insert ssl listens (idempotent if rerun)
+  awk '
+    BEGIN{inserted=0}
+    {
+      print
+      if(!inserted && $0 ~ /listen[[:space:]]+6002[[:space:]]+default_server;/){
+        print "    listen 6001 ssl;"
+        print "    listen [::]:6001 ssl;"
+        inserted=1
+      }
+    }
+  ' "$scaffold" > "$tmp" && mv "$tmp" "$scaffold"
+
+  # 2) Insert SSL maps right after the opening "http {" line
+  local maps
+  maps="$(render_ssl_maps_inline "$sapi")"
+  awk -v maps="$maps" '
+    BEGIN{done=0}
+    {
+      print
+      if(!done && $0 ~ /^[[:space:]]*http[[:space:]]*\{/){
+        print maps
+        done=1
+      }
+    }
+  ' "$scaffold" > "$tmp" && mv "$tmp" "$scaffold"
+
+  # 3) Ensure the default server has ssl_certificate lines using the map variables
+  # Insert immediately after the first occurrence of "server {" that also contains default_server in its block
+  awk '
+    BEGIN{in_server=0; added=0}
+    /server[[:space:]]*\{/ { in_server=1; }
+    {
+      print
+      if(in_server && !added && $0 ~ /listen[[:space:]]+6001[[:space:]]+ssl;/){
+        print "    ssl_certificate     $ssl_crt;"
+        print "    ssl_certificate_key $ssl_key;"
+        added=1
+      }
+      if(in_server && $0 ~ /\}/){ in_server=0; }
+    }
+  ' "$scaffold" > "$tmp" && mv "$tmp" "$scaffold"
+
+  ok "Generated nginx.generated.conf for $sapi (6001 ssl / 6002 plain with cert maps)."
 }
 
 cmd_build_docker() {
@@ -305,7 +403,7 @@ cmd_build_docker() {
     outdir="$ROOT/dev/docker/sapi/app/$id"
     mkdir -p "$outdir"
     collect_tls_inventory_for_sapi "$id" | jq -s . > "$outdir/tls.manifest.json"
-    generate_nginx_scaffold "$id"
+    generate_nginx_from_inventory "$id"
   done < <(
     jq -r '.charcoal.sapi[]
            | select(.type=="http" and (.enabled==null or .enabled==true) and (.nginxGenerateConfig==true))
