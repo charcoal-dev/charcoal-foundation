@@ -29,6 +29,10 @@
                 "minimum": 1,
                 "maximum": 65535
               },
+              "nginxGenerateConfig": {
+                "type": "boolean",
+                "description": "Generate nginx configuration for this SAPI"
+              },
               "env": {
                 "type": "object",
                 "propertyNames": {
