@@ -64,27 +64,17 @@ RUN set -e; \
   done;  \
   \
   mkdir -p /etc/nginx; \
-  if [ -f /opt/sapi/override/nginx.generated.conf ]; then \
+  if   [ -f /opt/sapi/override/nginx.generated.conf ]; then \
     cp -f /opt/sapi/override/nginx.generated.conf /etc/nginx/nginx.template.conf; \
   elif [ -f /opt/sapi/override/nginx.conf ]; then \
     cp -f /opt/sapi/override/nginx.conf /etc/nginx/nginx.template.conf; \
   elif [ -f /opt/sapi/base/nginx.conf ]; then \
     cp -f /opt/sapi/base/nginx.conf /etc/nginx/nginx.template.conf; \
   else \
-    echo "FATAL: no nginx.conf template found (generated/manual/base)"; exit 1; \
+    echo "info: no nginx template for this SAPI (likely non-http); skipping."; \
   fi; \
   \
   rm -rf /opt/sapi
-
-# Prefer generated → manual → base
-RUN set -eux; \
-  base="/etc/nginx/nginx.template.conf"; \
-  dir="/opt/charcoal/app-nginx"; \
-  if [ -f "$dir/nginx.generated.conf" ]; then \
-    cp "$dir/nginx.generated.conf" "$base"; \
-  elif [ -f "$dir/nginx.conf" ]; then \
-    cp "$dir/nginx.conf" "$base"; \
-  fi \
 
 # Global PHP logging: no display, log to stderr
 RUN printf "display_errors=Off\nlog_errors=On\nerror_log=/proc/self/fd/2\n" \
