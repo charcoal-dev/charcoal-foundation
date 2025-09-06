@@ -270,6 +270,23 @@ gen_sapi_df() {
   ok "Dockerfile for $id → dev/docker/sapi/app/$id/Dockerfile"
 }
 
+select_nginx_base_template() {
+  local sapi="$1"
+  local app_base="$ROOT/dev/docker/sapi/app/$sapi/nginx.conf"
+  local fpm_base="$ROOT/dev/docker/sapi/fpm/nginx.conf"
+  [[ -f "$app_base" ]] && { printf "%s" "$app_base"; return 0; }
+  printf "%s" "$fpm_base"
+}
+
+generate_nginx_scaffold() {
+  local sapi="$1"
+  local outdir="$ROOT/dev/docker/sapi/app/$sapi"
+  mkdir -p "$outdir"
+  local base; base="$(select_nginx_base_template "$sapi")" || { err2 "No base nginx.conf for $sapi"; exit 1; }
+  cp -f "$base" "$outdir/nginx.generated.conf"
+  ok "Scaffolded nginx.generated.conf for $sapi (from $(basename "$base"))."
+}
+
 cmd_build_docker() {
   require_env
 
@@ -283,10 +300,12 @@ cmd_build_docker() {
   generate_db_init_sql
   resolve_profiles
 
+  # Build TLS Config Inventory
   while IFS= read -r id; do
     outdir="$ROOT/dev/docker/sapi/app/$id"
     mkdir -p "$outdir"
     collect_tls_inventory_for_sapi "$id" | jq -s . > "$outdir/tls.manifest.json"
+    generate_nginx_scaffold "$id"
   done < <(
     jq -r '.charcoal.sapi[]
            | select(.type=="http" and (.enabled==null or .enabled==true) and (.nginxGenerateConfig==true))

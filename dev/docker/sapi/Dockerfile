@@ -62,8 +62,29 @@ RUN set -e; \
     [ -f "$d/supervisord.ini" ] && cp -f "$d/supervisord.ini" /etc/supervisord.conf; \
     [ -f "$d/nginx.conf" ]       && mkdir -p /etc/nginx && cp -f "$d/nginx.conf" /etc/nginx/nginx.template.conf; \
     [ -f "$d/php8.3-fpm.ini" ]  && mkdir -p /usr/local/etc/php-fpm.d && cp -f "$d/php8.3-fpm.ini" /usr/local/etc/php-fpm.d/zz-charcoal.conf; \
-  done; \
+  done;  \
+  mkdir -p /etc/nginx; \
+  if [ -f /opt/sapi/override/nginx.generated.conf ]; then \
+    cp -f /opt/sapi/override/nginx.generated.conf /etc/nginx/nginx.template.conf; \
+  elif [ -f /opt/sapi/override/nginx.conf ]; then \
+    cp -f /opt/sapi/override/nginx.conf /etc/nginx/nginx.template.conf; \
+  elif [ -f /opt/sapi/base/nginx.conf ]; then \
+    cp -f /opt/sapi/base/nginx.conf /etc/nginx/nginx.template.conf; \
+  else \
+    echo "FATAL: no nginx.conf template found (generated/manual/base)"; exit 1; \
+  fi; \
+  \
   rm -rf /opt/sapi
+
+# Prefer generated → manual → base
+RUN set -eux; \
+  base="/etc/nginx/nginx.template.conf"; \
+  dir="/opt/charcoal/app-nginx"; \
+  if [ -f "$dir/nginx.generated.conf" ]; then \
+    cp "$dir/nginx.generated.conf" "$base"; \
+  elif [ -f "$dir/nginx.conf" ]; then \
+    cp "$dir/nginx.conf" "$base"; \
+  fi \
 
 # Global PHP logging: no display, log to stderr
 RUN printf "display_errors=Off\nlog_errors=On\nerror_log=/proc/self/fd/2\n" \
