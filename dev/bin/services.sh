@@ -65,6 +65,14 @@ load_manifest() {
               ]
             | @tsv' "$MANIFEST"
   )
+
+  # verify each enabled HTTP SAPI has config/http/{sapi}.sapi.json
+  local _missing=0
+  for _id in "${HTTP_SAPI[@]}"; do
+    _f="$ROOT/config/http/${_id}.sapi.json"
+    [[ -f "$_f" ]] || { err2 "Missing HTTP config for SAPI \"${_id}\": expected config/http/${_id}.sapi.json."; _missing=1; }
+  done
+  [[ $_missing -eq 0 ]] || exit 1
 }
 
 # sanitize_json() is unused — keep or delete
@@ -103,6 +111,95 @@ write_manifest_overrides() {
   else
     ok "Manifest overrides → $MAN_OVR"
   fi
+}
+
+# usage: collect_tls_inventory_for_sapi "web" | jq -s . > "$ROOT/dev/docker/nginx/web/tls-inventory.json"
+collect_tls_inventory_for_sapi() {
+  local sapi="$1"
+  local cfg="$ROOT/config/http/${sapi}.sapi.json"
+  local storage="$ROOT/var/storage"
+
+  command -v jq >/dev/null 2>&1 || { err2 "jq is required."; exit 1; }
+  [[ -f "$cfg" ]] || { err2 "HTTP config for SAPI \"$sapi\" not found at config/http/${sapi}.sapi.json."; exit 1; }
+  [[ -d "$storage" ]] || { err2 "Missing var/storage/ directory at $storage."; exit 1; }
+
+  _normalize_identity() {
+    local host="$1"
+    [[ "$host" == \*.* ]] && printf ".%s" "${host#*.}" || printf "%s" "$host"
+  }
+
+  _reject_bad_relpath() {
+    local rel="$1"
+    [[ "$rel" == /* ]] && { err2 "Absolute path not allowed: $rel (must be relative to var/storage)."; exit 1; }
+    [[ "$rel" == *"../"* || "$rel" == "./"* ]] && { err2 "Invalid relative path: $rel (no ../ or ./ allowed)."; exit 1; }
+  }
+
+  _resolve_inside_storage() {
+    local rel="$1"
+    local abs="$storage/$rel"
+    [[ -e "$abs" ]] || { err2 "File not found under var/storage: $rel"; exit 1; }
+    # resolve symlinks; ensure final path stays inside var/storage
+    local real
+    real="$(readlink -f -- "$abs" 2>/dev/null || realpath -- "$abs")" || { err2 "Failed to resolve path: $rel"; exit 1; }
+    [[ "$real" == "$storage"* ]] || { err2 "Path escapes var/storage: $rel → $real"; exit 1; }
+    printf "%s" "$real"
+  }
+
+  _owner_uid() {
+    # Linux: stat -c %u; macOS: stat -f %u
+    stat -c %u -- "$1" 2>/dev/null || stat -f %u -- "$1"
+  }
+
+  _check_ownership() {
+    local p="$1"
+    local want; want="$(id -u)"
+    local have; have="$(_owner_uid "$p")" || { err2 "Cannot read owner for: $p"; exit 1; }
+    [[ "$have" == "$want" ]] || { err2 "Owner mismatch for $p (uid $have), expected current user (uid $want)."; exit 1; }
+  }
+
+  _check_ext_cert() { [[ "$1" == *.crt || "$1" == *.pem ]]; }
+  _check_ext_key()  { [[ "$1" == *.key || "$1" == *.pem ]]; }
+
+  # iterate hosts
+  while IFS= read -r row; do
+    # skip hosts without tls object
+    local has_tls; has_tls="$(jq -r 'has("tls") and (.tls|type=="object")' <<< "$row")"
+    [[ "$has_tls" != "true" ]] && continue
+
+    local host crt key
+    host="$(jq -r '.hostname' <<< "$row")"
+    crt="$(jq -r '.tls.cert' <<< "$row")"
+    key="$(jq -r '.tls.key'  <<< "$row")"
+
+    [[ -n "$host" && -n "$crt" && -n "$key" ]] || { err2 "Host entry missing hostname/crt/key."; exit 1; }
+
+    # normalize identity (wildcard "*.example.com" → ".example.com")
+    local ident; ident="$(_normalize_identity "$host")"
+
+    # path policy (relative to var/storage; no ../ or ./)
+    _reject_bad_relpath "$crt"
+    _reject_bad_relpath "$key"
+
+    # extensions
+    _check_ext_cert "$crt" || { err2 "Unexpected cert extension for: $crt"; exit 1; }
+    _check_ext_key  "$key" || { err2 "Unexpected key extension for: $key"; exit 1; }
+
+    # resolve to absolute inside var/storage (symlinks allowed if they stay inside)
+    local crt_abs key_abs
+    crt_abs="$(_resolve_inside_storage "$crt")"
+    key_abs="$(_resolve_inside_storage "$key")"
+
+    # ownership
+    _check_ownership "$crt_abs"
+    _check_ownership "$key_abs"
+
+    # quiet perms tighten (do not fail if chmod cannot change)
+    [[ -f "$key_abs" ]] && chmod 0400 "$key_abs" >/dev/null 2>&1 || true
+    [[ -f "$crt_abs" ]] && chmod 0444 "$crt_abs" >/dev/null 2>&1 || true
+
+    # emit one JSON object per line (combine with jq -s later)
+    jq -n --arg id "$ident" --arg crt "$crt_abs" --arg key "$key_abs" '{identity:$id, crt:$crt, key:$key}'
+  done < <(jq -c --arg sapi "$sapi" '.http.sapi[$sapi].hosts[]? // empty' "$cfg")
 }
 
 svc() {

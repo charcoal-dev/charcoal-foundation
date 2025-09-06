@@ -60,6 +60,12 @@ require_env() {
   set +a
 }
 
+require_http_roots() {
+  [[ -d "$ROOT/config" ]] || { err2 "Missing config/ directory."; exit 1; }
+  [[ -f "$ROOT/config/charcoal.json" ]] || { err2 "Missing config/charcoal.json."; exit 1; }
+  [[ -d "$ROOT/config/http" ]] || { err2 "Missing config/http/ directory."; exit 1; }
+}
+
 CHARCOAL_PROJECT="${CHARCOAL_PROJECT:-foundation-app}"
 CHARCOAL_DOCKER="${CHARCOAL_DOCKER:-engine,web,mysql,redis}"
 
@@ -276,6 +282,16 @@ cmd_build_docker() {
   write_manifest_overrides
   generate_db_init_sql
   resolve_profiles
+
+  while IFS= read -r id; do
+    outdir="$ROOT/dev/docker/sapi/app/$id"
+    mkdir -p "$outdir"
+    collect_tls_inventory_for_sapi "$id" | jq -s . > "$outdir/tls.manifest.json"
+  done < <(
+    jq -r '.charcoal.sapi[]
+           | select(.type=="http" and (.enabled==null or .enabled==true) and (.nginxGenerateConfig==true))
+           | .id' "$MANIFEST"
+  )
 
   info "Compose up (profiles: ${EFFECTIVE:-none}) …"
   local UIDGID=(--build-arg CHARCOAL_UID="$(id -u)" --build-arg CHARCOAL_GID="$(id -g)")

@@ -8,6 +8,8 @@ Thumbs.db
 # Development and Builds
 dev/.env
 dev/docker/utils/db/init/*.sql
+dev/**/tls.manifest.json
+dev/**/nginx.generated.conf
 # Composer (Packagist)
 dev/composer/**
 dev/composer/vendor/
