@@ -138,10 +138,20 @@ collect_tls_inventory_for_sapi() {
     local rel="$1"
     local abs="$storage/$rel"
     [[ -e "$abs" ]] || { err2 "File not found under var/storage: $rel"; exit 1; }
-    # resolve symlinks; ensure final path stays inside var/storage
-    local real
-    real="$(readlink -f -- "$abs" 2>/dev/null || realpath -- "$abs")" || { err2 "Failed to resolve path: $rel"; exit 1; }
-    [[ "$real" == "$storage"* ]] || { err2 "Path escapes var/storage: $rel → $real"; exit 1; }
+
+    # resolve without readlink/realpath quirks
+    local dir base real
+    dir="$(dirname -- "$rel")"
+    base="$(basename -- "$rel")"
+    ( cd "$storage/$dir" 2>/dev/null && real="$(pwd -P)/$base" ) \
+      || { err2 "Failed to resolve path: $rel"; exit 1; }
+
+    case "$real" in
+      "$storage"/*) ;;                       # stays inside var/storage
+      *) err2 "Path escapes var/storage: $rel → $real"; exit 1;;
+    esac
+
+    [[ -e "$real" ]] || { err2 "File vanished during resolve: $rel"; exit 1; }
     printf "%s" "$real"
   }
 
