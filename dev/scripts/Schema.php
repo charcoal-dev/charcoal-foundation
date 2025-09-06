@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Dev;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Enums\Databases;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\Database\Orm\Migrations;
 use Charcoal\Filesystem\Path\DirectoryPath;
@@ -24,7 +23,6 @@ $charcoal = CharcoalApp::Load(AppEnv::Dev,
     ["var", "shared"]);
 
 $createTable = Migrations::createTable(
-    $charcoal->database->getDb(Databases::Primary),
     $charcoal->http->callLog->table,
     true
 );

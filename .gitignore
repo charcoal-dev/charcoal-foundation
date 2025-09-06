@@ -43,6 +43,8 @@ var/**
 /deployment
 
 # PHPUnit Specific
+phpunit.phar
+composer.phar
 dev/tools/phpunit.phar
 /.phpunit.result.cache
 /coverage/

@@ -5,8 +5,14 @@
     "$imports": [
       "foundation/cache",
       "foundation/databases",
-      "foundation/mailer",
-      "foundation/http"
-    ]
+      "foundation/mailer"
+    ],
+    "http": {
+      "sapi": {
+        "web": {
+          "$imports": ["http/web.sapi"]
+        }
+      }
+    }
   }
 }
