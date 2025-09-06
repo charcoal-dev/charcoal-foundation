@@ -335,7 +335,6 @@ generate_nginx_from_inventory() {
   [[ -f "$base" ]] || { err2 "No base nginx.conf for $sapi"; exit 1; }
   cp -f "$base" "$scaffold"
 
-  # 1) Change listens: 6000 → 6002 (default_server), and add 6001 ssl listens once
   # Replace any existing default_server 6000 (v4/v6) to 6002
   sed -i 's/listen[[:space:]]\+\[::\]:6000[[:space:]]\+default_server;/listen [::]:6002 default_server;/' "$scaffold"
   sed -i 's/listen[[:space:]]\+6000[[:space:]]\+default_server;/listen 6002 default_server;/' "$scaffold"
@@ -345,8 +344,8 @@ generate_nginx_from_inventory() {
     {
       print
       if(!inserted && $0 ~ /listen[[:space:]]+6002[[:space:]]+default_server;/){
-        print "    listen 6001 ssl;"
-        print "    listen [::]:6001 ssl;"
+        print "    listen 6001 ssl default_server;"
+        print "    listen [::]:6001 ssl default_server;"
         inserted=1
       }
     }

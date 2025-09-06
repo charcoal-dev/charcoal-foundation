@@ -199,7 +199,7 @@ collect_tls_inventory_for_sapi() {
 
     # emit one JSON object per line (combine with jq -s later)
     jq -n --arg id "$ident" --arg crt "$crt_abs" --arg key "$key_abs" '{identity:$id, crt:$crt, key:$key}'
-  done < <(jq -c --arg sapi "$sapi" '.http.sapi[$sapi].hosts[]? // empty' "$cfg")
+  done < <(jq -c '.hosts[]? // empty' "$cfg")
 }
 
 svc() {
