@@ -281,43 +281,57 @@ select_nginx_base_template() {
 render_ssl_maps_inline() {
   local sapi="$1"
   local inv="$ROOT/dev/docker/sapi/app/$sapi/tls.manifest.json"
+  local container_storage="/home/charcoal/var/storage"   # <-- container path prefix
+
   [[ -f "$inv" ]] || { err2 "TLS manifest missing for $sapi at $inv"; exit 1; }
 
-  # Optional default (_default.crt/_default.key) under var/storage/ssl/<sapi>/
-  local default_dir="$ROOT/var/storage/ssl/$sapi"
-  local default_crt="$default_dir/_default.crt"
-  local default_key="$default_dir/_default.key"
+  # Optional default cert/key (checked on host; emitted with container paths)
+  local host_default_crt="$ROOT/var/storage/ssl/$sapi/_default.crt"
+  local host_default_key="$ROOT/var/storage/ssl/$sapi/_default.key"
   local have_default=0
-  if [[ -f "$default_crt" && -f "$default_key" ]]; then
-    have_default=1
-  fi
+  [[ -f "$host_default_crt" && -f "$host_default_key" ]] && have_default=1
 
   echo ""
   echo "    # --- BEGIN auto-generated SSL maps for $sapi ---"
   echo "    map \$ssl_server_name \$ssl_crt {"
   echo "        hostnames;"
-  [[ $have_default -eq 1 ]] && echo "        default $default_crt;"
-  # exact + wildcard identities
-  jq -r '.[] | "\(.identity) \(.crt)"' "$inv" | while read -r id path; do
+  [[ $have_default -eq 1 ]] && echo "        default $container_storage/ssl/$sapi/_default.crt;"
+
+  # Emit identity → container-path(cert)
+  jq -r '.[] | [.identity, (.crt_rel // ""), (.crt // "")] | @tsv' "$inv" | \
+  while IFS=$'\t' read -r id rel abs; do
+    # derive rel from abs if rel missing
+    if [[ -z "$rel" && "$abs" == "$ROOT/var/storage/"* ]]; then
+      rel="${abs#"$ROOT/var/storage/"}"
+    fi
+    [[ -z "$rel" ]] && continue  # skip if we still can't build a container path
+
     if [[ "$id" == .* ]]; then
-      # wildcard identity stored as .example.com  => regex suffix match
-      suf="${id:1}"; suf_escaped="${suf//./\\.}"
-      echo "        ~\\.${suf_escaped}\$ $path;"
+      suf="${id#.}"; suf_escaped="${suf//./\\.}"
+      echo "        ~\\.${suf_escaped}\$ $container_storage/$rel;"
     else
-      echo "        $id $path;"
+      echo "        $id $container_storage/$rel;"
     fi
   done
   echo "    }"
   echo ""
   echo "    map \$ssl_server_name \$ssl_key {"
   echo "        hostnames;"
-  [[ $have_default -eq 1 ]] && echo "        default $default_key;"
-  jq -r '.[] | "\(.identity) \(.key)"' "$inv" | while read -r id path; do
+  [[ $have_default -eq 1 ]] && echo "        default $container_storage/ssl/$sapi/_default.key;"
+
+  # Emit identity → container-path(key)
+  jq -r '.[] | [.identity, (.key_rel // ""), (.key // "")] | @tsv' "$inv" | \
+  while IFS=$'\t' read -r id rel abs; do
+    if [[ -z "$rel" && "$abs" == "$ROOT/var/storage/"* ]]; then
+      rel="${abs#"$ROOT/var/storage/"}"
+    fi
+    [[ -z "$rel" ]] && continue
+
     if [[ "$id" == .* ]]; then
-      suf="${id:1}"; suf_escaped="${suf//./\\.}"
-      echo "        ~\\.${suf_escaped}\$ $path;"
+      suf="${id#.}"; suf_escaped="${suf//./\\.}"
+      echo "        ~\\.${suf_escaped}\$ $container_storage/$rel;"
     else
-      echo "        $id $path;"
+      echo "        $id $container_storage/$rel;"
     fi
   done
   echo "    }"

@@ -114,6 +114,7 @@ write_manifest_overrides() {
 }
 
 # usage: collect_tls_inventory_for_sapi "web" | jq -s . > "$ROOT/dev/docker/nginx/web/tls-inventory.json"
+# --- Step 2: TLS inventory (validates + emits abs + rel paths) ---
 collect_tls_inventory_for_sapi() {
   local sapi="$1"
   local cfg="$ROOT/config/http/${sapi}.sapi.json"
@@ -121,53 +122,39 @@ collect_tls_inventory_for_sapi() {
   local errors=0
 
   command -v jq >/dev/null 2>&1 || { err2 "jq is required."; return 1; }
-  [[ -f "$cfg" ]] || { err2 "HTTP config for SAPI \"$sapi\" not found at config/http/${sapi}.sapi.json."; return 1; }
+  [[ -f "$cfg" ]]     || { err2 "HTTP config for SAPI \"$sapi\" not found: config/http/${sapi}.sapi.json"; return 1; }
   [[ -d "$storage" ]] || { err2 "Missing var/storage/ directory at $storage."; return 1; }
 
   _normalize_identity() {
     local host="$1"
     [[ "$host" == \*.* ]] && printf ".%s" "${host#*.}" || printf "%s" "$host"
   }
-
   _reject_bad_relpath() {
     local rel="$1"
     if [[ "$rel" == /* ]]; then err2 "[$sapi] Absolute path not allowed: $rel (must be relative to var/storage/)"; return 1; fi
     if [[ "$rel" == *"../"* || "$rel" == "./"* ]]; then err2 "[$sapi] Invalid relative path: $rel (no ../ or ./)"; return 1; fi
     return 0
   }
-
-  # portable resolver; no readlink -f traps
   _resolve_inside_storage() {
     local rel="$1"
     local abs="$storage/$rel"
     [[ -e "$abs" ]] || { err2 "[$sapi] File not found: var/storage/$rel"; return 1; }
-
     local dir base physdir real
-    dir="$(dirname -- "$rel")"
-    base="$(basename -- "$rel")"
-
-    physdir="$(cd "$storage/$dir" 2>/dev/null && pwd -P)" \
-      || { err2 "[$sapi] Failed to resolve: var/storage/$rel"; return 1; }
-
+    dir="$(dirname -- "$rel")"; base="$(basename -- "$rel")"
+    physdir="$(cd "$storage/$dir" 2>/dev/null && pwd -P)" || { err2 "[$sapi] Failed to resolve: var/storage/$rel"; return 1; }
     real="$physdir/$base"
-
-    case "$real" in
-      "$storage"/*) ;;
-      *) err2 "[$sapi] Path escapes var/storage/: $rel → $real"; return 1;;
-    esac
-
+    case "$real" in "$storage"/*) ;; *) err2 "[$sapi] Path escapes var/storage/: $rel → $real"; return 1;; esac
     [[ -e "$real" ]] || { err2 "[$sapi] File vanished during resolve: var/storage/$rel"; return 1; }
     printf "%s" "$real"
+    return 0
   }
-
   _owner_uid() { stat -c %u -- "$1" 2>/dev/null || stat -f %u -- "$1"; }
   _check_ownership() {
     local p="$1" want have
     want="$(id -u)"; have="$(_owner_uid "$p")" || { err2 "[$sapi] Cannot read owner: $p"; return 1; }
-    if [[ "$have" != "$want" ]]; then err2 "[$sapi] Owner mismatch: $p (uid $have), expected uid $want"; return 1; fi
+    [[ "$have" == "$want" ]] || { err2 "[$sapi] Owner mismatch: $p (uid $have), expected uid $want"; return 1; }
     return 0
   }
-
   _check_ext_cert() { [[ "$1" == *.crt || "$1" == *.pem ]]; }
   _check_ext_key()  { [[ "$1" == *.key || "$1" == *.pem ]]; }
 
@@ -205,20 +192,24 @@ collect_tls_inventory_for_sapi() {
     if [[ $ok -eq 1 ]]; then
       chmod 0444 "$crt_abs" >/dev/null 2>&1 || true
       chmod 0400 "$key_abs" >/dev/null 2>&1 || true
-      jq -n --arg id "$ident" --arg crt "$crt_abs" --arg key "$key_abs" '{identity:$id, crt:$crt, key:$key}'
+      # emit abs + rel so renderer can build container paths
+      jq -n \
+        --arg id "$ident" \
+        --arg crt "$crt_abs" \
+        --arg key "$key_abs" \
+        --arg crt_rel "$crt" \
+        --arg key_rel "$key" \
+        '{identity:$id, crt:$crt, key:$key, crt_rel:$crt_rel, key_rel:$key_rel}'
     else
       errors=$((errors+1))
       err2 "[$sapi][$host] TLS validation failed; expected cert/key under var/storage/"
     fi
   done < <(jq -c '.hosts[]? // empty' "$cfg")
 
-  # If config had TLS but we emitted nothing, fail with a clear summary
   if [[ $saw_tls -eq 1 && $errors -gt 0 ]]; then
     err2 "[$sapi] One or more TLS entries invalid. Fix the above issues under var/storage/ and retry."
     return 1
   fi
-
-  # If no TLS blocks at all, that's fine: output nothing (caller may write [])
   return 0
 }
 
