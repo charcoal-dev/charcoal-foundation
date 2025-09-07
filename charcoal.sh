@@ -354,14 +354,16 @@ generate_nginx_from_inventory() {
   sed -i 's/listen[[:space:]]\+6000[[:space:]]\+default_server;/listen 6002 default_server;/' "$scaffold"
   # After the first "listen 6002 default_server;" insert ssl listens (idempotent if rerun)
   awk '
-    BEGIN{inserted=0}
+    BEGIN{in_server=0; added=0}
+    /server[[:space:]]*\{/ { in_server=1; }
     {
       print
-      if(!inserted && $0 ~ /listen[[:space:]]+6002[[:space:]]+default_server;/){
-        print "    listen 6001 ssl default_server;"
-        print "    listen [::]:6001 ssl default_server;"
-        inserted=1
+      if(in_server && !added && $0 ~ /listen[[:space:]]+6001[[:space:]]+ssl([^;]*)?;/){
+        print "    ssl_certificate     $ssl_crt;"
+        print "    ssl_certificate_key $ssl_key;"
+        added=1
       }
+      if(in_server && $0 ~ /\}/){ in_server=0; }
     }
   ' "$scaffold" > "$tmp" && mv "$tmp" "$scaffold"
 
