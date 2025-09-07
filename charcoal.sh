@@ -349,25 +349,28 @@ generate_nginx_from_inventory() {
   [[ -f "$base" ]] || { err2 "No base nginx.conf for $sapi"; exit 1; }
   cp -f "$base" "$scaffold"
 
-  # Replace any existing default_server 6000 (v4/v6) to 6002
+  # 1) Rewrite base default port (6000 -> 6002) for the HTTP default server (v6 + v4)
   sed -i 's/listen[[:space:]]\+\[::\]:6000[[:space:]]\+default_server;/listen [::]:6002 default_server;/' "$scaffold"
   sed -i 's/listen[[:space:]]\+6000[[:space:]]\+default_server;/listen 6002 default_server;/' "$scaffold"
-  # After the first "listen 6002 default_server;" insert ssl listens (idempotent if rerun)
+
+  # 2) Ensure TLS listens exist in the same default server (insert once, idempotent)
+  #    Insert right after the first "listen 6002 default_server;" unless a 6001 ssl listen is already present.
   awk '
-    BEGIN{in_server=0; added=0}
-    /server[[:space:]]*\{/ { in_server=1; }
+    BEGIN{in_srv=0; inserted=0; seen_tls=0}
+    /^[[:space:]]*server[[:space:]]*\{/ { in_srv=1; inserted=0; seen_tls=0 }
     {
+      if (in_srv && $0 ~ /listen[[:space:]]+(\[::\]:)?6001[[:space:]]+ssl([^;]*)?;/) { seen_tls=1 }
       print
-      if(in_server && !added && $0 ~ /listen[[:space:]]+6001[[:space:]]+ssl([^;]*)?;/){
-        print "    ssl_certificate     $ssl_crt;"
-        print "    ssl_certificate_key $ssl_key;"
-        added=1
+      if (in_srv && !inserted && !seen_tls && $0 ~ /listen[[:space:]]+6002[[:space:]]+default_server;/) {
+        print "    listen 6001 ssl;"
+        print "    listen [::]:6001 ssl;"
+        inserted=1
       }
-      if(in_server && $0 ~ /\}/){ in_server=0; }
+      if (in_srv && $0 ~ /^[[:space:]]*\}/) { in_srv=0 }
     }
   ' "$scaffold" > "$tmp" && mv "$tmp" "$scaffold"
 
-  # 2) Insert SSL maps right after the opening "http {" line
+  # 3) Insert SSL maps right after the opening "http {" (keeps domains out of main file)
   local maps
   maps="$(render_ssl_maps_inline "$sapi")"
   awk -v maps="$maps" '
@@ -381,24 +384,29 @@ generate_nginx_from_inventory() {
     }
   ' "$scaffold" > "$tmp" && mv "$tmp" "$scaffold"
 
-  # 3) Ensure the default server has ssl_certificate lines using the map variables
-  # Insert immediately after the first occurrence of "server {" that also contains default_server in its block
+  # 4) Ensure the server that listens on 6001 ssl has certificate lines (idempotent)
+  #    Match "listen 6001 ssl" with optional extra tokens (e.g., "ssl http2 default_server")
+  #    and inject cert lines if they are not already present.
   awk '
-    BEGIN{in_server=0; added=0}
-    /server[[:space:]]*\{/ { in_server=1; }
+    BEGIN{in_srv=0; added=0; have_cert=0}
+    /^[[:space:]]*server[[:space:]]*\{/ { in_srv=1; added=0; have_cert=0 }
     {
+      if (in_srv && $0 ~ /ssl_certificate(_key)?[[:space:]]+/) { have_cert=1 }
       print
-      if(in_server && !added && $0 ~ /listen[[:space:]]+6001[[:space:]]+ssl;/){
-        print "    ssl_certificate     $ssl_crt;"
-        print "    ssl_certificate_key $ssl_key;"
+      if (in_srv && !added && $0 ~ /listen[[:space:]]+(\[::\]:)?6001[[:space:]]+ssl([^;]*)?;/) {
+        if (!have_cert) {
+          print "    ssl_certificate     \\$ssl_crt;"
+          print "    ssl_certificate_key \\$ssl_key;"
+        }
         added=1
       }
-      if(in_server && $0 ~ /\}/){ in_server=0; }
+      if (in_srv && $0 ~ /^[[:space:]]*\}/) { in_srv=0 }
     }
   ' "$scaffold" > "$tmp" && mv "$tmp" "$scaffold"
 
   ok "Generated nginx.generated.conf for $sapi (6001 ssl / 6002 plain with cert maps)."
 }
+
 
 cmd_build_docker() {
   require_env
