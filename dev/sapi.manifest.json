@@ -19,7 +19,7 @@
         "root": "/web/public_html",
         "dnat": {
           "tls": 7000,
-          "insecure": 6000
+          "insecure": 7001
         },
         "env": {
           "CHARCOAL_SAPI_DEPTH": "2"
