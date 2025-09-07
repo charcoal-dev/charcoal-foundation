@@ -87,42 +87,32 @@ write_manifest_overrides() {
   {
     echo "services:"
     for id in "${SAPI_IDS[@]}"; do
-      svc="${SAPI_SERVICE[$id]}"
-      echo "  $svc:"
+      echo "  ${SAPI_SERVICE[$id]}:"
       echo "    environment:"
-      if [[ -n "${SAPI_DOCROOT[$id]:-}" ]]; then
-        echo "      CHARCOAL_SAPI_ROOT: \"${SAPI_DOCROOT[$id]}\""
-      fi
+      [[ -n "${SAPI_DOCROOT[$id]:-}" ]] && echo "      CHARCOAL_SAPI_ROOT: \"${SAPI_DOCROOT[$id]}\""
       echo "      CHARCOAL_APP_ENV: \"${CHARCOAL_APP_ENV:-dev}\""
 
-      env_b64="${SAPI_ENV_B64[$id]:-e30=}"   # e30= is '{}' in base64
-      if [[ -n "$env_b64" ]]; then
-        env_json="$(printf '%s' "$env_b64" | base64 -d 2>/dev/null || printf '{}')"
-        jq -rn --argjson env "$env_json" '
-          $env | to_entries[] | "      \(.key): \"\(.value|tostring)\""
-        '
-      fi
+      # expand env map
+      env_b64="${SAPI_ENV_B64[$id]:-e30=}"   # '{}' base64
+      env_json="$(printf '%s' "$env_b64" | base64 -d 2>/dev/null || printf '{}')"
+      jq -rn --argjson env "$env_json" '$env | to_entries[] | "      \(.key): \"\(.value|tostring)\""'
 
       if [[ "${SAPI_TYPE[$id]}" == "http" ]]; then
-        # Emit ports only when at least one DNAT is provided
         if [[ -n "${SAPI_DNAT_INSECURE[$id]:-}" || -n "${SAPI_DNAT_TLS[$id]:-}" ]]; then
           echo "    ports:"
-          # HTTP (insecure) host → container 6002
-          if [[ -n "${SAPI_DNAT_INSECURE[$id]:-}" ]]; then
-            echo "      - \"${SAPI_DNAT_INSECURE[$id]}:6002\""
-          fi
-          # TLS host → container 6001
-          if [[ -n "${SAPI_DNAT_TLS[$id]:-}" ]]; then
-            echo "      - \"${SAPI_DNAT_TLS[$id]}:6001\""
-          fi
+          [[ -n "${SAPI_DNAT_INSECURE[$id]:-}" ]] && echo "      - \"${SAPI_DNAT_INSECURE[$id]}:6002\""
+          [[ -n "${SAPI_DNAT_TLS[$id]:-}"      ]] && echo "      - \"${SAPI_DNAT_TLS[$id]}:6001\""
         fi
       fi
     done
   } > "$MAN_OVR"
 
-  # best-effort relative path print
-  if command -v realpath >/dev
-
+  if command -v realpath >/dev/null 2>&1; then
+    ok "Manifest overrides → $(realpath --relative-to="$ROOT" "$MAN_OVR" 2>/dev/null || echo "$MAN_OVR")"
+  else
+    ok "Manifest overrides → $MAN_OVR"
+  fi
+}
 
 # usage: collect_tls_inventory_for_sapi "web" | jq -s . > "$ROOT/dev/docker/nginx/web/tls-inventory.json"
 # --- Step 2: TLS inventory (validates + emits abs + rel paths) ---
