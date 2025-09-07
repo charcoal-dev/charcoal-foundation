@@ -572,7 +572,7 @@ cmd_logs() {
     exec tail -n 200 -F -- "$file"
   else
     info "No log specified; streaming container logs for $service (Ctrl-C to stop)…"
-    exec compose logs -f "$service"
+    compose logs -f "$service"
   fi
 }
 
