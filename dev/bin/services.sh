@@ -140,16 +140,24 @@ collect_tls_inventory_for_sapi() {
   _resolve_inside_storage() {
     local rel="$1"
     local abs="$storage/$rel"
-    if [[ ! -e "$abs" ]]; then err2 "[$sapi] File not found: var/storage/$rel"; return 1; fi
-    local dir base real
-    dir="$(dirname -- "$rel")"; base="$(basename -- "$rel")"
-    if ! ( cd "$storage/$dir" 2>/dev/null && real="$(pwd -P)/$base" ); then
-      err2 "[$sapi] Failed to resolve: var/storage/$rel"; return 1
-    fi
-    case "$real" in "$storage"/*) ;; *) err2 "[$sapi] Path escapes var/storage/: $rel → $real"; return 1;; esac
+    [[ -e "$abs" ]] || { err2 "[$sapi] File not found: var/storage/$rel"; return 1; }
+
+    local dir base physdir real
+    dir="$(dirname -- "$rel")"
+    base="$(basename -- "$rel")"
+
+    physdir="$(cd "$storage/$dir" 2>/dev/null && pwd -P)" \
+      || { err2 "[$sapi] Failed to resolve: var/storage/$rel"; return 1; }
+
+    real="$physdir/$base"
+
+    case "$real" in
+      "$storage"/*) ;;
+      *) err2 "[$sapi] Path escapes var/storage/: $rel → $real"; return 1;;
+    esac
+
     [[ -e "$real" ]] || { err2 "[$sapi] File vanished during resolve: var/storage/$rel"; return 1; }
     printf "%s" "$real"
-    return 0
   }
 
   _owner_uid() { stat -c %u -- "$1" 2>/dev/null || stat -f %u -- "$1"; }
