@@ -395,8 +395,8 @@ generate_nginx_from_inventory() {
       print
       if (in_srv && !added && $0 ~ /listen[[:space:]]+(\[::\]:)?6001[[:space:]]+ssl([^;]*)?;/) {
         if (!have_cert) {
-          print "    ssl_certificate     \\$ssl_crt;"
-          print "    ssl_certificate_key \\$ssl_key;"
+          print "    ssl_certificate     $ssl_crt;"
+          print "    ssl_certificate_key $ssl_key;"
         }
         added=1
       }
