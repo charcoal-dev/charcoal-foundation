@@ -73,10 +73,8 @@ RUN set -e; \
   else \
     echo "info: no nginx template for this SAPI (likely non-http); skipping."; \
   fi; \
-  \
+  [ -f /etc/nginx/nginx.template.conf ] && chmod 0644 /etc/nginx/nginx.template.conf || true; \
   rm -rf /opt/sapi
-
-RUN chmod 0644 /etc/nginx/nginx.template.conf
 
 # Global PHP logging: no display, log to stderr
 RUN printf "display_errors=Off\nlog_errors=On\nerror_log=/proc/self/fd/2\n" \
