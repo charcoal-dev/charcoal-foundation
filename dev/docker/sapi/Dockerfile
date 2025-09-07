@@ -76,6 +76,8 @@ RUN set -e; \
   \
   rm -rf /opt/sapi
 
+RUN chmod 0644 /etc/nginx/nginx.template.conf
+
 # Global PHP logging: no display, log to stderr
 RUN printf "display_errors=Off\nlog_errors=On\nerror_log=/proc/self/fd/2\n" \
   > /usr/local/etc/php/conf.d/99-logs.ini
