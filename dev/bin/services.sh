@@ -10,7 +10,8 @@ MAN_OVR="${MAN_OVR:-$ROOT/dev/docker/compose/manifest.overrides.yml}"
 
 # registries
 # was: declare -A SAPI_SERVICE SAPI_TYPE SAPI_DOCROOT SAPI_ENV_JSON SAPI_PORT
-declare -A SAPI_SERVICE SAPI_TYPE SAPI_DOCROOT SAPI_ENV_B64 SAPI_PORT
+declare -A SAPI_SERVICE SAPI_TYPE SAPI_DOCROOT SAPI_ENV_B64
+declare -A SAPI_DNAT_TLS SAPI_DNAT_INSECURE
 SAPI_IDS=(); HTTP_SAPI=(); CLI_SAPI=()
 
 # ...
@@ -21,17 +22,16 @@ load_manifest() {
   # require jq
   command -v jq >/dev/null 2>&1 || err "jq is required to load $MANIFEST"
 
-  # registries
+  # reset registries
   SAPI_IDS=(); HTTP_SAPI=(); CLI_SAPI=()
-  declare -gA SAPI_TYPE SAPI_SERVICE SAPI_DOCROOT SAPI_PORT SAPI_ENV_B64
+  declare -gA SAPI_TYPE SAPI_SERVICE SAPI_DOCROOT SAPI_ENV_B64 SAPI_DNAT_INSECURE SAPI_DNAT_TLS
 
-  while IFS=$'\t' read -r id typ root port env_b64; do
+  while IFS=$'\t' read -r id typ root dnat_insecure dnat_tls env_b64; do
     [[ -n "$id" ]] || continue
 
     # normalize basics
     typ="${typ:-cli}"
     root="${root#/}"; root="${root%/}"   # strip leading/trailing slash
-    port="${port:-0}"
 
     # registries
     SAPI_IDS+=("$id")
@@ -43,10 +43,11 @@ load_manifest() {
       SAPI_DOCROOT["$id"]="/home/charcoal/${root}"
     fi
 
-    # classify + optional port for HTTP sapis
+    # classify + optional DNAT for HTTP sapis
     if [[ "$typ" == "http" ]]; then
       HTTP_SAPI+=("$id")
-      [[ -n "$port" && "$port" != "0" ]] && SAPI_PORT["$id"]="$port" || true
+      [[ -n "$dnat_insecure" && "$dnat_insecure" != "0" ]] && SAPI_DNAT_INSECURE["$id"]="$dnat_insecure"
+      [[ -n "$dnat_tls"      && "$dnat_tls"      != "0" ]] && SAPI_DNAT_TLS["$id"]="$dnat_tls"
     else
       CLI_SAPI+=("$id")
     fi
@@ -55,19 +56,23 @@ load_manifest() {
     SAPI_ENV_B64["$id"]="$env_b64"
 
   done < <(
-    jq -rc '.charcoal.sapi[]
-            | select(.enabled != false)
-            | [ (.id|tostring),
-                (.type // "cli"),
-                (.root // ""),
-                ((.port // 0)|tostring),
-                ((.env // {}) | @json | @base64)
-              ]
-            | @tsv' "$MANIFEST"
+    jq -rc '
+      .charcoal.sapi[]
+      | select(.enabled != false)
+      | [
+          (.id|tostring),
+          (.type // "cli"),
+          (.root // ""),
+          ((.dnat.insecure // 0)|tostring),
+          ((.dnat.tls      // 0)|tostring),
+          ((.env // {}) | @json | @base64)
+        ]
+      | @tsv
+    ' "$MANIFEST"
   )
 
   # verify each enabled HTTP SAPI has config/http/{sapi}.sapi.json
-  local _missing=0
+  local _missing=0 _id _f
   for _id in "${HTTP_SAPI[@]}"; do
     _f="$ROOT/config/http/${_id}.sapi.json"
     [[ -f "$_f" ]] || { err2 "Missing HTTP config for SAPI \"${_id}\": expected config/http/${_id}.sapi.json."; _missing=1; }
@@ -98,20 +103,26 @@ write_manifest_overrides() {
         '
       fi
 
-      if [[ -n "${SAPI_PORT[$id]:-}" && "${SAPI_TYPE[$id]}" == "http" ]]; then
-        echo "    ports:"
-        echo "      - \"${SAPI_PORT[$id]}:6000\""
+      if [[ "${SAPI_TYPE[$id]}" == "http" ]]; then
+        # Emit ports only when at least one DNAT is provided
+        if [[ -n "${SAPI_DNAT_INSECURE[$id]:-}" || -n "${SAPI_DNAT_TLS[$id]:-}" ]]; then
+          echo "    ports:"
+          # HTTP (insecure) host → container 6002
+          if [[ -n "${SAPI_DNAT_INSECURE[$id]:-}" ]]; then
+            echo "      - \"${SAPI_DNAT_INSECURE[$id]}:6002\""
+          fi
+          # TLS host → container 6001
+          if [[ -n "${SAPI_DNAT_TLS[$id]:-}" ]]; then
+            echo "      - \"${SAPI_DNAT_TLS[$id]}:6001\""
+          fi
+        fi
       fi
     done
   } > "$MAN_OVR"
 
   # best-effort relative path print
-  if command -v realpath >/dev/null 2>&1; then
-    ok "Manifest overrides → $(realpath --relative-to="$ROOT" "$MAN_OVR" 2>/dev/null || echo "$MAN_OVR")"
-  else
-    ok "Manifest overrides → $MAN_OVR"
-  fi
-}
+  if command -v realpath >/dev
+
 
 # usage: collect_tls_inventory_for_sapi "web" | jq -s . > "$ROOT/dev/docker/nginx/web/tls-inventory.json"
 # --- Step 2: TLS inventory (validates + emits abs + rel paths) ---
