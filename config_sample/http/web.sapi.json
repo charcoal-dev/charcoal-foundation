@@ -1,6 +1,6 @@
 {
   "$schema": "../../dev/schemas/configs/http-sapi.schema.json",
-  "wesb": {
+  "web": {
     "hosts": [
       {
         "hostname": "localhost",
