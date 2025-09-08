@@ -4,7 +4,10 @@
   "title": "HTTP SAPI Configuration",
   "type": "object",
   "patternProperties": {
-    "^\\$schema$": { "type": "string", "format": "uri" },
+    "^\\$schema$": {
+      "type": "string",
+      "format": "uri"
+    },
     "^[A-Za-z0-9_-]+$": {
       "type": "object",
       "additionalProperties": false,
@@ -28,6 +31,9 @@
                 "type": "boolean"
               },
               "dnat": {
+                "type": "boolean"
+              },
+              "allowInternalConnections": {
                 "type": "boolean"
               }
             },

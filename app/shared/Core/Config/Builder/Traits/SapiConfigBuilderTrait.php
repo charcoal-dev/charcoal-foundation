@@ -62,8 +62,14 @@ trait SapiConfigBuilderTrait
                                 "Invalid DNAT configuration for virtual host at index: " . $i);
                         }
 
+                        $allowInternal = $hosts[$i]["allowInternalConnections"] ?? false;
+                        if (!is_bool($allowInternal)) {
+                            throw new \InvalidArgumentException(
+                                "Invalid value for \"allowInternalConnections\" for virtual host at index: " . $i);
+                        }
+
                         $httpSapi->addServer($hosts[$i]["hostname"], $port, $tls,
-                            $dnat ? ForwardingMode::DNAT : ForwardingMode::ReverseProxy);
+                            $dnat ? ForwardingMode::DNAT : ForwardingMode::ReverseProxy, $allowInternal);
                     }
                 }
             }
