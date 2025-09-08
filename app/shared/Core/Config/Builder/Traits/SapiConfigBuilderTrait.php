@@ -11,6 +11,7 @@ namespace App\Shared\Core\Config\Builder\Traits;
 use App\Shared\Enums\Interfaces;
 use Charcoal\Http\Commons\Enums\HeaderKeyValidation;
 use Charcoal\Http\Commons\Enums\ParamKeyValidation;
+use Charcoal\Http\Server\Enums\ForwardingMode;
 use Charcoal\Http\TrustProxy\Config\TrustedProxy;
 
 /**
@@ -23,17 +24,6 @@ trait SapiConfigBuilderTrait
 {
     /**
      * Configures HTTP interfaces based on the provided configuration data.
-     * The configuration data for setting up HTTP interfaces.
-     * Expected to be an array containing HTTP interface definitions,
-     * their configurations for virtual hosts, CORS policies, trusted proxies,
-     * router triggers, and per-request constraints.
-     * If the input is not a valid array or empty, the method returns early without any effect.
-     * Each interface configuration in the array may include:
-     * - "listen" for virtual hosts
-     * - "cors" for CORS policy settings
-     * - "proxies" for trusted proxy definitions
-     * - "wwwSupport" and "enforceTls" for router triggers
-     * - Per-request constraints such as URI, headers, and body sizes.
      */
     public function httpInterfacesFromFileConfig(mixed $config): void
     {
@@ -44,40 +34,48 @@ trait SapiConfigBuilderTrait
         foreach ($config as $name => $server) {
             $interface = Interfaces::tryFrom(strval($name));
             if (!$interface) {
-                continue;
+                throw new \OutOfBoundsException("No matching interface found between Enum and config");
             }
 
             $httpSapi = $this->sapi->http($interface);
 
             // Virtual Hosts
-            $listen = $server["listen"] ?? null;
-            if (is_array($listen) && count($listen)) {
-                for ($i = 0; $i < count($listen); $i++) {
-                    if (isset($listen[$i]["hostname"])) {
-                        $ports = $listen[$i]["ports"] ?? null;
+            $hosts = $server["hosts"] ?? null;
+            if (is_array($hosts) && count($hosts)) {
+                for ($i = 0; $i < count($hosts); $i++) {
+                    if (isset($hosts[$i]["hostname"])) {
+                        $ports = $hosts[$i]["ports"] ?? null;
                         if (!is_null($ports) && !is_array($ports)) {
                             throw new \InvalidArgumentException(
                                 "Invalid ports configuration for virtual host at index: " . $i);
                         }
 
-                        $tls = $listen[$i]["tls"] ?? null;
+                        $port = $hosts[$i]["port"] ?? null;
+                        if (!is_int($port) || $port < 0 || $port > 65535) {
+                            throw new \InvalidArgumentException(
+                                "Invalid port configuration for virtual host at index: " . $i);
+                        }
+
+                        $tls = $hosts[$i]["tls"] ?? null;
                         if (!is_bool($tls)) {
                             throw new \InvalidArgumentException(
                                 "Invalid TLS configuration for virtual host at index: " . $i);
                         }
 
-                        if (is_array($ports)) {
-                            foreach ($ports as $port) {
-                                if (!is_int($port) || $port < 0 || $port > 65535) {
-                                    throw new \InvalidArgumentException(
-                                        "Invalid port configuration for virtual host at index: " . $i);
-                                }
-                            }
+                        $dnat = $hosts[$i]["dnat"] ?? null;
+                        if (!is_bool($dnat)) {
+                            throw new \InvalidArgumentException(
+                                "Invalid DNAT configuration for virtual host at index: " . $i);
                         }
 
-                        $httpSapi->addServer($listen[$i]["hostname"], $tls, ...($ports ?: [80]));
+                        $httpSapi->addServer($hosts[$i]["hostname"], $port, $tls,
+                            $dnat ? ForwardingMode::DNAT : ForwardingMode::ReverseProxy);
                     }
                 }
+            }
+
+            if (!$hosts) {
+                throw new \InvalidArgumentException("Invalid hosts configuration for interface: " . $interface->name);
             }
 
             // Cors
