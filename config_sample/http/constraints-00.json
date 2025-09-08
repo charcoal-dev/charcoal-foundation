@@ -1,4 +1,5 @@
 {
+  "$schema": "../../dev/schemas/configs/http-constraints.schema.json",
   "maxUriBytes": 256,
   "maxHeaders": 40,
   "maxHeaderLength": 256,

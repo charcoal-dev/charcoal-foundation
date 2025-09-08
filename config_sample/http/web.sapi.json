@@ -1,0 +1,45 @@
+{
+  "$schema": "../../dev/schemas/configs/http-sapi.schema.json",
+  "wesb": {
+    "hosts": [
+      {
+        "hostname": "localhost",
+        "ports": [80],
+        "tls": false,
+        "dnat": true
+      },
+      {
+        "hostname": "foundation.charcoal.dev",
+        "ports": [443],
+        "tls": true,
+        "dnat": false
+      }
+    ],
+    "cors": {
+      "enforced": true,
+      "maxAge": 600,
+      "origins": [
+        "http://localhost:4200",
+        "https://foundation.charcoal.dev"
+      ]
+    },
+    "proxies": [
+      {
+        "cidr": [
+          "127.0.0.1/32",
+          "::1/128",
+          "10.0.11.0/27",
+          "10.0.11.32/27"
+        ],
+        "xff": false,
+        "maxHops": 6,
+        "protoFromTrustedEdge": false
+      }
+    ],
+    "wwwSupport": true,
+    "enforceTls": true,
+    "perRequestConstraints": {
+      "$imports": ["http/constraints-00"]
+    }
+  }
+}

@@ -1,5 +1,0 @@
-{
-  "$schema": "../../dev/schemas/presets/host.schema.json",
-  "hostname": "localhost",
-  "ports": [80, 443]
-}
