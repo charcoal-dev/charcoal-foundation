@@ -23,9 +23,9 @@ final class CountriesRepository extends OrmRepositoryBase
 {
     use EntityUpsertTrait;
 
-    public function __construct(CoreDataModule $module)
+    public function __construct()
     {
-        parent::__construct($module, DatabaseTables::Countries);
+        parent::__construct(DatabaseTables::Countries);
     }
 
     /**

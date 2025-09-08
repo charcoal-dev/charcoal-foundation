@@ -20,9 +20,9 @@ use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
  */
 final class BruteForceLogger extends OrmRepositoryBase
 {
-    public function __construct(CoreDataModule $module)
+    public function __construct()
     {
-        parent::__construct($module, DatabaseTables::BruteForceControl);
+        parent::__construct(DatabaseTables::BruteForceControl);
     }
 
     /**

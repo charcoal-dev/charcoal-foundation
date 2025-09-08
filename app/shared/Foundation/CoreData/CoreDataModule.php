@@ -47,10 +47,10 @@ final class CoreDataModule extends OrmModuleBase implements AppBindableInterface
     public function __construct(CharcoalApp $app)
     {
         parent::__construct($app);
-        $this->objectStore = new ObjectStoreService($this);
-        $this->countries = new CountriesRepository($this);
-        $this->bruteForce = new BruteForceLogger($this);
-        $this->dbBackups = new DbBackupService($this);
+        $this->objectStore = new ObjectStoreService();
+        $this->countries = new CountriesRepository();
+        $this->bruteForce = new BruteForceLogger();
+        $this->dbBackups = new DbBackupService();
     }
 
     /**

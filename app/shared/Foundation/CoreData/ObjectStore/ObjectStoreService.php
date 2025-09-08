@@ -31,12 +31,9 @@ use Charcoal\Vectors\Strings\StringVector;
  */
 final class ObjectStoreService extends OrmRepositoryBase
 {
-    /**
-     * @param CoreDataModule $module
-     */
-    public function __construct(CoreDataModule $module)
+    public function __construct()
     {
-        parent::__construct($module, DatabaseTables::ObjectStore);
+        parent::__construct(DatabaseTables::ObjectStore);
     }
 
     /**
