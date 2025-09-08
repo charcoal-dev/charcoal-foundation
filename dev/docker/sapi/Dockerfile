@@ -60,20 +60,9 @@ RUN set -e; \
   for d in /opt/sapi/base /opt/sapi/override; do \
     [ -f "$d/entrypoint.sh" ]    && cp -f "$d/entrypoint.sh" /entrypoint.sh && chmod +x /entrypoint.sh; \
     [ -f "$d/supervisord.ini" ] && cp -f "$d/supervisord.ini" /etc/supervisord.conf; \
+    [ -f "$d/nginx.conf" ]       && mkdir -p /etc/nginx && cp -f "$d/nginx.conf" /etc/nginx/nginx.template.conf; \
     [ -f "$d/php8.3-fpm.ini" ]  && mkdir -p /usr/local/etc/php-fpm.d && cp -f "$d/php8.3-fpm.ini" /usr/local/etc/php-fpm.d/zz-charcoal.conf; \
-  done;  \
-  \
-  mkdir -p /etc/nginx; \
-  if   [ -f /opt/sapi/override/nginx.generated.conf ]; then \
-    cp -f /opt/sapi/override/nginx.generated.conf /etc/nginx/nginx.template.conf; \
-  elif [ -f /opt/sapi/override/nginx.conf ]; then \
-    cp -f /opt/sapi/override/nginx.conf /etc/nginx/nginx.template.conf; \
-  elif [ -f /opt/sapi/base/nginx.conf ]; then \
-    cp -f /opt/sapi/base/nginx.conf /etc/nginx/nginx.template.conf; \
-  else \
-    echo "info: no nginx template for this SAPI (likely non-http); skipping."; \
-  fi; \
-  [ -f /etc/nginx/nginx.template.conf ] && chmod 0644 /etc/nginx/nginx.template.conf || true; \
+  done; \
   rm -rf /opt/sapi
 
 # Global PHP logging: no display, log to stderr

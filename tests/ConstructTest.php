@@ -12,7 +12,7 @@ use App\Shared\CharcoalApp;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
 use Charcoal\App\Kernel\Enums\AppEnv;
-use Charcoal\Base\Objects\ObjectHelper;
+use Charcoal\Base\Support\Helpers\ObjectHelper;
 use Charcoal\Filesystem\Path\DirectoryPath;
 use PHPUnit\Framework\TestCase;
 
@@ -66,7 +66,6 @@ class ConstructTest extends TestCase
         $this->assertCount(0, $eventInspect->current[BuildStageEvents::class],
             "No subscribers held for " . ObjectHelper::baseClassName(BuildStageEvents::class));
 
-        $table = serialize($charcoal->http->callLog->table);
         // Serialize the application
         CharcoalApp::CreateBuild($charcoal, $rootDirectory, ["var","shared"]);
     }

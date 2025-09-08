@@ -60,12 +60,6 @@ require_env() {
   set +a
 }
 
-require_http_roots() {
-  [[ -d "$ROOT/config" ]] || { err2 "Missing config/ directory."; exit 1; }
-  [[ -f "$ROOT/config/charcoal.json" ]] || { err2 "Missing config/charcoal.json."; exit 1; }
-  [[ -d "$ROOT/config/http" ]] || { err2 "Missing config/http/ directory."; exit 1; }
-}
-
 CHARCOAL_PROJECT="${CHARCOAL_PROJECT:-foundation-app}"
 CHARCOAL_DOCKER="${CHARCOAL_DOCKER:-engine,web,mysql,redis}"
 
@@ -270,144 +264,6 @@ gen_sapi_df() {
   ok "Dockerfile for $id → dev/docker/sapi/app/$id/Dockerfile"
 }
 
-select_nginx_base_template() {
-  local sapi="$1"
-  local app_base="$ROOT/dev/docker/sapi/app/$sapi/nginx.conf"
-  local fpm_base="$ROOT/dev/docker/sapi/fpm/nginx.conf"
-  [[ -f "$app_base" ]] && { printf "%s" "$app_base"; return 0; }
-  printf "%s" "$fpm_base"
-}
-
-render_ssl_maps_inline() {
-  local sapi="$1"
-  local inv="$ROOT/dev/docker/sapi/app/$sapi/tls.manifest.json"
-  local container_storage="/home/charcoal/var/storage"   # <-- container path prefix
-
-  [[ -f "$inv" ]] || { err2 "TLS manifest missing for $sapi at $inv"; exit 1; }
-
-  # Optional default cert/key (checked on host; emitted with container paths)
-  local host_default_crt="$ROOT/var/storage/ssl/$sapi/_default.crt"
-  local host_default_key="$ROOT/var/storage/ssl/$sapi/_default.key"
-  local have_default=0
-  [[ -f "$host_default_crt" && -f "$host_default_key" ]] && have_default=1
-
-  echo ""
-  echo "    # --- BEGIN auto-generated SSL maps for $sapi ---"
-  echo "    map \$ssl_server_name \$ssl_crt {"
-  echo "        hostnames;"
-  [[ $have_default -eq 1 ]] && echo "        default $container_storage/ssl/$sapi/_default.crt;"
-
-  # Emit identity → container-path(cert)
-  jq -r '.[] | [.identity, (.crt_rel // ""), (.crt // "")] | @tsv' "$inv" | \
-  while IFS=$'\t' read -r id rel abs; do
-    # derive rel from abs if rel missing
-    if [[ -z "$rel" && "$abs" == "$ROOT/var/storage/"* ]]; then
-      rel="${abs#"$ROOT/var/storage/"}"
-    fi
-    [[ -z "$rel" ]] && continue  # skip if we still can't build a container path
-
-    if [[ "$id" == .* ]]; then
-      suf="${id#.}"; suf_escaped="${suf//./\\.}"
-      echo "        ~\\.${suf_escaped}\$ $container_storage/$rel;"
-    else
-      echo "        $id $container_storage/$rel;"
-    fi
-  done
-  echo "    }"
-  echo ""
-  echo "    map \$ssl_server_name \$ssl_key {"
-  echo "        hostnames;"
-  [[ $have_default -eq 1 ]] && echo "        default $container_storage/ssl/$sapi/_default.key;"
-
-  # Emit identity → container-path(key)
-  jq -r '.[] | [.identity, (.key_rel // ""), (.key // "")] | @tsv' "$inv" | \
-  while IFS=$'\t' read -r id rel abs; do
-    if [[ -z "$rel" && "$abs" == "$ROOT/var/storage/"* ]]; then
-      rel="${abs#"$ROOT/var/storage/"}"
-    fi
-    [[ -z "$rel" ]] && continue
-
-    if [[ "$id" == .* ]]; then
-      suf="${id#.}"; suf_escaped="${suf//./\\.}"
-      echo "        ~\\.${suf_escaped}\$ $container_storage/$rel;"
-    else
-      echo "        $id $container_storage/$rel;"
-    fi
-  done
-  echo "    }"
-  echo "    # --- END auto-generated SSL maps ---"
-  echo ""
-}
-
-generate_nginx_from_inventory() {
-  local sapi="$1"
-  local outdir="$ROOT/dev/docker/sapi/app/$sapi"
-  local base="$(select_nginx_base_template "$sapi")"
-  local scaffold="$outdir/nginx.generated.conf"
-  local tmp="$outdir/.nginx.gen.tmp"
-
-  [[ -f "$base" ]] || { err2 "No base nginx.conf for $sapi"; exit 1; }
-  cp -f "$base" "$scaffold"
-
-  # 1) Rewrite base default port (6000 -> 6002) for the HTTP default server (v6 + v4)
-  sed -i 's/listen[[:space:]]\+\[::\]:6000[[:space:]]\+default_server;/listen [::]:6002 default_server;/' "$scaffold"
-  sed -i 's/listen[[:space:]]\+6000[[:space:]]\+default_server;/listen 6002 default_server;/' "$scaffold"
-
-  # 2) Ensure TLS listens exist in the same default server (insert once, idempotent)
-  #    Insert right after the first "listen 6002 default_server;" unless a 6001 ssl listen is already present.
-  awk '
-    BEGIN{in_srv=0; inserted=0; seen_tls=0}
-    /^[[:space:]]*server[[:space:]]*\{/ { in_srv=1; inserted=0; seen_tls=0 }
-    {
-      if (in_srv && $0 ~ /listen[[:space:]]+(\[::\]:)?6001[[:space:]]+ssl([^;]*)?;/) { seen_tls=1 }
-      print
-      if (in_srv && !inserted && !seen_tls && $0 ~ /listen[[:space:]]+6002[[:space:]]+default_server;/) {
-        print "    listen 6001 ssl;"
-        print "    listen [::]:6001 ssl;"
-        inserted=1
-      }
-      if (in_srv && $0 ~ /^[[:space:]]*\}/) { in_srv=0 }
-    }
-  ' "$scaffold" > "$tmp" && mv "$tmp" "$scaffold"
-
-  # 3) Insert SSL maps right after the opening "http {" (keeps domains out of main file)
-  local maps
-  maps="$(render_ssl_maps_inline "$sapi")"
-  awk -v maps="$maps" '
-    BEGIN{done=0}
-    {
-      print
-      if(!done && $0 ~ /^[[:space:]]*http[[:space:]]*\{/){
-        print maps
-        done=1
-      }
-    }
-  ' "$scaffold" > "$tmp" && mv "$tmp" "$scaffold"
-
-  # 4) Ensure the server that listens on 6001 ssl has certificate lines (idempotent)
-  #    Match "listen 6001 ssl" with optional extra tokens (e.g., "ssl http2 default_server")
-  #    and inject cert lines if they are not already present.
-  awk '
-    BEGIN{in_srv=0; added=0; have_cert=0}
-    /^[[:space:]]*server[[:space:]]*\{/ { in_srv=1; added=0; have_cert=0 }
-    {
-      if (in_srv && $0 ~ /ssl_certificate(_key)?[[:space:]]+/) { have_cert=1 }
-      print
-      if (in_srv && !added && $0 ~ /listen[[:space:]]+(\[::\]:)?6001[[:space:]]+ssl([^;]*)?;/) {
-        if (!have_cert) {
-          print "    ssl_certificate     $ssl_crt;"
-          print "    ssl_certificate_key $ssl_key;"
-        }
-        added=1
-      }
-      if (in_srv && $0 ~ /^[[:space:]]*\}/) { in_srv=0 }
-    }
-  ' "$scaffold" > "$tmp" && mv "$tmp" "$scaffold"
-
-  ok "Generated nginx.generated.conf for $sapi (6001 ssl / 6002 plain with cert maps)."
-}
-
-
 cmd_build_docker() {
   require_env
 
@@ -420,29 +276,6 @@ cmd_build_docker() {
   write_manifest_overrides
   generate_db_init_sql
   resolve_profiles
-
-  # Build TLS Config Inventory
-  while IFS= read -r id; do
-    outdir="$ROOT/dev/docker/sapi/app/$id"
-    mkdir -p "$outdir"
-    collect_tls_inventory_for_sapi "$id" | jq -s . > "$outdir/tls.manifest.json" || {
-      err2 "[${id}] TLS inventory generation failed. Ensure cert/key paths in config/http/${id}.sapi.json exist under var/storage/ (relative paths, correct owner/perms).";
-      exit 1;
-    }
-
-    if jq -e '.hosts[]? | select(.tls|type=="object")' "$ROOT/config/http/${id}.sapi.json" >/dev/null; then
-      if jq -e 'length==0' "$outdir/tls.manifest.json" >/dev/null; then
-        err2 "[${id}] TLS configured but no valid cert/key found under var/storage/. See errors above.";
-        exit 1;
-      fi
-    fi
-    ok "[${id}] TLS inventory written to $outdir/tls.manifest.json"
-    generate_nginx_from_inventory "$id"
-  done < <(
-    jq -r '.charcoal.sapi[]
-           | select(.type=="http" and (.enabled==null or .enabled==true) and (.nginxGenerateConfig==true))
-           | .id' "$MANIFEST"
-  )
 
   info "Compose up (profiles: ${EFFECTIVE:-none}) …"
   local UIDGID=(--build-arg CHARCOAL_UID="$(id -u)" --build-arg CHARCOAL_GID="$(id -g)")
@@ -582,7 +415,7 @@ cmd_logs() {
     exec tail -n 200 -F -- "$file"
   else
     info "No log specified; streaming container logs for $service (Ctrl-C to stop)…"
-    compose logs -f "$service"
+    exec compose logs -f "$service"
   fi
 }
 

@@ -24,26 +24,10 @@
                 "pattern": "^/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$",
                 "description": "Absolute path inside container"
               },
-              "dnat": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "tls": {
-                    "type": ["integer", "null"],
-                    "minimum": 1,
-                    "maximum": 65535
-                  },
-                  "insecure": {
-                    "type": ["integer", "null"],
-                    "minimum": 1,
-                    "maximum": 65535
-                  }
-                },
-                "required": ["tls", "insecure"]
-              },
-              "nginxGenerateConfig": {
-                "type": "boolean",
-                "description": "Generate nginx configuration for this SAPI"
+              "port": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
               },
               "env": {
                 "type": "object",

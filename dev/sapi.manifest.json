@@ -13,14 +13,10 @@
       },
       {
         "enabled": true,
-        "nginxGenerateConfig": true,
         "id": "web",
         "type": "http",
         "root": "/web/public_html",
-        "dnat": {
-          "tls": 7000,
-          "insecure": 7001
-        },
+        "port": 6001,
         "env": {
           "CHARCOAL_SAPI_DEPTH": "2"
         }
