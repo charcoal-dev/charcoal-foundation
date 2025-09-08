@@ -19,13 +19,10 @@
                 "type": "string",
                 "format": "hostname"
               },
-              "ports": {
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "minimum": 1,
-                  "maximum": 65535
-                }
+              "port": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
               },
               "tls": {
                 "type": "boolean"
@@ -34,7 +31,7 @@
                 "type": "boolean"
               }
             },
-            "required": ["hostname", "ports", "tls", "dnat"]
+            "required": ["hostname", "port", "tls", "dnat"]
           }
         },
         "cors": {

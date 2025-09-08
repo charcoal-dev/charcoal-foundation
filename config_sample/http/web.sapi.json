@@ -4,13 +4,13 @@
     "hosts": [
       {
         "hostname": "localhost",
-        "ports": [80],
+        "port": 80,
         "tls": false,
         "dnat": true
       },
       {
         "hostname": "foundation.charcoal.dev",
-        "ports": [443],
+        "port": 443,
         "tls": true,
         "dnat": false
       }

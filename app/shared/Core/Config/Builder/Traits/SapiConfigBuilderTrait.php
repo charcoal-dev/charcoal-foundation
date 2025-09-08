@@ -44,12 +44,6 @@ trait SapiConfigBuilderTrait
             if (is_array($hosts) && count($hosts)) {
                 for ($i = 0; $i < count($hosts); $i++) {
                     if (isset($hosts[$i]["hostname"])) {
-                        $ports = $hosts[$i]["ports"] ?? null;
-                        if (!is_null($ports) && !is_array($ports)) {
-                            throw new \InvalidArgumentException(
-                                "Invalid ports configuration for virtual host at index: " . $i);
-                        }
-
                         $port = $hosts[$i]["port"] ?? null;
                         if (!is_int($port) || $port < 0 || $port > 65535) {
                             throw new \InvalidArgumentException(
