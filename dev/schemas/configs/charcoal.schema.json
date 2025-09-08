@@ -1,21 +1,50 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "../dev/schemas/config/charcoal.schema.json",
-  "title": "Charcoal config",
+  "$id": "urn:charcoal:foundation:schemas:configs:charcoal:1.0.0",
+  "title": "Charcoal Framework Config",
   "type": "object",
+  "patternProperties": {
+    "^\\$schema$": { "type": "string", "format": "uri" }
+  },
   "properties": {
     "charcoal": {
       "type": "object",
       "properties": {
         "$imports": {
-          "$ref": "../globals/imports.schema.json#/$defs/imports"
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(?!/)[A-Za-z0-9_.-/]+$"
+          }
         },
-        "timezone": { "type": "string", "minLength": 1 }
+        "timezone": {
+          "type": "string",
+          "minLength": 1
+        },
+        "http": {
+          "type": "object",
+          "properties": {
+            "sapi": {
+              "type": "object",
+              "properties": {
+                "$imports": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^(?!/)[A-Za-z0-9_.-/]+$"
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
       },
       "required": ["timezone"],
       "additionalProperties": false
     }
   },
   "required": ["charcoal"],
-  "additionalProperties": true
+  "additionalProperties": false
 }

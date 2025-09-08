@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:charcoal:foundation:schemas:configs:http-sapi:1.0.0",
+  "title": "HTTP SAPI Configuration",
+  "type": "object",
+  "patternProperties": {
+    "^\\$schema$": { "type": "string", "format": "uri" },
+    "^[A-Za-z0-9_-]+$": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hosts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "hostname": {
+                "type": "string",
+                "format": "hostname"
+              },
+              "ports": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 65535
+                }
+              },
+              "tls": {
+                "type": "boolean"
+              },
+              "dnat": {
+                "type": "boolean"
+              }
+            },
+            "required": ["hostname", "ports", "tls", "dnat"]
+          }
+        },
+        "cors": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enforced": {
+              "type": "boolean"
+            },
+            "maxAge": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "origins": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          },
+          "required": ["enforced"]
+        },
+        "proxies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cidr": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$|^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}/[0-9]{1,3}$"
+                }
+              },
+              "xff": {
+                "type": "boolean"
+              },
+              "maxHops": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "protoFromTrustedEdge": {
+                "type": "boolean"
+              }
+            },
+            "required": ["cidr", "xff", "maxHops", "protoFromTrustedEdge"]
+          }
+        },
+        "wwwSupport": {
+          "type": "boolean"
+        },
+        "enforceTls": {
+          "type": "boolean"
+        },
+        "perRequestConstraints": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "$imports": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "required": ["hosts"]
+    }
+  },
+  "unevaluatedProperties": false
+}

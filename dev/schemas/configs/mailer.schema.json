@@ -1,9 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:charcoal:foundation:schemas:config:mailer:1.0.0",
+  "$id": "urn:charcoal:foundation:schemas:configs:mailer:1.0.0",
   "title": "Mailer Module Configuration",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
+  "patternProperties": {
+    "^\\$schema$": { "type": "string", "format": "uri" }
+  },
   "required": [
     "mailer"
   ],

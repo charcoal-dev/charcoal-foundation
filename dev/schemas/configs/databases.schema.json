@@ -1,9 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:charcoal:foundation:schemas:config:databases:1.0.0",
+  "$id": "urn:charcoal:foundation:schemas:configs:databases:1.0.0",
   "title": "Databases Configuration",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
+  "patternProperties": {
+    "^\\$schema$": { "type": "string", "format": "uri" }
+  },
   "required": ["databases"],
   "properties": {
     "databases": {
