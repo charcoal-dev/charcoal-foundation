@@ -37,7 +37,7 @@ final class MailerModule extends OrmModuleBase
     public function __construct(CharcoalApp $app)
     {
         parent::__construct($app);
-        $this->backlog = new BacklogHandler($this);
+        $this->backlog = new BacklogHandler();
         $this->service = new MailerService();
     }
 

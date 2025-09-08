@@ -17,6 +17,7 @@ use App\Shared\Enums\Mailer\QueuedEmailStatus;
 use App\Shared\Exceptions\Mailer\EmailDeliveryException;
 use App\Shared\Exceptions\Mailer\EmailServiceException;
 use Charcoal\App\Kernel\Contracts\Domain\ModuleBindableInterface;
+use Charcoal\App\Kernel\Domain\AbstractModule;
 use Charcoal\App\Kernel\Support\ErrorHelper;
 use Charcoal\Mailer\Mailer as CharcoalMailer;
 use Charcoal\Mailer\Message;
@@ -59,6 +60,10 @@ final class MailerService implements ModuleBindableInterface
         $this->config = null;
         $this->client = null;
         $this->templating = null;
+    }
+
+    public function bootstrap(AbstractModule $module): void
+    {
     }
 
     /**

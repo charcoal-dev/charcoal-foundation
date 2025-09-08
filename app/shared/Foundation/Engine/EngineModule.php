@@ -39,8 +39,8 @@ final class EngineModule extends OrmModuleBase
     public function __construct(CharcoalApp $app)
     {
         parent::__construct($app);
-        $this->executionLog = new LogService($this);
-        $this->logStats = new MetricsLogger($this);
+        $this->executionLog = new LogService();
+        $this->logStats = new MetricsLogger();
     }
 
     /**

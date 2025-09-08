@@ -20,12 +20,9 @@ use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
  */
 final class MetricsLogger extends OrmRepositoryBase
 {
-    /**
-     * @param EngineModule $module
-     */
-    public function __construct(EngineModule $module)
+    public function __construct()
     {
-        parent::__construct($module, DatabaseTables::EngineExecMetrics);
+        parent::__construct(DatabaseTables::EngineExecMetrics);
     }
 
     /**

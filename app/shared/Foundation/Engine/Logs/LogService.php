@@ -29,9 +29,9 @@ final class LogService extends OrmRepositoryBase
     use EntityInsertableTrait;
     use EntityUpdatableTrait;
 
-    public function __construct(EngineModule $module)
+    public function __construct()
     {
-        parent::__construct($module, DatabaseTables::EngineExecLog);
+        parent::__construct(DatabaseTables::EngineExecLog);
     }
 
     /**

@@ -20,12 +20,9 @@ use Charcoal\Http\Commons\Enums\HttpMethod;
  */
 final class ProxiesHandler extends OrmRepositoryBase
 {
-    /**
-     * @param HttpModule $module
-     */
-    public function __construct(HttpModule $module)
+    public function __construct()
     {
-        parent::__construct($module, DatabaseTables::HttpProxies);
+        parent::__construct(DatabaseTables::HttpProxies);
     }
 
     /**

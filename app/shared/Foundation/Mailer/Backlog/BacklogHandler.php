@@ -25,9 +25,9 @@ final class BacklogHandler extends OrmRepositoryBase
 {
     use EntityInsertableTrait;
 
-    public function __construct(MailerModule $module)
+    public function __construct()
     {
-        parent::__construct($module, DatabaseTables::MailerQueue);
+        parent::__construct(DatabaseTables::MailerQueue);
     }
 
     /**

@@ -28,9 +28,9 @@ final class LogHandler extends OrmRepositoryBase
     use EntityInsertableTrait;
     use EntityUpdatableTrait;
 
-    public function __construct(HttpModule $module)
+    public function __construct()
     {
-        parent::__construct($module, DatabaseTables::HttpInterfaceLog);
+        parent::__construct(DatabaseTables::HttpInterfaceLog);
     }
 
     /**

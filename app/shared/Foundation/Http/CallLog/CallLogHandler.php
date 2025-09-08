@@ -30,12 +30,9 @@ final class CallLogHandler extends OrmRepositoryBase
     use EntityInsertableTrait;
     use EntityUpdatableTrait;
 
-    /**
-     * @param HttpModule $module
-     */
-    public function __construct(HttpModule $module)
+    public function __construct()
     {
-        parent::__construct($module, DatabaseTables::HttpCallLog);
+        parent::__construct(DatabaseTables::HttpCallLog);
     }
 
     /**
