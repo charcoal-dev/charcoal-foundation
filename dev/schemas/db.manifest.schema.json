@@ -3,7 +3,10 @@
   "$id": "urn:charcoal:foundation:schemas:dev:manifest:databases:1.0.0",
   "title": "Databases Manifest",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
+  "patternProperties": {
+    "^\\$schema$": { "type": "string" }
+  },
   "properties": {
     "schemas": {
       "type": "array",

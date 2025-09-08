@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:charcoal:foundation:schemas:configs:http-constraints:1.0.0",
+  "title": "HTTP Request Constraints Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^\\$schema$": { "type": "string", "format": "uri" }
+  },
+  "properties": {
+    "maxUriBytes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65536,
+      "description": "Maximum number of bytes allowed in URI"
+    },
+    "maxHeaders": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 200,
+      "description": "Maximum number of headers allowed"
+    },
+    "maxHeaderLength": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 8192,
+      "description": "Maximum length of a single header value in bytes"
+    },
+    "headerKeyValidation": {
+      "type": "string",
+      "enum": ["rfc7230", "strict", "unsanitized"],
+      "description": "Header key validation mode"
+    },
+    "paramKeyValidation": {
+      "type": "string",
+      "enum": ["strict", "loose", "unsanitized"],
+      "description": "Parameter key validation mode"
+    },
+    "maxBodyBytes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 104857600,
+      "description": "Maximum request body size in bytes"
+    },
+    "maxParams": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000,
+      "description": "Maximum number of parameters allowed"
+    },
+    "maxParamLength": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65536,
+      "description": "Maximum length of a single parameter value in bytes"
+    },
+    "dtoMaxDepth": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20,
+      "description": "Maximum nesting depth for data transfer objects"
+    }
+  },
+  "required": [
+    "maxUriBytes",
+    "maxHeaders",
+    "maxHeaderLength",
+    "headerKeyValidation",
+    "paramKeyValidation",
+    "maxBodyBytes",
+    "maxParams",
+    "maxParamLength",
+    "dtoMaxDepth"
+  ]
+}
