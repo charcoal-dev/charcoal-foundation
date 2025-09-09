@@ -19,7 +19,7 @@ use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Internal\Exceptions\AppCrashException;
 use Charcoal\Base\Exceptions\WrappedException;
 use Charcoal\Filesystem\Path\DirectoryPath;
-use Charcoal\Http\Server\Exceptions\RequestGatewayException;
+use Charcoal\Http\Server\Exceptions\Internal\RequestGatewayException;
 use Charcoal\Http\Server\HttpServer;
 use Charcoal\Http\Server\Support\SapiRequest;
 
