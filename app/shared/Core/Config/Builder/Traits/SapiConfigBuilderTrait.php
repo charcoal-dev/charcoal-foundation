@@ -150,7 +150,7 @@ trait SapiConfigBuilderTrait
                         $interface->name);
                 }
 
-                $httpSapi->addTrustedProxy(new TrustedProxy($xff, $cidr, $maxHops, $protoFromTrustedEdge));
+                $httpSapi->addTrustedProxy(new TrustedProxy(!$xff, $cidr, $maxHops, $protoFromTrustedEdge));
             }
 
             // Triggers
