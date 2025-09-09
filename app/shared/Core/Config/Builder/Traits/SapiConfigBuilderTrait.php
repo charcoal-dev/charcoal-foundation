@@ -132,9 +132,9 @@ trait SapiConfigBuilderTrait
                 }
 
                 // Triggers
-                $xff = $trustProxy["xff"] ?? null;
-                if (!is_bool($xff)) {
-                    throw new \InvalidArgumentException("Invalid XFF configuration for interface: " .
+                $useForwarded = $trustProxy["useForwarded"] ?? null;
+                if (!is_bool($useForwarded)) {
+                    throw new \InvalidArgumentException("Invalid \"useForwarded\" configuration for interface: " .
                         $interface->name);
                 }
 
@@ -150,7 +150,7 @@ trait SapiConfigBuilderTrait
                         $interface->name);
                 }
 
-                $httpSapi->addTrustedProxy(new TrustedProxy(!$xff, $cidr, $maxHops, $protoFromTrustedEdge));
+                $httpSapi->addTrustedProxy(new TrustedProxy($useForwarded, $cidr, $maxHops, $protoFromTrustedEdge));
             }
 
             // Triggers

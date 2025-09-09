@@ -31,7 +31,7 @@
           "10.0.11.0/27",
           "10.0.11.32/27"
         ],
-        "xff": false,
+        "useForwarded": false,
         "maxHops": 6,
         "protoFromTrustedEdge": false
       }
