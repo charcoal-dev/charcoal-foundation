@@ -12,7 +12,7 @@ use App\Shared\CharcoalApp;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
 use Charcoal\App\Kernel\Enums\AppEnv;
-use Charcoal\Base\Support\Helpers\ObjectHelper;
+use Charcoal\Base\Objects\ObjectHelper;
 use Charcoal\Filesystem\Path\DirectoryPath;
 use PHPUnit\Framework\TestCase;
 

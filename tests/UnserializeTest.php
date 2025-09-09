@@ -31,7 +31,7 @@ class UnserializeTest extends \PHPUnit\Framework\TestCase
 
         try {
             $timestamp = MonotonicTimestamp::now();
-            $charcoal = CharcoalApp::Load(AppEnv::Test, $rootDirectory, ["tmp"]);
+            $charcoal = CharcoalApp::Load(AppEnv::Test, $rootDirectory, ["var", "shared"]);
         } catch (\Throwable $t) {
             throw $t;
         }
@@ -106,7 +106,7 @@ class UnserializeTest extends \PHPUnit\Framework\TestCase
 
         $client1 = $charcoal->http->client();
         $client2 = $charcoal->http->client();
-         $this->assertSame($client1, $client2, "HttpService is memoized (single instance per HttpModule)");
+        $this->assertSame($client1, $client2, "HttpService is memoized (single instance per HttpModule)");
 
         $httpStore1 = $charcoal->http->getCacheStore();
         $httpStore2 = $charcoal->http->getCacheStore();

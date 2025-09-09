@@ -14,6 +14,7 @@ use App\Shared\Foundation\Http\CallLog\CallLogSnapshot;
 use App\Shared\Foundation\Http\ProxyServers\ProxyServer;
 use Charcoal\App\Kernel\Contracts\Domain\ModuleBindableInterface;
 use Charcoal\App\Kernel\Diagnostics\Diagnostics;
+use Charcoal\App\Kernel\Domain\AbstractModule;
 use Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException;
 use Charcoal\App\Kernel\Support\DtoHelper;
 use Charcoal\Base\Objects\Traits\NoDumpTrait;
@@ -50,6 +51,11 @@ final class HttpService implements ModuleBindableInterface, RequestObserverInter
     {
         $this->client = new HttpClient($app->config->httpClient);
         $this->proxyConfigs = [];
+    }
+
+
+    public function bootstrap(AbstractModule $module): void
+    {
     }
 
     /**

@@ -25,6 +25,7 @@ dev/tools/**
 
 # IDE Specific
 vendor/
+composer.phar
 composer.lock
 
 # Tests build artifacts
@@ -43,6 +44,7 @@ var/**
 /deployment
 
 # PHPUnit Specific
+phpunit.phar
 dev/tools/phpunit.phar
 /.phpunit.result.cache
 /coverage/
