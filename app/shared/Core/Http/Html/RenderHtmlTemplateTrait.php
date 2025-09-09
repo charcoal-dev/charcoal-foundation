@@ -8,10 +8,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Core\Http\Html;
 
-use Charcoal\Buffers\Buffer;
+use Charcoal\Buffers\BufferImmutable;
 use Charcoal\Filesystem\Enums\Assert;
-use Charcoal\Filesystem\Exceptions\InvalidPathException;
-use Charcoal\Filesystem\Exceptions\PathTypeException;
+use Charcoal\Filesystem\Exceptions\FilesystemException;
 use Charcoal\Filesystem\Path\PathInfo;
 
 /**
@@ -22,13 +21,18 @@ trait RenderHtmlTemplateTrait
 {
     /**
      * Renders a template file using the provided data and returns the output as a buffer.
-     * @throws InvalidPathException
-     * @throws PathTypeException
      */
-    final protected static function renderTemplateFile(PathInfo|string $templateFilepath, array $data = []): Buffer
+    final protected static function renderTemplateFile(
+        PathInfo|string $templateFilepath,
+        array           $data = []
+    ): BufferImmutable
     {
         if (!$templateFilepath instanceof PathInfo) {
-            $templateFilepath = new PathInfo($templateFilepath);
+            try {
+                $templateFilepath = new PathInfo($templateFilepath);
+            } catch (FilesystemException $e) {
+                throw new \RuntimeException("Failed to resolve template path: " . $e->getMessage(), 0, $e);
+            }
         }
 
         if (!$templateFilepath->assertQuite(Assert::Exists, Assert::IsFile, Assert::Readable)) {
@@ -47,7 +51,7 @@ trait RenderHtmlTemplateTrait
 
         try {
             include $templateFilepath;
-            return new Buffer(ob_get_clean());
+            return new BufferImmutable(ob_get_clean());
         } catch (\Throwable $e) {
             ob_end_clean();
             throw new \RuntimeException("Error rendering template: " . $e->getMessage(), 0, $e);
