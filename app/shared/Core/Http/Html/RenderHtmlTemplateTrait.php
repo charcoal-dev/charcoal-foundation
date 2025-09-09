@@ -53,9 +53,8 @@ trait RenderHtmlTemplateTrait
             include $templateFilepath;
             return new BufferImmutable(ob_get_clean());
         } catch (\Throwable $e) {
-            throw new \RuntimeException("Error rendering template: " . $e->getMessage(), 0, $e);
-        } finally {
             ob_end_clean();
+            throw new \RuntimeException("Error rendering template: " . $e->getMessage(), 0, $e);
         }
     }
 }
