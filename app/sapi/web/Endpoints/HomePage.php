@@ -36,8 +36,6 @@ final class HomePage implements ControllerInterface
      */
     public function entrypoint(GatewayFacade $request): never
     {
-        var_dump(json_encode($request->request()->headers));
-        var_dump(json_encode($request->server()->proxy->proxy));
         $this->sendTemplate(
             $request,
             "home",
