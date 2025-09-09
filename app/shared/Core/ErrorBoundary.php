@@ -20,9 +20,6 @@ final class ErrorBoundary extends \Charcoal\App\Kernel\Support\Errors\ErrorBound
 {
     use RenderHtmlTemplateTrait;
 
-    /**
-     * @noinspection PhpUnhandledExceptionInspection
-     */
     public static function crashHtmlPage(
         AppCrashException|\Throwable $exIn,
         string                       $crashHtmlTemplate,
