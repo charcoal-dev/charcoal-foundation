@@ -27,8 +27,8 @@ ErrorBoundary::configStreams(true, false, strlen(charcoal_from_root()))
     ::handle(function (\Throwable $e) {
         $exception = match (true) {
             $e instanceof AppCrashException,
-            $e instanceof WrappedException,
-            $e instanceof RequestGatewayException => match(true) {
+                $e instanceof WrappedException,
+                $e instanceof RequestGatewayException => match (true) {
                 $e->getPrevious() instanceof \Throwable => $e->getPrevious(),
                 default => $e,
             },
@@ -53,5 +53,11 @@ $charcoal = $appFqcn::Load(
 
 $web = $charcoal->bootstrap($timestamp, Interfaces::Web);
 assert($web instanceof HttpServer);
+
+if ($charcoal->context->env !== AppEnv::Prod) {
+    HttpServer::$enableOutputBuffering = true;
+    HttpServer::$outputBufferToStdErr = true;
+}
+
 SapiRequest::serveResult($web->handle(SapiRequest::fromGlobals()));
 
