@@ -65,8 +65,8 @@ RUN set -e; \
   done; \
   rm -rf /opt/sapi
 
-# Global PHP logging: no display, log to stderr
-RUN printf "display_errors=Off\nlog_errors=On\nerror_log=/proc/self/fd/2\n" \
+# Global PHP logging + disable expose_php
+RUN printf "display_errors=Off\nlog_errors=On\nerror_log=/proc/self/fd/2\nexpose_php=Off\n" \
   > /usr/local/etc/php/conf.d/99-logs.ini
 
 # Install Composer
