@@ -1,0 +1,74 @@
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+
+    # Configure TLS ceritficate and private key
+    ssl_certificate /absolute/path/to/tls/certificate.crt;
+    ssl_certificate_key /absolute/path/to/tls/certificate.key;
+
+    # Declare your hostname; Not required but recommended;
+    # Final validation still happens at app-level, but early-termination is better.
+    server_name "foundation.charcoal.dev";
+    if ($host != "foundation.charcoal.dev") {
+        return 403;
+    }
+
+    # Define means of real client IP resolution
+    real_ip_header X-Forwarded-For;
+    real_ip_recursive on;
+
+    # TrustProxy CIDR Config
+    # ---
+    # On reverse proxy, Make sure your app is configured to trust:
+    # ["127.0.0.1/32", "::1/128", "10.0.11.0/27", "10.0.11.32/27"]
+
+    # Cloudflare: CIDR Configuration;
+    # Always get latest from: https://www.cloudflare.com/ips/
+    set_real_ip_from 173.245.48.0/20;
+    set_real_ip_from 103.21.244.0/22;
+    set_real_ip_from 103.22.200.0/22;
+    set_real_ip_from 103.31.4.0/22;
+    set_real_ip_from 141.101.64.0/18;
+    set_real_ip_from 108.162.192.0/18;
+    set_real_ip_from 190.93.240.0/20;
+    set_real_ip_from 188.114.96.0/20;
+    set_real_ip_from 197.234.240.0/22;
+    set_real_ip_from 198.41.128.0/17;
+    set_real_ip_from 162.158.0.0/15;
+    set_real_ip_from 104.16.0.0/13;
+    set_real_ip_from 104.24.0.0/14;
+    set_real_ip_from 172.64.0.0/13;
+    set_real_ip_from 131.0.72.0/22;
+    set_real_ip_from 2400:cb00::/32;
+    set_real_ip_from 2606:4700::/32;
+    set_real_ip_from 2803:f800::/32;
+    set_real_ip_from 2405:b500::/32;
+    set_real_ip_from 2405:8100::/32;
+    set_real_ip_from 2a06:98c0::/29;
+    set_real_ip_from 2c0f:f248::/32;
+
+    # WebSockets support; Reserved for future use
+    set $connection_upgrade "";
+    if ($http_upgrade != "") { set $connection_upgrade "upgrade"; }
+
+    location / {
+        set $fwd_proto $scheme;
+        if ($http_x_forwarded_proto ~* '^https?$') {
+            set $fwd_proto $http_x_forwarded_proto;
+        }
+
+        proxy_http_version 1.1;
+        proxy_set_header Host               $host;
+        proxy_set_header X-Forwarded-Host   $host;
+        proxy_set_header X-Forwarded-Proto  $fwd_proto;
+        proxy_set_header X-Forwarded-Port   $server_port;
+        proxy_set_header X-Forwarded-For    $remote_addr;
+        #proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header Upgrade            $http_upgrade;
+        proxy_set_header Connection         $connection_upgrade;
+        proxy_set_header X-Request-Id       $request_id;
+
+        # Makesure that IP and port correctly resolves to app container (HTTP SAPI only)
+        proxy_pass http://10.0.11.50:6000;
+    }
+}
