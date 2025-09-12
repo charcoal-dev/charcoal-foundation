@@ -40,10 +40,10 @@ readonly class CharcoalApp extends AbstractApp
     public function collectSerializableData(): array
     {
         $data = parent::collectSerializableData();
-        $data["coreData"] = $this->coreData;
-        $data["http"] = $this->http;
-        $data["mailer"] = $this->mailer;
-        $data["engine"] = $this->engine;
+//        $data["coreData"] = $this->coreData;
+//        $data["http"] = $this->http;
+//        $data["mailer"] = $this->mailer;
+//        $data["engine"] = $this->engine;
         return $data;
     }
 
