@@ -49,15 +49,14 @@ readonly class CharcoalApp extends AbstractApp
 
     /**
      * @return void
-     * @noinspection PhpFieldAssignmentTypeMismatchInspection
      * @internal
      */
     protected function onReadyCallback(): void
     {
-        $this->coreData = $this->domain->get(AppBindings::coreData);
-        $this->http = $this->domain->get(AppBindings::http);
-        $this->mailer = $this->domain->get(AppBindings::mailer);
-        $this->engine = $this->domain->get(AppBindings::engine);
+//        $this->coreData = $this->domain->get(AppBindings::coreData);
+//        $this->http = $this->domain->get(AppBindings::http);
+//        $this->mailer = $this->domain->get(AppBindings::mailer);
+//        $this->engine = $this->domain->get(AppBindings::engine);
 
         //Initialize app on static scope
         //static::initializeStatic($this);
