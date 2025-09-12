@@ -35,14 +35,15 @@ final class AppManifest extends \Charcoal\App\Kernel\AppManifest
      */
     public function __construct()
     {
-        $this->bind(AppBindings::coreData,
-            fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::coreData, $app));
-        $this->bind(AppBindings::engine,
-            fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::engine, $app));
-        $this->bind(AppBindings::http,
-            fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::http, $app));
-        $this->bind(AppBindings::mailer,
-            fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::mailer, $app));
+        // Todo: Disconnect modules; Pending removal of all existing modules off app
+//        $this->bind(AppBindings::coreData,
+//            fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::coreData, $app));
+//        $this->bind(AppBindings::engine,
+//            fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::engine, $app));
+//        $this->bind(AppBindings::http,
+//            fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::http, $app));
+//        $this->bind(AppBindings::mailer,
+//            fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::mailer, $app));
 
         $this->httpServer(new WebRouter(Interfaces::Web));
     }
