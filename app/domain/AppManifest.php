@@ -18,7 +18,6 @@ use App\Shared\Foundation\Engine\EngineModule;
 use App\Shared\Foundation\Http\HttpModule;
 use App\Shared\Foundation\Mailer\MailerModule;
 use App\Shared\PathRegistry;
-use App\Shared\Sapi\Http\WebRouter;
 use Charcoal\App\Kernel\Domain\AbstractModule;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Enums\SemaphoreType;

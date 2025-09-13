@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Sapi\Http;
+namespace App\Domain;
 
 use App\Sapi\Web\Endpoints\HomePage;
 use App\Sapi\Web\Endpoints\ProblemPage;
