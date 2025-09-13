@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace App\Shared\Foundation\Mailer;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Core\Config\Persisted\MailerConfig;
-use App\Shared\Core\Config\Traits\PersistedConfigResolverTrait;
+use App\Shared\Config\Persisted\MailerConfig;
+use App\Shared\Config\Traits\PersistedConfigResolverTrait;
 use App\Shared\Enums\Mailer\EmailTemplate;
 use App\Shared\Enums\Mailer\MailDispatchMode;
 use App\Shared\Enums\Mailer\QueuedEmailStatus;

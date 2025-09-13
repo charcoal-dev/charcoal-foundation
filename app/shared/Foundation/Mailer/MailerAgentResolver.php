@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace App\Shared\Foundation\Mailer;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Core\Config\Persisted\MailerConfig;
-use App\Shared\Core\Config\Persisted\SmtpConfig;
+use App\Shared\Config\Persisted\MailerConfig;
+use App\Shared\Config\Persisted\SmtpConfig;
 use App\Shared\Enums\Mailer\MailProvider;
 use App\Shared\Stubs\NullMailProvider;
 use Charcoal\Base\Exceptions\WrappedException;

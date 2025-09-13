@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace App\Shared;
 
 use App\Domain\Core\AppManifest;
-use App\Shared\Core\Config\Snapshot\AppConfig;
+use App\Shared\Config\Snapshot\AppConfig;
 use App\Shared\Core\PathRegistry;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use App\Shared\Foundation\Engine\EngineModule;
