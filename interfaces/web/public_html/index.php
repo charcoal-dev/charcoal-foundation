@@ -12,8 +12,8 @@ charcoal_autoloader();
 
 use App\Shared\CharcoalApp;
 use App\Shared\Constants\AppConstants;
-use App\Shared\Core\ErrorBoundary;
 use App\Shared\Enums\Interfaces;
+use App\Shared\ErrorBoundary;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Internal\Exceptions\AppCrashException;

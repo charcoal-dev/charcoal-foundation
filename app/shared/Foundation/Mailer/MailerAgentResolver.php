@@ -9,13 +9,13 @@ declare(strict_types=1);
 namespace App\Shared\Foundation\Mailer;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Config\Persisted\MailerConfig;
-use App\Shared\Config\Persisted\SmtpConfig;
 use App\Shared\Enums\Mailer\MailProvider;
 use App\Shared\Stubs\NullMailProvider;
 use Charcoal\Base\Exceptions\WrappedException;
 use Charcoal\Mailer\Agents\MailerAgentInterface;
 use Charcoal\Mailer\Agents\SmtpClient;
+use MailerConfig;
+use SmtpConfig;
 
 /**
  * This class is responsible for resolving the appropriate mailer agent

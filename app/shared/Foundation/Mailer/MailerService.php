@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace App\Shared\Foundation\Mailer;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Config\Persisted\MailerConfig;
 use App\Shared\Config\Traits\PersistedConfigResolverTrait;
 use App\Shared\Enums\Mailer\EmailTemplate;
 use App\Shared\Enums\Mailer\MailDispatchMode;
@@ -25,6 +24,7 @@ use Charcoal\Mailer\Message\CompiledMimeMessage;
 use Charcoal\Mailer\Message\Sender;
 use Charcoal\Mailer\Templating\RawTemplatedEmail;
 use Charcoal\Mailer\TemplatingEngine;
+use MailerConfig;
 
 /**
  * Service class for handling mail operations including email creation, dispatching, and queuing.

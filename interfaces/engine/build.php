@@ -10,13 +10,13 @@ declare(strict_types=1);
 require_once "bootstrap.php";
 charcoal_autoloader();
 
-use App\Shared\Constants\AppConstants;
 use App\Shared\CharcoalApp;
-use App\Shared\Core\ErrorBoundary;
+use App\Shared\Constants\AppConstants;
+use App\Shared\ErrorBoundary;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Diagnostics\Events\BuildStageEvents;
 use Charcoal\App\Kernel\Internal\Exceptions\AppCrashException;
-use Charcoal\App\Kernel\Support\Errors\ConsoleErrorWriter;
+use Charcoal\App\Kernel\ServerApi\Cli\ConsoleErrorWriter;
 use Charcoal\Base\Objects\ObjectHelper;
 use Charcoal\Cli\Output\StdoutPrinter;
 use Charcoal\Filesystem\Path\DirectoryPath;

@@ -8,17 +8,17 @@ declare(strict_types=1);
 
 namespace App\Domain\Core;
 
-use App\Domain\Core\Sapi\WebRouter;
 use App\Shared\AppBindings;
 use App\Shared\CharcoalApp;
 use App\Shared\Config\Builder\AppConfigBuilder;
 use App\Shared\Config\Snapshot\AppConfig;
-use App\Shared\Core\PathRegistry;
 use App\Shared\Enums\Interfaces;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use App\Shared\Foundation\Engine\EngineModule;
 use App\Shared\Foundation\Http\HttpModule;
 use App\Shared\Foundation\Mailer\MailerModule;
+use App\Shared\PathRegistry;
+use App\Shared\Sapi\Http\WebRouter;
 use Charcoal\App\Kernel\Domain\AbstractModule;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Enums\SemaphoreType;

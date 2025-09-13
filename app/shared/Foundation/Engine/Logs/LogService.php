@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Engine\Logs;
 
-use App\Shared\Core\Cli\DomainScriptBase;
+use App\Shared\Sapi\Cli\DomainScriptBase;
 use App\Shared\Enums\DatabaseTables;
 use App\Shared\Foundation\Engine\EngineModule;
 use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;

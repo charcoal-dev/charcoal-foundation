@@ -10,7 +10,6 @@ namespace App\Shared;
 
 use App\Domain\Core\AppManifest;
 use App\Shared\Config\Snapshot\AppConfig;
-use App\Shared\Core\PathRegistry;
 use App\Shared\Foundation\CoreData\CoreDataModule;
 use App\Shared\Foundation\Engine\EngineModule;
 use App\Shared\Foundation\Http\HttpModule;

@@ -8,7 +8,7 @@
 declare(strict_types=1);
 
 use App\Shared\CharcoalApp;
-use App\Shared\Core\ErrorBoundary;
+use App\Shared\ErrorBoundary;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\ServerApi\Cli\AppCliHandler;

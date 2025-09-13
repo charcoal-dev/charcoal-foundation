@@ -111,7 +111,7 @@ final class ObjectStoreService extends OrmRepositoryBase
             throw new \RuntimeException(sprintf('%s encountered empty data_blob', __METHOD__));
         }
 
-        if ($objectClasspath::ENCRYPTION->isEnabled()) {
+        if ($objectClasspath::declaredEncryptionState()->isEnabled()) {
             try {
                 $encryptedObject = EncryptedEntity::Unserialize(new Buffer($storedObjectBytes),
                     $this->module->getCipherFor($this)->mode->requiresTag());

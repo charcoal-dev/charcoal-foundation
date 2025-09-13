@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Config\Snapshot;
 
-use App\Shared\Config\Http\ClientConfig;
+use App\Shared\Sapi\Http\Client\HttpClientConfig;
 use Charcoal\App\Kernel\Config\Snapshot\CacheManagerConfig;
 use Charcoal\App\Kernel\Config\Snapshot\DatabaseManagerConfig;
 use Charcoal\App\Kernel\Config\Snapshot\SapiConfigBundle;
@@ -23,14 +23,13 @@ use Charcoal\App\Kernel\Enums\AppEnv;
 final readonly class AppConfig extends \Charcoal\App\Kernel\Config\Snapshot\AppConfig
 {
     public function __construct(
-        AppEnv                 $env,
-        TimezoneEnumInterface  $timezone,
-        ?CacheManagerConfig    $cache,
-        ?DatabaseManagerConfig $database,
-        SecurityConfig         $security,
-        SapiConfigBundle       $sapi,
-        public ClientConfig    $httpClient,
-        public ?MailerConfig   $mailer,
+        AppEnv                  $env,
+        TimezoneEnumInterface   $timezone,
+        ?CacheManagerConfig     $cache,
+        ?DatabaseManagerConfig  $database,
+        SecurityConfig          $security,
+        SapiConfigBundle        $sapi,
+        public HttpClientConfig $httpClient,
     )
     {
         parent::__construct($env, $timezone, $cache, $database, $security, $sapi);

@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace App\Sapi\Engine\Scripts\Config;
 
-use App\Shared\Core\Cli\DomainScriptBase;
-use App\Shared\Core\Cli\LogPolicy;
+use App\Shared\Sapi\Cli\DomainScriptBase;
+use App\Shared\Sapi\Cli\LogPolicy;
 use App\Shared\Exceptions\CliScriptException;
 use Charcoal\Base\Objects\ObjectHelper;
 use Charcoal\Database\Exceptions\QueryExecuteException;

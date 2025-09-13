@@ -18,6 +18,8 @@ interface StoredObjectInterface
 {
     public const StoredObjectEncryption ENCRYPTION = StoredObjectEncryption::Disabled;
 
+    public static function declaredEncryptionState(): StoredObjectEncryption;
+
     public static function unserializeDependencies(): array;
 
     public static function getObjectStoreKey(): string;

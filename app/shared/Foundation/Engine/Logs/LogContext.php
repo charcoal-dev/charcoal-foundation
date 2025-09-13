@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Foundation\Engine\Logs;
 
-use App\Shared\Core\Cli\DomainScriptBase;
+use App\Shared\Sapi\Cli\DomainScriptBase;
 use Charcoal\App\Kernel\Support\DtoHelper;
 
 /**

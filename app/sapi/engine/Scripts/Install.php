@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace App\Sapi\Engine\Scripts;
 
-use App\Shared\Core\Cli\DomainScriptBase;
-use App\Shared\Core\Cli\LogPolicy;
+use App\Shared\Sapi\Cli\DomainScriptBase;
+use App\Shared\Sapi\Cli\LogPolicy;
 use App\Shared\Enums\Databases;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
 use Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException;

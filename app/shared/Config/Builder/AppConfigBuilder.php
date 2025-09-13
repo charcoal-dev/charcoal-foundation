@@ -10,13 +10,11 @@ namespace App\Shared\Config\Builder;
 
 use App\Shared\Config\Builder\Traits\CacheConfigBuilderTrait;
 use App\Shared\Config\Builder\Traits\DatabaseConfigBuilderTrait;
-use App\Shared\Config\Builder\Traits\MailerFileConfigTrait;
 use App\Shared\Config\Builder\Traits\SapiConfigBuilderTrait;
-use App\Shared\Config\Http\ClientConfig;
-use App\Shared\Config\Persisted\MailerConfig;
 use App\Shared\Config\Snapshot\AppConfig;
-use App\Shared\Core\PathRegistry;
 use App\Shared\Enums\Timezones;
+use App\Shared\PathRegistry;
+use App\Shared\Sapi\Http\Client\HttpClientConfig;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Support\JsonHelper;
 
@@ -27,12 +25,9 @@ use Charcoal\App\Kernel\Support\JsonHelper;
  */
 final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConfigBuilder
 {
-    public readonly ?MailerConfig $mailer;
-
     use CacheConfigBuilderTrait;
     use DatabaseConfigBuilderTrait;
     use SapiConfigBuilderTrait;
-    use MailerFileConfigTrait;
 
     /**
      * @param AppEnv $env
@@ -52,22 +47,6 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
         $this->cacheStoresFromFileConfig($configData["charcoal"]["cache"] ?? null);
         $this->databasesFromFileConfig($configData["charcoal"]["databases"] ?? null);
         $this->httpInterfacesFromFileConfig($configData["charcoal"]["http"]["sapi"] ?? null);
-        $this->includeMailerConfig($configData["charcoal"]["mailer"] ?? null);
-        if (!isset($this->mailer)) {
-            $this->mailer = null;
-        }
-    }
-
-    /**
-     * @param mixed $mailerConfig
-     * @return void
-     */
-    protected function includeMailerConfig(mixed $mailerConfig): void
-    {
-        $mailerConfig = $this->getMailerConfig($mailerConfig);
-        if ($mailerConfig) {
-            $this->mailer = $mailerConfig;
-        }
     }
 
     /**
@@ -82,8 +61,7 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
             $this->database->build(),
             $this->security->build(),
             $this->sapi->build(),
-            new ClientConfig(),
-            $this->mailer?->snapshot()
+            new HttpClientConfig()
         );
     }
 }
