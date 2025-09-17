@@ -10,10 +10,6 @@ namespace App\Shared;
 
 use App\Domain\AppManifest;
 use App\Shared\Config\Snapshot\AppConfig;
-use App\Shared\Foundation\CoreData\CoreDataModule;
-use App\Shared\Foundation\Engine\EngineModule;
-use App\Shared\Foundation\Http\HttpModule;
-use App\Shared\Foundation\Mailer\MailerModule;
 use Charcoal\App\Kernel\AbstractApp;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Internal\PathRegistry as Directories;
@@ -27,11 +23,6 @@ use Charcoal\App\Kernel\Internal\PathRegistry as Directories;
 readonly class CharcoalApp extends AbstractApp
 {
     //use InstanceOnStaticScopeTrait;
-
-    public CoreDataModule $coreData;
-    public HttpModule $http;
-    public MailerModule $mailer;
-    public EngineModule $engine;
 
     /**
      * @return array

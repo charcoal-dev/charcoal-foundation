@@ -13,10 +13,6 @@ use App\Shared\CharcoalApp;
 use App\Shared\Config\Builder\AppConfigBuilder;
 use App\Shared\Config\Snapshot\AppConfig;
 use App\Shared\Enums\Interfaces;
-use App\Shared\Foundation\CoreData\CoreDataModule;
-use App\Shared\Foundation\Engine\EngineModule;
-use App\Shared\Foundation\Http\HttpModule;
-use App\Shared\Foundation\Mailer\MailerModule;
 use App\Shared\PathRegistry;
 use Charcoal\App\Kernel\Domain\AbstractModule;
 use Charcoal\App\Kernel\Enums\AppEnv;
@@ -67,13 +63,13 @@ final class AppManifest extends \Charcoal\App\Kernel\AppManifest
      */
     protected function createDomainModule(AppBindings $module, CharcoalApp $app): AbstractModule
     {
-        return match ($module) {
-            AppBindings::coreData => new CoreDataModule($app),
-            AppBindings::engine => new EngineModule($app),
-            AppBindings::http => new HttpModule($app),
-            AppBindings::mailer => new MailerModule($app),
-            default => throw new \DomainException("Cannot build domain module"),
-        };
+//        return match ($module) {
+//            AppBindings::coreData => new CoreDataModule($app),
+//            AppBindings::engine => new EngineModule($app),
+//            AppBindings::http => new HttpModule($app),
+//            AppBindings::mailer => new MailerModule($app),
+//            default => throw new \DomainException("Cannot build domain module"),
+//        };
     }
 
     /**
