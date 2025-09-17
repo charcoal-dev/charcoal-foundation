@@ -70,6 +70,8 @@ final class AppManifest extends \Charcoal\App\Kernel\AppManifest
 //            AppBindings::mailer => new MailerModule($app),
 //            default => throw new \DomainException("Cannot build domain module"),
 //        };
+
+        throw new \DomainException("Cannot build domain module");
     }
 
     /**
