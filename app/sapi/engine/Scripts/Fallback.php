@@ -8,13 +8,12 @@ declare(strict_types=1);
 
 namespace App\Sapi\Engine\Scripts;
 
-use App\Shared\Sapi\Cli\DomainScriptBase;
-use App\Shared\Sapi\Cli\LogPolicy;
+use App\Shared\Cli\DomainScriptBase;
+use App\Shared\Cli\LogPolicy;
 
 /**
  * Class Fallback
  * @package App\Sapi\Engine\Scripts
- * @api
  */
 class Fallback extends DomainScriptBase
 {

@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Config\Snapshot;
 
-use App\Shared\Sapi\Http\Client\HttpClientConfig;
+use App\Shared\Http\Client\HttpClientConfig;
 use Charcoal\App\Kernel\Config\Snapshot\CacheManagerConfig;
 use Charcoal\App\Kernel\Config\Snapshot\DatabaseManagerConfig;
 use Charcoal\App\Kernel\Config\Snapshot\SapiConfigBundle;

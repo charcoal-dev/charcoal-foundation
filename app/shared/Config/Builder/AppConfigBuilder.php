@@ -8,13 +8,13 @@ declare(strict_types=1);
 
 namespace App\Shared\Config\Builder;
 
-use App\Shared\Config\Builder\Traits\CacheConfigBuilderTrait;
-use App\Shared\Config\Builder\Traits\DatabaseConfigBuilderTrait;
-use App\Shared\Config\Builder\Traits\SapiConfigBuilderTrait;
 use App\Shared\Config\Snapshot\AppConfig;
+use App\Shared\Config\Traits\CacheConfigBuilderTrait;
+use App\Shared\Config\Traits\DatabaseConfigBuilderTrait;
+use App\Shared\Config\Traits\SapiConfigBuilderTrait;
 use App\Shared\Enums\Timezones;
+use App\Shared\Http\Client\HttpClientConfig;
 use App\Shared\PathRegistry;
-use App\Shared\Sapi\Http\Client\HttpClientConfig;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Support\JsonHelper;
 

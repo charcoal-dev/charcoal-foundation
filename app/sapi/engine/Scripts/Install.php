@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace App\Sapi\Engine\Scripts;
 
-use App\Shared\Sapi\Cli\DomainScriptBase;
-use App\Shared\Sapi\Cli\LogPolicy;
+use App\Shared\Cli\DomainScriptBase;
+use App\Shared\Cli\LogPolicy;
 use App\Shared\Enums\Databases;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
 use Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException;
@@ -19,7 +19,6 @@ use Charcoal\Database\Orm\Migrations;
 /**
  * Class Install
  * @package App\Sapi\Engine\Scripts
- * @api
  */
 class Install extends DomainScriptBase
 {

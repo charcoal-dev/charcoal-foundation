@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace App\Sapi\Engine\Scripts\Config;
 
-use App\Shared\Sapi\Cli\DomainScriptBase;
-use App\Shared\Sapi\Cli\LogPolicy;
+use App\Shared\Cli\DomainScriptBase;
+use App\Shared\Cli\LogPolicy;
 use App\Shared\Exceptions\CliScriptException;
 use Charcoal\Base\Objects\ObjectHelper;
 use Charcoal\Database\Exceptions\QueryExecuteException;
@@ -18,7 +18,6 @@ use Charcoal\Filesystem\Exceptions\FilesystemException;
 /**
  * Class ImportCountries
  * @package App\Sapi\Engine\Scripts\Config
- * @api
  */
 class ImportCountries extends DomainScriptBase
 {

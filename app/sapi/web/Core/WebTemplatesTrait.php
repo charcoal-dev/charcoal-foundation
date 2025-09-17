@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace App\Sapi\Web\Core;
 
-use App\Shared\Sapi\Http\Html\RenderHtmlTemplateTrait;
+use App\Shared\Http\Traits\RenderHtmlTemplateTrait;
 use Charcoal\Base\Objects\Traits\NotSerializableTrait;
 use Charcoal\Contracts\Charsets\Charset;
 use Charcoal\Filesystem\Node\DirectoryNode;

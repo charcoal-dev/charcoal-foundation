@@ -10,8 +10,8 @@ declare(strict_types=1);
 require_once "bootstrap.php";
 charcoal_autoloader();
 
+use App\Shared\AppConstants;
 use App\Shared\CharcoalApp;
-use App\Shared\Constants\AppConstants;
 use App\Shared\Enums\Interfaces;
 use App\Shared\ErrorBoundary;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;

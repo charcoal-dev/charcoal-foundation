@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace App\Shared;
 
-use App\Shared\Sapi\Http\Html\RenderHtmlTemplateTrait;
+use App\Shared\Http\Traits\RenderHtmlTemplateTrait;
 use Charcoal\App\Kernel\Internal\Exceptions\AppCrashException;
 use Charcoal\App\Kernel\Support\ErrorHelper;
 
