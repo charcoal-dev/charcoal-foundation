@@ -44,6 +44,9 @@
           "password": {
             "type": ["string", "null"]
           },
+          "password_ref": {
+            "type": ["string", "null"]
+          },
           "connection": {
             "type": "string",
             "enum": ["lazy", "default", "onDemand"]
