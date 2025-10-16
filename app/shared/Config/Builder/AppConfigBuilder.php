@@ -12,6 +12,7 @@ use App\Shared\Config\Snapshot\AppConfig;
 use App\Shared\Config\Traits\CacheConfigBuilderTrait;
 use App\Shared\Config\Traits\DatabaseConfigBuilderTrait;
 use App\Shared\Config\Traits\SapiConfigBuilderTrait;
+use App\Shared\Config\Traits\SecurityConfigBuilderTrait;
 use App\Shared\Enums\Timezones;
 use App\Shared\Http\Client\HttpClientConfig;
 use App\Shared\PathRegistry;
@@ -28,6 +29,7 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
     use CacheConfigBuilderTrait;
     use DatabaseConfigBuilderTrait;
     use SapiConfigBuilderTrait;
+    use SecurityConfigBuilderTrait;
 
     /**
      * @param AppEnv $env
@@ -47,6 +49,7 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
         $this->cacheStoresFromFileConfig($configData["charcoal"]["cache"] ?? null);
         $this->databasesFromFileConfig($configData["charcoal"]["databases"] ?? null);
         $this->httpInterfacesFromFileConfig($configData["charcoal"]["http"]["sapi"] ?? null);
+        $this->securityFromFileConfig($configData["charcoal"]["security"] ?? null);
     }
 
     /**
