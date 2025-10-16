@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:charcoal:foundation:schemas:configs:security:1.0.0",
+  "title": "Security Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^\\$schema$": {
+      "type": "string",
+      "format": "uri"
+    }
+  },
+  "required": ["security"],
+  "properties": {
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semaphoreProviders", "secretStores"],
+      "properties": {
+        "semaphoreProviders": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cache", "local"],
+          "properties": {
+            "cache": {
+              "type": "string",
+              "minLength": 1
+            },
+            "local": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "secretStores": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": false,
+          "required": ["local"],
+          "properties": {
+            "local": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

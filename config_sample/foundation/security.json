@@ -1,0 +1,12 @@
+{
+  "$schema": "../../dev/schemas/configs/security.schema.json",
+  "security": {
+    "semaphoreProviders": {
+      "cache": "primary",
+      "local": "var/shared/semaphore"
+    },
+    "secretStores": {
+      "local": "/run/secrets/charcoal"
+    }
+  }
+}
