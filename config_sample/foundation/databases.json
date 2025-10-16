@@ -7,7 +7,12 @@
       "port": 3306,
       "database": "primary",
       "username": "charcoal",
-      "password": null,
+      "password": {
+        "store": "local",
+        "ref": "db_charcoal",
+        "version": 1,
+        "namespace": "passwords"
+      },
       "connection": "onDemand"
     }
   }

@@ -5,7 +5,10 @@
   "type": "object",
   "additionalProperties": false,
   "patternProperties": {
-    "^\\$schema$": { "type": "string", "format": "uri" }
+    "^\\$schema$": {
+      "type": "string",
+      "format": "uri"
+    }
   },
   "required": ["databases"],
   "properties": {
@@ -24,8 +27,12 @@
           "host": {
             "type": "string",
             "oneOf": [
-              { "format": "ipv4" },
-              { "format": "hostname" }
+              {
+                "format": "ipv4"
+              },
+              {
+                "format": "hostname"
+              }
             ]
           },
           "port": {
@@ -42,10 +49,44 @@
             "minLength": 1
           },
           "password": {
-            "type": ["string", "null"]
-          },
-          "password_ref": {
-            "type": ["string", "null"]
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "required": ["store", "ref", "version"],
+                "additionalProperties": false,
+                "properties": {
+                  "store": {
+                    "type": "string"
+                  },
+                  "ref": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9\\-_]{1,39}$"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 65535
+                  },
+                  "namespace": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9\\-_]{1,39}(/[A-Za-z0-9][A-Za-z0-9\\-_]{1,39}){0,3}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
           },
           "connection": {
             "type": "string",
