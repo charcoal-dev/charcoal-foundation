@@ -9,7 +9,9 @@ declare(strict_types=1);
 namespace App\Shared\Config\Traits;
 
 use App\Shared\Enums\Databases;
+use App\Shared\Enums\SecretsStores;
 use Charcoal\App\Kernel\Config\Snapshot\DatabaseConfig;
+use Charcoal\App\Kernel\Security\Secrets\SecretRef;
 use Charcoal\Database\Enums\DbConnectionStrategy;
 use Charcoal\Database\Enums\DbDriver;
 
@@ -43,6 +45,22 @@ trait DatabaseConfigBuilderTrait
                 ),
             };
 
+            // Resolve password value
+            $password = $dbConfig["password"] ?? null;
+            if (is_array($password)) {
+                try {
+                    $password = new SecretRef(
+                        SecretsStores::from($password["store"]),
+                        $password["ref"] ?? null,
+                        $password["version"] ?? -1,
+                        $password["namespace"] ?? 1
+                    );
+                } catch (\Throwable $t) {
+                    throw new \InvalidArgumentException("Invalid secret reference for DB: " . $key->name,
+                        previous: $t);
+                }
+            }
+
             // Append Configuration
             $this->database->set($key, new DatabaseConfig(
                 $driver,
@@ -50,7 +68,7 @@ trait DatabaseConfigBuilderTrait
                 $dbConfig["host"] ?? "localhost",
                 $dbConfig["port"] ?? null,
                 $dbConfig["username"] ?? null,
-                $dbConfig["password"] ?? null,
+                $password,
                 $connection
             ));
         }
