@@ -19,10 +19,10 @@ use Charcoal\Database\Enums\DbDriver;
 enum DatabaseTables: string implements TableRegistryEnumInterface
 {
     /** Foundation Modules */
+    case ObjectStore = "object_store";
+    case DatabaseBackups = "db_backups";
     case BruteForceControl = "bfc_index";
     case Countries = "countries";
-    case DatabaseBackups = "db_backups";
-    case ObjectStore = "object_store";
     case MailerQueue = "mails_queue";
     case HttpInterfaceLog = "http_if_log";
     case HttpCallLog = "http_call_log";
