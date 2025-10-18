@@ -5,7 +5,8 @@
     "$imports": [
       "foundation/cache",
       "foundation/databases",
-      "foundation/mailer"
+      "foundation/mailer",
+      "foundation/security"
     ],
     "http": {
       "sapi": {

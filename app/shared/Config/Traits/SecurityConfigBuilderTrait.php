@@ -10,7 +10,6 @@ namespace App\Shared\Config\Traits;
 
 use App\Shared\Enums\SecretsStores;
 use App\Shared\Enums\SemaphoreProviders;
-use Charcoal\Filesystem\Exceptions\InvalidPathException;
 use Charcoal\Security\Secrets\Enums\KeySize;
 
 /**
@@ -18,13 +17,10 @@ use Charcoal\Security\Secrets\Enums\KeySize;
  */
 trait SecurityConfigBuilderTrait
 {
-    /**
-     * @throws InvalidPathException
-     */
     final protected function securityFromFileConfig(mixed $securityConfigData): void
     {
         if (!is_array($securityConfigData) || !$securityConfigData) {
-            return;
+            throw new \UnexpectedValueException("Invalid security configuration");
         }
 
         // Semaphore providers

@@ -7,7 +7,7 @@
     },
     "secretStores": {
       "local": {
-        "path": "/run/secrets/charcoal",
+        "path": "var/storage/secrets",
         "keySize": 32
       }
     }
