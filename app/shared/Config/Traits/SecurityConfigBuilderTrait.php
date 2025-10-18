@@ -10,12 +10,17 @@ namespace App\Shared\Config\Traits;
 
 use App\Shared\Enums\SecretsStores;
 use App\Shared\Enums\SemaphoreProviders;
+use Charcoal\Filesystem\Exceptions\InvalidPathException;
+use Charcoal\Security\Secrets\Enums\KeySize;
 
 /**
  * Provide a trait for building security configurations.
  */
 trait SecurityConfigBuilderTrait
 {
+    /**
+     * @throws InvalidPathException
+     */
     final protected function securityFromFileConfig(mixed $securityConfigData): void
     {
         if (!is_array($securityConfigData) || !$securityConfigData) {
@@ -45,15 +50,32 @@ trait SecurityConfigBuilderTrait
             throw new \InvalidArgumentException("Invalid secret stores configuration");
         }
 
-        foreach ($secretStores as $storeId => $pathOrNode) {
+        foreach ($secretStores as $storeId => $storeConfig) {
             $storeEnum = SecretsStores::tryFrom(strval($storeId));
             if (!$storeEnum) {
                 throw new \OutOfBoundsException("No matching secret store found between Enum and config ");
             }
 
-            $this->security->declareSecretStore($storeEnum, strval($pathOrNode));
+            if (!is_array($storeConfig)) {
+                throw new \InvalidArgumentException("Invalid secret store configuration");
+            }
+
+            if (!isset($storeConfig["path"]) || !is_string($storeConfig["path"]) || !$storeConfig["path"]) {
+                throw new \InvalidArgumentException("Invalid secret store path configuration");
+            }
+
+            if (!isset($storeConfig["keySize"]) || !is_int($storeConfig["keySize"])) {
+                throw new \InvalidArgumentException("Invalid secret store key size configuration");
+            }
+
+            $keySize = KeySize::tryFrom($storeConfig["keySize"]);
+            if (!$keySize) {
+                throw new \OutOfBoundsException("Invalid secret store key size configuration");
+            }
+
+            $this->security->declareSecretStore($storeEnum, $storeConfig["path"], $keySize);
         }
 
-        unset($storeId, $storeEnum, $pathOrNode);
+        unset($storeId, $storeEnum, $storeConfig, $keySize);
     }
 }

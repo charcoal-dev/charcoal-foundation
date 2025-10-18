@@ -39,8 +39,20 @@
           "required": ["local"],
           "properties": {
             "local": {
-              "type": "string",
-              "minLength": 1
+              "type": "object",
+              "minProperties": 2,
+              "additionalProperties": false,
+              "required": ["path", "keySize"],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "keySize": {
+                  "type": "integer",
+                  "enum": [16, 20, 24, 32, 40, 64]
+                }
+              }
             }
           }
         }

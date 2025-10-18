@@ -6,7 +6,10 @@
       "local": "var/shared/semaphore"
     },
     "secretStores": {
-      "local": "/run/secrets/charcoal"
+      "local": {
+        "path": "/run/secrets/charcoal",
+        "keySize": 32
+      }
     }
   }
 }
