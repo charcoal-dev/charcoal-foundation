@@ -10,6 +10,7 @@ namespace App\Shared\Enums;
 
 use Charcoal\App\Kernel\Contracts\Enums\SemaphoreProviderEnumInterface;
 use Charcoal\App\Kernel\Enums\SemaphoreType;
+use Charcoal\Base\Enums\Traits\EnumFindCaseTrait;
 
 /**
  * Represents the available semaphore providers.
@@ -18,6 +19,8 @@ use Charcoal\App\Kernel\Enums\SemaphoreType;
  */
 enum SemaphoreProviders: string implements SemaphoreProviderEnumInterface
 {
+    use EnumFindCaseTrait;
+
     case Cache = "cache";
     case Local = "local";
 

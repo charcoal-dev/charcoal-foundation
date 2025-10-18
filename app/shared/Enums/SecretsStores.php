@@ -10,6 +10,7 @@ namespace App\Shared\Enums;
 
 use Charcoal\App\Kernel\Contracts\Enums\SecretsStoreEnumInterface;
 use Charcoal\App\Kernel\Enums\SecretsStoreType;
+use Charcoal\Base\Enums\Traits\EnumFindCaseTrait;
 
 /**
  * Represents the enumeration of secret store types.
@@ -17,6 +18,8 @@ use Charcoal\App\Kernel\Enums\SecretsStoreType;
  */
 enum SecretsStores: string implements SecretsStoreEnumInterface
 {
+    use EnumFindCaseTrait;
+
     case Local = "local";
 
     public function getConfigKey(): string

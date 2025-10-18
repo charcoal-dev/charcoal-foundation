@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace App\Shared\Enums;
 
 use Charcoal\App\Kernel\Contracts\Enums\CacheStoreEnumInterface;
+use Charcoal\Base\Enums\Traits\EnumFindCaseTrait;
 
 /**
  * Class CacheStores
@@ -16,6 +17,8 @@ use Charcoal\App\Kernel\Contracts\Enums\CacheStoreEnumInterface;
  */
 enum CacheStores: string implements CacheStoreEnumInterface
 {
+    use EnumFindCaseTrait;
+
     case Primary = "primary";
 
     /**

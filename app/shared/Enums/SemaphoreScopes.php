@@ -10,6 +10,7 @@ namespace App\Shared\Enums;
 
 use Charcoal\App\Kernel\Contracts\Enums\SemaphoreProviderEnumInterface;
 use Charcoal\App\Kernel\Contracts\Enums\SemaphoreScopeEnumInterface;
+use Charcoal\Base\Enums\Traits\EnumFindCaseTrait;
 
 /**
  * Enumeration representing different semaphore scope types.
@@ -17,6 +18,8 @@ use Charcoal\App\Kernel\Contracts\Enums\SemaphoreScopeEnumInterface;
  */
 enum SemaphoreScopes: string implements SemaphoreScopeEnumInterface
 {
+    use EnumFindCaseTrait;
+
     case Orm = "orm";
     case Http = "http";
     case Cli = "cli";
