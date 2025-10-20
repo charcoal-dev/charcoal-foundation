@@ -16,9 +16,6 @@ enum AppBindings
 {
     /** @for Foundation App */
     case coreData;
-    case http;
-    case mailer;
-    case engine;
 
     /** @for Placeholder */
     case ethereal;

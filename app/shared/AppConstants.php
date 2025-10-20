@@ -15,9 +15,14 @@ use Charcoal\Contracts\Errors\ExceptionAction;
  */
 interface AppConstants
 {
+    /** @for=Error Handling */
     public const bool CONSOLE_ANSI = true;
     public const string HTTP_CRASH_TEMPLATE = "var/storage/defaults/crash.phtml";
 
-    // Todo: check
+    /** @for=ORM */
     public const ExceptionAction ORM_CACHE_ERROR_HANDLING = ExceptionAction::Throw;
+
+    /** @for=Security */
+    /** @var string Directory path or ref for default secrets namespace inside Local store */
+    public const string SECRETS_LOCAL_NAMESPACE = "charcoal";
 }

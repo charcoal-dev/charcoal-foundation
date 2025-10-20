@@ -12,6 +12,7 @@ use App\Shared\AppBindings;
 use App\Shared\CharcoalApp;
 use App\Shared\Config\Builder\AppConfigBuilder;
 use App\Shared\Config\Snapshot\AppConfig;
+use App\Shared\CoreData\CoreDataModule;
 use App\Shared\Enums\CacheStores;
 use App\Shared\Enums\Databases;
 use App\Shared\Enums\Interfaces;
@@ -22,6 +23,7 @@ use App\Shared\PathRegistry;
 use Charcoal\App\Kernel\Domain\AbstractModule;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Enums\EnumContract;
+use Charcoal\App\Kernel\Security\SecurityService;
 use Charcoal\Filesystem\Node\DirectoryNode;
 
 /**
@@ -37,15 +39,8 @@ final class AppManifest extends \Charcoal\App\Kernel\AppManifest
     {
         parent::__construct();
 
-        // Todo: Disconnect modules; Pending removal of all existing modules off app
-//        $this->bind(AppBindings::coreData,
-//            fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::coreData, $app));
-//        $this->bind(AppBindings::engine,
-//            fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::engine, $app));
-//        $this->bind(AppBindings::http,
-//            fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::http, $app));
-//        $this->bind(AppBindings::mailer,
-//            fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::mailer, $app));
+        $this->bind(AppBindings::coreData,
+            fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::coreData, $app));
 
         // HTTP Server(s)
         $this->httpServer(new WebRouter(Interfaces::Web));
@@ -76,15 +71,10 @@ final class AppManifest extends \Charcoal\App\Kernel\AppManifest
      */
     protected function createDomainModule(AppBindings $module, CharcoalApp $app): AbstractModule
     {
-//        return match ($module) {
-//            AppBindings::coreData => new CoreDataModule($app),
-//            AppBindings::engine => new EngineModule($app),
-//            AppBindings::http => new HttpModule($app),
-//            AppBindings::mailer => new MailerModule($app),
-//            default => throw new \DomainException("Cannot build domain module"),
-//        };
-
-        throw new \DomainException("Cannot build domain module");
+        return match ($module) {
+            AppBindings::coreData => new CoreDataModule($app),
+            default => throw new \DomainException("Cannot build domain module"),
+        };
     }
 
     /**
@@ -94,5 +84,13 @@ final class AppManifest extends \Charcoal\App\Kernel\AppManifest
     public function resolvePathsRegistry(AppEnv $env, DirectoryNode $root): PathRegistry
     {
         return new PathRegistry($env, $root->path);
+    }
+
+    /**
+     * @return SecurityService
+     */
+    final protected function createSecurityService(): SecurityService
+    {
+        return new \App\Shared\Security\SecurityService();
     }
 }

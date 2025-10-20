@@ -10,6 +10,7 @@ namespace App\Shared;
 
 use App\Domain\AppManifest;
 use App\Shared\Config\Snapshot\AppConfig;
+use App\Shared\CoreData\CoreDataModule;
 use Charcoal\App\Kernel\AbstractApp;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Internal\PathRegistry as Directories;
@@ -22,7 +23,7 @@ use Charcoal\App\Kernel\Internal\PathRegistry as Directories;
  */
 readonly class CharcoalApp extends AbstractApp
 {
-    //use InstanceOnStaticScopeTrait;
+    public CoreDataModule $coreData;
 
     /**
      * @return array
@@ -30,26 +31,18 @@ readonly class CharcoalApp extends AbstractApp
     public function collectSerializableData(): array
     {
         $data = parent::collectSerializableData();
-//        $data["coreData"] = $this->coreData;
-//        $data["http"] = $this->http;
-//        $data["mailer"] = $this->mailer;
-//        $data["engine"] = $this->engine;
+        $data["coreData"] = null;
         return $data;
     }
 
     /**
      * @return void
      * @internal
+     * @noinspection PhpFieldAssignmentTypeMismatchInspection
      */
     protected function onReadyCallback(): void
     {
-//        $this->coreData = $this->domain->get(AppBindings::coreData);
-//        $this->http = $this->domain->get(AppBindings::http);
-//        $this->mailer = $this->domain->get(AppBindings::mailer);
-//        $this->engine = $this->domain->get(AppBindings::engine);
-
-        //Initialize app on static scope
-        //static::initializeStatic($this);
+        $this->coreData = $this->domain->get(AppBindings::coreData);
     }
 
     /**
