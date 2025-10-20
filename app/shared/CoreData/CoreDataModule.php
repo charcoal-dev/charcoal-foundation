@@ -55,8 +55,9 @@ final class CoreDataModule extends OrmModuleBase
      */
     protected function collectSerializableData(): array
     {
+        $this->ensureCipherKeyRef();
         $data = parent::collectSerializableData();
-        $data["cipherKeyRef"] = $this->cipherKeyRef;
+        $data["cipherKeyRef"] = $this->cipherKeyRef ?? null;
         return $data;
     }
 
@@ -94,13 +95,7 @@ final class CoreDataModule extends OrmModuleBase
      */
     public function getCipherFor(OrmRepositoryBase $resolveFor): ?CipherKeyRef
     {
-        if (!isset($this->cipherKeyRef)) {
-            $this->cipherKeyRef = new CipherKeyRef(
-                Cipher::AES_256_GCM,
-                SecretKeys::CoreDataModule->getKeyRef()
-            );
-        }
-
+        $this->ensureCipherKeyRef();
         return $this->cipherKeyRef;
     }
 
@@ -110,5 +105,18 @@ final class CoreDataModule extends OrmModuleBase
     public function getSemaphore(): SemaphoreProviderEnumInterface
     {
         return SemaphoreProviders::Local;
+    }
+
+    /**
+     * @return void
+     */
+    private function ensureCipherKeyRef(): void
+    {
+        if (!isset($this->cipherKeyRef)) {
+            $this->cipherKeyRef = new CipherKeyRef(
+                Cipher::AES_256_GCM,
+                SecretKeys::CoreDataModule->getKeyRef()
+            );
+        }
     }
 }
