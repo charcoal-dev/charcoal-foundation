@@ -11,6 +11,7 @@ namespace App\Shared\CoreData;
 use App\Shared\CharcoalApp;
 use App\Shared\CoreData\ObjectStore\ObjectStoreRepository;
 use App\Shared\CoreData\ObjectStore\ObjectStoreTable;
+use App\Shared\Enums\CacheStores;
 use App\Shared\Enums\SecretKeys;
 use App\Shared\Enums\SemaphoreProviders;
 use Charcoal\App\Kernel\Contracts\Enums\SemaphoreProviderEnumInterface;
@@ -20,7 +21,6 @@ use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
 use Charcoal\Cache\CacheClient;
 use Charcoal\Cipher\Cipher;
 use Charcoal\Cipher\Support\CipherKeyRef;
-use Charcoal\Tests\App\Fixtures\Enums\CacheStore;
 
 /**
  * This class provides functionality for normalizing storage keys,
@@ -86,7 +86,7 @@ final class CoreDataModule extends OrmModuleBase
      */
     public function getCacheStore(): CacheClient
     {
-        return $this->app->cache->getStore(CacheStore::Primary);
+        return $this->app->cache->getStore(CacheStores::Primary);
     }
 
     /**
