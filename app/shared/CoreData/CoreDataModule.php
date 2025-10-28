@@ -11,16 +11,9 @@ namespace App\Shared\CoreData;
 use App\Shared\CharcoalApp;
 use App\Shared\CoreData\ObjectStore\ObjectStoreRepository;
 use App\Shared\CoreData\ObjectStore\ObjectStoreTable;
-use App\Shared\Enums\CacheStores;
-use App\Shared\Enums\SecretKeys;
-use App\Shared\Enums\SemaphoreProviders;
-use Charcoal\App\Kernel\Contracts\Enums\SemaphoreProviderEnumInterface;
+use App\Shared\Traits\OrmModuleTrait;
 use Charcoal\App\Kernel\Orm\Db\TableRegistry;
 use Charcoal\App\Kernel\Orm\Module\OrmModuleBase;
-use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
-use Charcoal\Cache\CacheClient;
-use Charcoal\Cipher\Cipher;
-use Charcoal\Cipher\Support\CipherKeyRef;
 
 /**
  * This class provides functionality for normalizing storage keys,
@@ -29,8 +22,9 @@ use Charcoal\Cipher\Support\CipherKeyRef;
  */
 final class CoreDataModule extends OrmModuleBase
 {
+    use OrmModuleTrait;
+
     public readonly ObjectStoreRepository $objectStore;
-    private CipherKeyRef $cipherKeyRef;
 
     /**
      * @param CharcoalApp $app
@@ -51,17 +45,6 @@ final class CoreDataModule extends OrmModuleBase
     }
 
     /**
-     * @return array
-     */
-    protected function collectSerializableData(): array
-    {
-        $this->ensureCipherKeyRef();
-        $data = parent::collectSerializableData();
-        $data["cipherKeyRef"] = $this->cipherKeyRef ?? null;
-        return $data;
-    }
-
-    /**
      * @param array $data
      * @return void
      */
@@ -70,53 +53,5 @@ final class CoreDataModule extends OrmModuleBase
         $this->objectStore = $data["objectStore"];
         $this->cipherKeyRef = $data["cipherKeyRef"];
         parent::__unserialize($data);
-    }
-
-    /**
-     * @param string $key
-     * @return string
-     */
-    public function normalizeStorageKey(string $key): string
-    {
-        return strtolower(trim($key));
-    }
-
-    /**
-     * @return CacheClient
-     */
-    public function getCacheStore(): CacheClient
-    {
-        return $this->app->cache->getStore(CacheStores::Primary);
-    }
-
-    /**
-     * @param OrmRepositoryBase $resolveFor
-     * @return CipherKeyRef|null
-     */
-    public function getCipherFor(OrmRepositoryBase $resolveFor): ?CipherKeyRef
-    {
-        $this->ensureCipherKeyRef();
-        return $this->cipherKeyRef;
-    }
-
-    /**
-     * @return SemaphoreProviderEnumInterface
-     */
-    public function getSemaphore(): SemaphoreProviderEnumInterface
-    {
-        return SemaphoreProviders::Local;
-    }
-
-    /**
-     * @return void
-     */
-    private function ensureCipherKeyRef(): void
-    {
-        if (!isset($this->cipherKeyRef)) {
-            $this->cipherKeyRef = new CipherKeyRef(
-                Cipher::AES_256_GCM,
-                SecretKeys::CoreDataModule->getKeyRef()
-            );
-        }
     }
 }
