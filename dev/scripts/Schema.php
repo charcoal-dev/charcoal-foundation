@@ -26,7 +26,7 @@ $charcoal = CharcoalApp::Load(AppEnv::Dev,
 
 $charcoal->bootstrap($timestamp);
 $createTable = Migrations::createTable(
-    $charcoal->coreData->countries->table,
+    $charcoal->coreData->objectStore->table,
     true
 );
 

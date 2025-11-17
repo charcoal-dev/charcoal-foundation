@@ -42,7 +42,7 @@ final class ObjectStoreTable extends OrmTableBase
         $cols->string("kid")->length(80)->nullable();
         $cols->int("updated_on")->size(4)->unSigned();
 
-        $constraints->uniqueKey("ref_id")->columns("ref", "version");
+        $constraints->uniqueKey("ref_id")->columns("ref", "version")->isPrimary();
     }
 
     /**
