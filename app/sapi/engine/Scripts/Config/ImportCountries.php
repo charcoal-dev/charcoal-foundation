@@ -78,10 +78,8 @@ class ImportCountries extends DomainScriptBase
             try {
                 $saveCountryQuery = $db->exec(sprintf($saveCountryQuery, $countriesOrm->table->name), $saveCountryData);
                 $this->print("{green}SUCCESS{/}");
-            } catch (QueryExecuteException $e) {
+            } catch (QueryExecuteException) {
                 $this->print("{red}FAIL{/}");
-                $this->print("");
-                throw $e;
             }
 
             unset($country, $saveCountryQuery, $saveCountryData);
