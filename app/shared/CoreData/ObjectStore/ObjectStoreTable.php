@@ -38,7 +38,7 @@ final class ObjectStoreTable extends OrmTableBase
 
         $cols->string("ref")->length(40);
         $cols->int("version")->unSigned()->size(2);
-        $cols->binary("blob")->length(10240);
+        $cols->binary("payload")->length(10240);
         $cols->string("kid")->length(80)->nullable();
         $cols->int("updated_on")->size(4)->unSigned();
 

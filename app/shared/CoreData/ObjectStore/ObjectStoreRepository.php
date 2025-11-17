@@ -44,7 +44,7 @@ final class ObjectStoreRepository extends OrmRepositoryBase
      */
     public function store(StoredObjectEntity $storeObject): void
     {
-        $this->table->querySave($storeObject, new StringVector("blob", "kid", "updatedOn"));
+        $this->table->querySave($storeObject, new StringVector("payload", "kid", "updatedOn"));
     }
 
     /**

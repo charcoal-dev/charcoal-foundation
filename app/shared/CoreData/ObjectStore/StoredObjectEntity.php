@@ -33,7 +33,7 @@ final class StoredObjectEntity extends OrmEntityBase implements
 
     public string $ref;
     public int $version;
-    public string $blob;
+    public string $payload;
     public ?string $kid;
     public int $updatedOn;
 
@@ -70,7 +70,7 @@ final class StoredObjectEntity extends OrmEntityBase implements
 
         try {
             $encrypted = $cipher->encrypt($secret, $object, $ref, $version);
-            $storedObject->blob = chr(strlen($encrypted->iv()))
+            $storedObject->payload = chr(strlen($encrypted->iv()))
                 . chr(strlen($encrypted->tag()))
                 . $encrypted->iv()
                 . $encrypted->tag()
@@ -102,7 +102,7 @@ final class StoredObjectEntity extends OrmEntityBase implements
         self::validateFields($storedObject);
 
         try {
-            $storedObject->blob = serialize($clone ? clone $object : $object);
+            $storedObject->payload = serialize($clone ? clone $object : $object);
         } catch (\Throwable $t) {
             throw new WrappedException($t, "Failed to encrypt object for storage");
         }
@@ -155,7 +155,7 @@ final class StoredObjectEntity extends OrmEntityBase implements
                 throw new \InvalidArgumentException("Secret key is required to decrypt encrypted object");
             }
 
-            $ciphertext = $this->blob;
+            $ciphertext = $this->payload;
             if (!$ciphertext || strlen($ciphertext) < 2) {
                 throw new \UnexpectedValueException("Invalid encrypted blob: " . $this->ref, 1000);
             }
@@ -198,7 +198,7 @@ final class StoredObjectEntity extends OrmEntityBase implements
         }
 
         try {
-            $unserialized = unserialize($this->blob, $options);
+            $unserialized = unserialize($this->payload, $options);
             if (!$unserialized instanceof StorableObjectInterface) {
                 throw new \UnexpectedValueException("Invalid unserialized object: " . $this->ref, 2002);
             }
@@ -211,6 +211,7 @@ final class StoredObjectEntity extends OrmEntityBase implements
 
     /**
      * @return StorableObjectInterface|null
+     * @api
      */
     public function getRecoveredObject(): ?StorableObjectInterface
     {
