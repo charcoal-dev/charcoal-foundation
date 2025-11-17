@@ -9,6 +9,8 @@ declare(strict_types=1);
 namespace App\Shared\CoreData;
 
 use App\Shared\CharcoalApp;
+use App\Shared\CoreData\Countries\CountriesRepository;
+use App\Shared\CoreData\Countries\CountriesTable;
 use App\Shared\CoreData\ObjectStore\ObjectStoreRepository;
 use App\Shared\CoreData\ObjectStore\ObjectStoreTable;
 use App\Shared\Traits\OrmModuleTrait;
@@ -25,6 +27,7 @@ final class CoreDataModule extends OrmModuleBase
     use OrmModuleTrait;
 
     public readonly ObjectStoreRepository $objectStore;
+    public readonly CountriesRepository $countries;
 
     /**
      * @param CharcoalApp $app
@@ -33,6 +36,7 @@ final class CoreDataModule extends OrmModuleBase
     {
         parent::__construct($app);
         $this->objectStore = new ObjectStoreRepository();
+        $this->countries = new CountriesRepository();
     }
 
     /**
@@ -42,6 +46,7 @@ final class CoreDataModule extends OrmModuleBase
     protected function declareDatabaseTables(TableRegistry $tables): void
     {
         $tables->register(new ObjectStoreTable($this));
+        $tables->register(new CountriesTable($this));
     }
 
     /**
@@ -50,6 +55,7 @@ final class CoreDataModule extends OrmModuleBase
      */
     public function __unserialize(array $data): void
     {
+        $this->countries = $data["countries"];
         $this->objectStore = $data["objectStore"];
         $this->cipherKeyRef = $data["cipherKeyRef"];
         parent::__unserialize($data);
