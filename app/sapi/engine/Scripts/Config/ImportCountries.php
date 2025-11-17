@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace App\Sapi\Engine\Scripts\Config;
 
 use App\Shared\Cli\DomainScriptBase;
-use App\Shared\Cli\LogPolicy;
 use App\Shared\Exceptions\CliScriptException;
 use Charcoal\Base\Objects\ObjectHelper;
 use Charcoal\Database\Exceptions\QueryExecuteException;
@@ -21,14 +20,6 @@ use Charcoal\Filesystem\Exceptions\FilesystemException;
  */
 class ImportCountries extends DomainScriptBase
 {
-    /**
-     * @return LogPolicy
-     */
-    protected function declareExecutionLogging(): LogPolicy
-    {
-        return new LogPolicy(false);
-    }
-
     /**
      * @return void
      */

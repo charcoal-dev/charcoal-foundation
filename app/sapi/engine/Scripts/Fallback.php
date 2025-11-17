@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace App\Sapi\Engine\Scripts;
 
 use App\Shared\Cli\DomainScriptBase;
-use App\Shared\Cli\LogPolicy;
 
 /**
  * Class Fallback
@@ -18,14 +17,6 @@ use App\Shared\Cli\LogPolicy;
 class Fallback extends DomainScriptBase
 {
     private array $scripts = [];
-
-    /**
-     * @return LogPolicy
-     */
-    protected function declareExecutionLogging(): LogPolicy
-    {
-        return new LogPolicy(false);
-    }
 
     /**
      * @return void

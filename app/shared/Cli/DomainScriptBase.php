@@ -10,14 +10,11 @@ namespace App\Shared\Cli;
 
 use App\Shared\CharcoalApp;
 use App\Shared\Enums\SemaphoreScopes;
-use App\Shared\Exceptions\CliScriptException;
 use Charcoal\App\Kernel\Enums\SemaphoreType;
 use Charcoal\App\Kernel\ServerApi\Cli\AppCliHandler;
 use Charcoal\App\Kernel\ServerApi\Cli\AppCliScript;
 use Charcoal\App\Kernel\Support\TypeCaster;
 use Charcoal\Cli\Enums\ExecutionState;
-use Charcoal\Cli\Events\Terminate\ExceptionCaught;
-use Charcoal\Cli\Events\Terminate\PcntlSignalClose;
 use Charcoal\Filesystem\Semaphore\FileLock;
 use Charcoal\Semaphore\Exceptions\SemaphoreLockException;
 
@@ -28,7 +25,6 @@ use Charcoal\Semaphore\Exceptions\SemaphoreLockException;
 abstract class DomainScriptBase extends AppCliScript
 {
     public readonly int $startedOn;
-    protected readonly ?LogPolicy $logBinding;
 //    protected readonly ?FileLock $semaphoreLock;
 
     /**
@@ -55,7 +51,7 @@ abstract class DomainScriptBase extends AppCliScript
 //            $this->obtainSemaphoreLock($this->semaphoreLockId, true) : null;
 
         // Log Binding & ScriptExecutionLogger
-        $this->logBinding = $this->declareExecutionLogging();
+        //$this->logBinding = $this->declareExecutionLogging();
 //        if (!$this->logBinding->loggable) {
 //            $this->logger = null;
 //        } else {
@@ -82,11 +78,6 @@ abstract class DomainScriptBase extends AppCliScript
 //            });
 //        }
     }
-
-    /**
-     * @return LogPolicy
-     */
-    abstract protected function declareExecutionLogging(): LogPolicy;
 
     /**
      * @return void

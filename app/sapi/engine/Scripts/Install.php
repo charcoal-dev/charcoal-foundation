@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace App\Sapi\Engine\Scripts;
 
 use App\Shared\Cli\DomainScriptBase;
-use App\Shared\Cli\LogPolicy;
 use App\Shared\Enums\Databases;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
 use Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException;
@@ -22,14 +21,6 @@ use Charcoal\Database\Orm\Migrations;
  */
 class Install extends DomainScriptBase
 {
-    /**
-     * @return LogPolicy
-     */
-    protected function declareExecutionLogging(): LogPolicy
-    {
-        return new LogPolicy(false);
-    }
-
     /**
      * @return void
      */
@@ -62,11 +53,8 @@ class Install extends DomainScriptBase
     }
 
     /**
-     * @param string $objectClassname
-     * @param \Closure $newInstance
-     * @return void
      * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
-     * @throws \Charcoal\Cipher\Exceptions\CipherException
+     * @throws \Charcoal\Base\Exceptions\WrappedException
      * @throws \Charcoal\Database\Orm\Exceptions\OrmQueryException
      * @api
      */
@@ -83,7 +71,7 @@ class Install extends DomainScriptBase
         $this->inline("\t{grey}Checking {yellow}" . ObjectHelper::baseClassName($objectClassname) . "{/}{grey} ... ");
 
         try {
-            $objectStore->get($objectClassname, useCache: false);
+            $objectStore->getObject($objectClassname, 1, useCache: false);
             $this->print("{green}Exists");
             return;
         } catch (EntityNotFoundException) {
