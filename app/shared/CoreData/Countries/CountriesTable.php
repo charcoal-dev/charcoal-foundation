@@ -42,6 +42,7 @@ final class CountriesTable extends OrmTableBase
         $cols->string("code2")->fixed(2)->unique();
         $cols->string("code3")->fixed(3)->unique();
         $cols->string("dial_code")->length(8)->matchRegExp("/^\+[1-9][0-9]*(-[0-9]+)*$/");
+        $cols->setPrimaryKey("code2", false);
     }
 
     /**
