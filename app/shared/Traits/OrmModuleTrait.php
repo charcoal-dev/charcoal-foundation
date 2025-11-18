@@ -9,13 +9,11 @@ declare(strict_types=1);
 namespace App\Shared\Traits;
 
 use App\Shared\Enums\CacheStores;
-use App\Shared\Enums\SecretKeys;
 use App\Shared\Enums\SemaphoreProviders;
 use Charcoal\App\Kernel\Contracts\Enums\SemaphoreProviderEnumInterface;
 use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
+use Charcoal\App\Kernel\Orm\Repository\RepositoryCipherRef;
 use Charcoal\Cache\CacheClient;
-use Charcoal\Cipher\Cipher;
-use Charcoal\Cipher\Support\CipherKeyRef;
 
 /**
  * Trait ModuleCipherKeyTrait
@@ -23,40 +21,25 @@ use Charcoal\Cipher\Support\CipherKeyRef;
  */
 trait OrmModuleTrait
 {
-    private CipherKeyRef $cipherKeyRef;
-
     /**
-     * @return array
+     * @param OrmRepositoryBase $repo
+     * @return RepositoryCipherRef|null
      */
-    protected function collectSerializableData(): array
+    public function getCipherFor(OrmRepositoryBase $repo): ?RepositoryCipherRef
     {
-        $this->ensureCipherKeyRef();
-        $data = parent::collectSerializableData();
-        $data["cipherKeyRef"] = $this->cipherKeyRef ?? null;
-        return $data;
-    }
-
-    /**
-     * @param OrmRepositoryBase $resolveFor
-     * @return CipherKeyRef|null
-     */
-    public function getCipherFor(OrmRepositoryBase $resolveFor): ?CipherKeyRef
-    {
-        $this->ensureCipherKeyRef();
-        return $this->cipherKeyRef;
-    }
-
-    /**
-     * @return void
-     */
-    private function ensureCipherKeyRef(): void
-    {
-        if (!isset($this->cipherKeyRef)) {
-            $this->cipherKeyRef = new CipherKeyRef(
-                Cipher::AES_256_GCM,
-                SecretKeys::CoreDataModule->getKeyRef()
-            );
+        if (!$this->security || !$this->security->cipherAlgo) {
+            return null;
         }
+
+        $moduleSecret = $this->getSecretKey();
+        if (!$moduleSecret) {
+            return null;
+        }
+
+        return new RepositoryCipherRef(
+            $this->security->cipherAlgo,
+            $moduleSecret
+        );
     }
 
     /**

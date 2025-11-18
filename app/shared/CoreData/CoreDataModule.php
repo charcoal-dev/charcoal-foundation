@@ -13,9 +13,13 @@ use App\Shared\CoreData\Countries\CountriesRepository;
 use App\Shared\CoreData\Countries\CountriesTable;
 use App\Shared\CoreData\ObjectStore\ObjectStoreRepository;
 use App\Shared\CoreData\ObjectStore\ObjectStoreTable;
+use App\Shared\Enums\SecretKeys;
+use App\Shared\Enums\SecretsStores;
 use App\Shared\Traits\OrmModuleTrait;
+use Charcoal\App\Kernel\Domain\ModuleSecurityBindings;
 use Charcoal\App\Kernel\Orm\Db\TableRegistry;
 use Charcoal\App\Kernel\Orm\Module\OrmModuleBase;
+use Charcoal\Cipher\Cipher;
 
 /**
  * This class provides functionality for normalizing storage keys,
@@ -57,7 +61,18 @@ final class CoreDataModule extends OrmModuleBase
     {
         $this->countries = $data["countries"];
         $this->objectStore = $data["objectStore"];
-        $this->cipherKeyRef = $data["cipherKeyRef"];
         parent::__unserialize($data);
+    }
+
+    /**
+     * @return ModuleSecurityBindings
+     */
+    protected function declareSecurityBindings(): ModuleSecurityBindings
+    {
+        return new ModuleSecurityBindings(
+            Cipher::AES_256_GCM,
+            SecretsStores::Local,
+            SecretKeys::CoreDataModule->getKeyRef()
+        );
     }
 }
