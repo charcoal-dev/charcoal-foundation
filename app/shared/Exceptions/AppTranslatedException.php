@@ -9,25 +9,25 @@ declare(strict_types=1);
 namespace App\Shared\Exceptions;
 
 use Charcoal\Contracts\Sapi\DomainMessageEnumInterface;
+use Charcoal\Contracts\Sapi\Exceptions\TranslatedExceptionInterface;
 use Charcoal\Contracts\Sapi\SapiRequestContextInterface;
-use Charcoal\Contracts\Sapi\ValidationExceptionInterface;
 
 /**
- * Class AppValidationException
+ * Class AppTranslatedException
  * @package App\Shared\Exceptions
  */
-final class AppValidationException extends AppException implements ValidationExceptionInterface
+final class AppTranslatedException extends AppException implements TranslatedExceptionInterface
 {
     public function __construct(
         DomainMessageEnumInterface   $msg,
-        ?array                       $context = null,
+        public readonly array        $context = [],
         ?SapiRequestContextInterface $requestContext = null,
         ?\Throwable                  $previous = null,
     )
     {
         $code = $msg->getCode($requestContext, $context);
         parent::__construct(
-            $msg->getTranslatedMessage($requestContext, $context),
+            $msg->getTranslated($requestContext, $context),
             is_int($code) ? $code : 0,
             $previous,
         );
@@ -47,5 +47,13 @@ final class AppValidationException extends AppException implements ValidationExc
     public function getTranslatedCode(): int
     {
         return $this->code;
+    }
+
+    /**
+     * @return array
+     */
+    public function getContext(): array
+    {
+        return $this->context;
     }
 }
