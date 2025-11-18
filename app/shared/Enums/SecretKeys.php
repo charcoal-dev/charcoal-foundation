@@ -54,7 +54,7 @@ enum SecretKeys: string implements SecretKeysEnumInterface
     {
         return match ($this) {
             self::CoreDataModule => new SecretEntropyRemixing($this->value,
-                CoreDataConstants::CIPHER_KEY_REMIX_ITERATIONS),
+                AppConstants::SECRETS_REMIX_ITERATIONS),
             default => null
         };
     }

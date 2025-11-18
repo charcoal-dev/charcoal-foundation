@@ -25,4 +25,6 @@ interface AppConstants
     /** @for=Security */
     /** @var string Directory path or ref for default secrets namespace inside Local store */
     public const string SECRETS_LOCAL_NAMESPACE = "charcoal";
+    /** @var int Number of iterations to perform when remixing secret keys (from app's Primary key)') */
+    public const int SECRETS_REMIX_ITERATIONS = 1;
 }

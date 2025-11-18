@@ -16,7 +16,4 @@ interface CoreDataConstants
 {
     /** language=RegExp */
     public const string STORED_OBJECT_REF_REGEXP = "/\A[a-zA-Z0-9][a-zA-Z0-9\-_.]{1,39}\z/";
-
-    /** @var int Number of iterations to perform when remixing cipher keys (from app's Primary key) */
-    public const int CIPHER_KEY_REMIX_ITERATIONS = 1;
 }
