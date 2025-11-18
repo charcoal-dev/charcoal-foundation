@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace App\Shared\Enums;
 
 use App\Shared\AppConstants;
-use App\Shared\CoreData\Internal\CoreDataConstants;
 use Charcoal\App\Kernel\Contracts\Enums\SecretKeysEnumInterface;
 use Charcoal\App\Kernel\Security\Secrets\SecretEntropyRemixing;
 use Charcoal\Security\Secrets\Support\SecretKeyRef;
