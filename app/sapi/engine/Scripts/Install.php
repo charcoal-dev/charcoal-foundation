@@ -49,7 +49,7 @@ class Install extends DomainScriptBase
     protected function checkSecretsLfsDirectory(): void
     {
         $charcoal = $this->getAppBuild();
-        $this->inline("Checking for Secrets KMS ... ");
+        $this->print("Checking for Secrets KMS:");
 
         $index = 0;
         foreach ($charcoal->config->security->secretsStores as $storeId => $secretStoreConfig) {
@@ -61,7 +61,7 @@ class Install extends DomainScriptBase
                 $secretStoreConfig->provider->getStoreType()->name
             ));
 
-            if ($secretStoreConfig->getStoreType() !== SecretsStoreType::LFS) {
+            if ($secretStoreConfig->provider->getStoreType() !== SecretsStoreType::LFS) {
                 $this->print("{yellow}Skip");
                 continue;
             }
