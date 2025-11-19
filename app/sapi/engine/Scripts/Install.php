@@ -69,7 +69,7 @@ class Install extends DomainScriptBase
                 $this->print(sprintf("{green}%d Bytes", $secretKeyLength));
             } catch (\Exception $e) {
                 $this->print("{red}Error");
-                $this->print("   " . ErrorHelper::exception2String($e));
+                $this->print("   {red}" . ErrorHelper::exception2String($e));
                 throw $e;
             }
         }
