@@ -74,7 +74,7 @@ class Install extends DomainScriptBase
             } catch (\Throwable $e) {
                 $this->print("{red}Failed");
                 if (isset($secretsDefaultNamespacePath)) {
-                    $this->print("\t{cyan}" . $secretsDefaultNamespacePath->path);
+                    $this->print("   [{green}+{/}]: {cyan}" . $secretsDefaultNamespacePath->path);
                 }
 
                 throw $e;
@@ -83,6 +83,8 @@ class Install extends DomainScriptBase
             $this->print("{green}OK");
             $this->print("\t{cyan}" . $secretsDefaultNamespacePath->path);
         }
+
+        $this->print("");
     }
 
     /**
