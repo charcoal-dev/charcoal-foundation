@@ -44,6 +44,6 @@ $console = new AppCliHandler($charcoal,
 
 $console->stdout->useAnsiCodes(true);
 
-$console->print(sprintf("{grey}%s app bootstrapped in {green}%ss{/}",
+$console->print(sprintf("{grey}%s app bootstrapped in {green}%s ms{/}",
     ObjectHelper::baseClassName($appFqcn), $startupTime));
 $console->exec();
