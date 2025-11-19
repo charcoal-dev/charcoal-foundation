@@ -8,12 +8,15 @@ declare(strict_types=1);
 
 namespace App\Sapi\Engine\Scripts;
 
+use App\Shared\AppConstants;
 use App\Shared\Cli\DomainScriptBase;
 use App\Shared\Enums\Databases;
+use Charcoal\App\Kernel\Enums\SecretsStoreType;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
 use Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException;
 use Charcoal\Base\Objects\ObjectHelper;
 use Charcoal\Database\Orm\Migrations;
+use Charcoal\Filesystem\Enums\Assert;
 
 /**
  * Class Install
@@ -30,11 +33,55 @@ class Install extends DomainScriptBase
 
     /**
      * @return void
+     * @throws \Throwable
      */
     protected function execScript(): void
     {
         $this->createDbTables();
+        $this->checkSecretsLfsDirectory();
         $this->createRequiredStoredObjects();
+    }
+
+    /**
+     * @return void
+     * @throws \Throwable
+     */
+    protected function checkSecretsLfsDirectory(): void
+    {
+        $charcoal = $this->getAppBuild();
+        $this->inline("Checking for Secrets KMS ... ");
+
+        $index = 0;
+        foreach ($charcoal->config->security->secretsStores as $storeId => $secretStoreConfig) {
+            $index++;
+            $this->inline(sprintf("%d. {yellow}%s{/} (KeySize: {magenta}%d Bytes{/}) ... {blue}%s{/} ... ",
+                $index,
+                $storeId,
+                $secretStoreConfig->keySize->value,
+                $secretStoreConfig->provider->getStoreType()->name
+            ));
+
+            if ($secretStoreConfig->getStoreType() !== SecretsStoreType::LFS) {
+                $this->print("{yellow}Skip");
+                continue;
+            }
+
+            try {
+                $secretsDefaultNamespacePath = $secretStoreConfig->ref->join(AppConstants::SECRETS_LOCAL_NAMESPACE);
+                $secretsDefaultNamespace = $secretsDefaultNamespacePath->isDirectory();
+                $asserts = DIRECTORY_SEPARATOR === "/" ? [Assert::Readable, Assert::Executable] : [Assert::Readable];
+                $secretsDefaultNamespace->assert(...$asserts);
+            } catch (\Throwable $e) {
+                $this->print("{red}Failed");
+                if (isset($secretsDefaultNamespacePath)) {
+                    $this->print("\t{cyan}" . $secretsDefaultNamespacePath->path);
+                }
+
+                throw $e;
+            }
+
+            $this->print("{green}OK");
+        }
     }
 
     /**
