@@ -27,8 +27,8 @@ trait DatabaseConfigBuilderTrait
         }
 
         foreach ($dbConfigData as $dbId => $dbConfig) {
-            $key = Databases::tryFrom(strval($dbId));
-            if (!$dbId) {
+            $key = Databases::find(strval($dbId), caseSensitive: false);
+            if (!$key) {
                 throw new \OutOfBoundsException("No matching database found between Enum and config ");
             }
 

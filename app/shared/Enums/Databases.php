@@ -14,17 +14,25 @@ use Charcoal\Base\Enums\Traits\EnumFindCaseTrait;
 /**
  * An enumeration representing databases embedded with app.
  */
-enum Databases: string implements DatabaseEnumInterface
+enum Databases implements DatabaseEnumInterface
 {
     use EnumFindCaseTrait;
 
-    case Primary = "primary";
+    case Primary;
 
     /**
      * @return string
      */
     public function getConfigKey(): string
     {
-        return $this->value;
+        return $this->name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDatabaseName(): string
+    {
+        return "primary";
     }
 }
