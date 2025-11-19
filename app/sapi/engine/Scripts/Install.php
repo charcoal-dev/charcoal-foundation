@@ -96,7 +96,7 @@ class Install extends DomainScriptBase
 
         $installSequence = [];
         foreach ($dbDeclaredTables as $dbTag => $dbTables) {
-            $dbTag = Databases::find($dbTag);
+            $dbTag = Databases::find($dbTag, caseSensitive: false);
             $this->inline("Getting {invert}{yellow} " . $dbTag->name . " {/} database ... ");
             $dbInstance = $app->database->getDb($dbTag);
             $this->print("{grey}[{green}OK{grey}]{/}");
