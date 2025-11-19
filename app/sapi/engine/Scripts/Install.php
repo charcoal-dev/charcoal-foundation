@@ -81,6 +81,7 @@ class Install extends DomainScriptBase
             }
 
             $this->print("{green}OK");
+            $this->print("\t{cyan}" . $secretsDefaultNamespacePath->path);
         }
     }
 
