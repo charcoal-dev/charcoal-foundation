@@ -71,8 +71,7 @@ final class CoreDataModule extends OrmModuleBase
     {
         return new ModuleSecurityBindings(
             Cipher::AES_256_GCM,
-            SecretsStores::Local,
-            SecretKeys::CoreDataModule->getKeyRef()
+            SecretKeys::CoreDataModule
         );
     }
 }
