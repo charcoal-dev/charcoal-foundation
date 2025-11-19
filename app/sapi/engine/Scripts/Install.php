@@ -8,15 +8,14 @@ declare(strict_types=1);
 
 namespace App\Sapi\Engine\Scripts;
 
-use App\Shared\AppConstants;
 use App\Shared\Cli\DomainScriptBase;
 use App\Shared\Enums\Databases;
-use Charcoal\App\Kernel\Enums\SecretsStoreType;
+use App\Shared\Enums\SecretKeys;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
 use Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException;
+use Charcoal\App\Kernel\Support\ErrorHelper;
 use Charcoal\Base\Objects\ObjectHelper;
 use Charcoal\Database\Orm\Migrations;
-use Charcoal\Filesystem\Enums\Assert;
 
 /**
  * Class Install
@@ -37,51 +36,42 @@ class Install extends DomainScriptBase
      */
     protected function execScript(): void
     {
+        $this->checkSecretKeys();
         $this->createDbTables();
-        $this->checkSecretsLfsDirectory();
         $this->createRequiredStoredObjects();
     }
 
     /**
      * @return void
-     * @throws \Throwable
+     * @throws \Exception
      */
-    protected function checkSecretsLfsDirectory(): void
+    protected function checkSecretKeys(): void
     {
+        $this->inline("Checking for configured secret keys: ");
+        $secretKeys = SecretKeys::cases();
+        $secretKeysCount = count($secretKeys);
+        $this->print(sprintf("[{%s}%d{/}]", $secretKeysCount > 0 ? "green" : "yellow", $secretKeysCount));
+
         $charcoal = $this->getAppBuild();
-        $this->print("Checking for Secrets KMS:");
-
+        $secretsManager = $charcoal->security->secrets;
         $index = 0;
-        foreach ($charcoal->config->security->secretsStores as $storeId => $secretStoreConfig) {
+        foreach ($secretKeys as $secretKeyEnum) {
+            unset($secretKeyLength);
+
             $index++;
-            $this->inline(sprintf("%d. {yellow}%s{/} (KeySize: {magenta}%d Bytes{/}) ... {blue}%s{/} ... ",
-                $index,
-                $storeId,
-                $secretStoreConfig->keySize->value,
-                $secretStoreConfig->provider->getStoreType()->name
-            ));
-
-            if ($secretStoreConfig->provider->getStoreType() !== SecretsStoreType::LFS) {
-                $this->print("{yellow}Skip");
-                continue;
-            }
-
+            $this->inline(sprintf("   [{yellow}%d{/}] %s ... ", $index, $secretKeyEnum->name));
             try {
-                $secretsDefaultNamespacePath = $secretStoreConfig->ref->join(AppConstants::SECRETS_LOCAL_NAMESPACE);
-                $secretsDefaultNamespace = $secretsDefaultNamespacePath->isDirectory();
-                $asserts = DIRECTORY_SEPARATOR === "/" ? [Assert::Readable, Assert::Executable] : [Assert::Readable];
-                $secretsDefaultNamespace->assert(...$asserts);
-            } catch (\Throwable $e) {
-                $this->print("{red}Failed");
-                if (isset($secretsDefaultNamespacePath)) {
-                    $this->print("   [{green}+{/}]: {cyan}" . $secretsDefaultNamespacePath->path);
-                }
+                $secretKeyBuffer = $secretsManager->resolveSecretEnum($secretKeyEnum);
+                $secretKeyBuffer->useSecretEntropy(function (string $entropy) use (&$secretKeyLength) {
+                    $secretKeyLength = strlen($entropy);
+                });
 
+                $this->print(sprintf("{green}%d Bytes", $secretKeyLength));
+            } catch (\Exception $e) {
+                $this->print("{red}Error");
+                $this->print("   " . ErrorHelper::exception2String($e));
                 throw $e;
             }
-
-            $this->print("{green}OK");
-            $this->print("\t{cyan}" . $secretsDefaultNamespacePath->path);
         }
 
         $this->print("");
