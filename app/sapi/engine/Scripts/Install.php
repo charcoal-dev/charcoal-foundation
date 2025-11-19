@@ -50,7 +50,7 @@ class Install extends DomainScriptBase
         $this->inline("Checking for configured secret keys: ");
         $secretKeys = SecretKeys::cases();
         $secretKeysCount = count($secretKeys);
-        $this->print(sprintf("[{%s}%d{/}]", $secretKeysCount > 0 ? "green" : "yellow", $secretKeysCount));
+        $this->print(sprintf("{grey}[{%s}%d{/}{grey}]", $secretKeysCount > 0 ? "green" : "yellow", $secretKeysCount));
 
         $charcoal = $this->getAppBuild();
         $secretsManager = $charcoal->security->secrets;
@@ -59,7 +59,7 @@ class Install extends DomainScriptBase
             unset($secretKeyLength);
 
             $index++;
-            $this->inline(sprintf("   [{yellow}%d{/}] %s ... ", $index, $secretKeyEnum->name));
+            $this->inline(sprintf("   {grey}[{yellow}%d{/}{grey}]{/} {cyan}%s ... ", $index, $secretKeyEnum->name));
             try {
                 $secretKeyBuffer = $secretsManager->resolveSecretEnum($secretKeyEnum);
                 $secretKeyBuffer->useSecretEntropy(function (string $entropy) use (&$secretKeyLength) {
