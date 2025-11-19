@@ -25,7 +25,7 @@ enum Databases implements DatabaseEnumInterface
      */
     public function getConfigKey(): string
     {
-        return $this->name;
+        return strtolower($this->name);
     }
 
     /**
