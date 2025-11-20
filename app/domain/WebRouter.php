@@ -10,7 +10,7 @@ namespace App\Domain;
 
 use App\Sapi\Web\Endpoints\HomePage;
 use App\Sapi\Web\Endpoints\ProblemPage;
-use App\Shared\Http\Middleware\GlobalPipelines;
+use Charcoal\App\Kernel\AbstractApp;
 use Charcoal\App\Kernel\ServerApi\Http\AppRouter;
 use Charcoal\Http\Server\Middleware\MiddlewareRegistry;
 use Charcoal\Http\Server\Routing\Group\RouteGroupBuilder;
@@ -32,12 +32,7 @@ final readonly class WebRouter extends AppRouter
         });
     }
 
-    protected function middleware(): MiddlewareRegistry
-    {
-        return GlobalPipelines::getInstance();
-    }
-
-    public function onServerConstruct(MiddlewareRegistry $mw): void
+    public function onServerConstruct(AbstractApp $app, MiddlewareRegistry $middleware): void
     {
     }
 }
