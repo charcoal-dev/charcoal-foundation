@@ -39,7 +39,6 @@ final class StoredObjectEntity extends OrmEntityBase implements
 
     private readonly StorableObjectInterface $recoveredObject;
 
-
     /**
      * Generates a unique reference ID by combining the reference and version.
      */
