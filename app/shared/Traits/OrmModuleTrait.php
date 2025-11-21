@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace App\Shared\Traits;
 
 use App\Shared\Enums\CacheStores;
-use App\Shared\Enums\SemaphoreProviders;
-use Charcoal\App\Kernel\Contracts\Enums\SemaphoreProviderEnumInterface;
+use App\Shared\Enums\SemaphoreScopes;
+use Charcoal\App\Kernel\Contracts\Enums\SemaphoreScopeEnumInterface;
 use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
 use Charcoal\App\Kernel\Orm\Repository\RepositoryCipherRef;
 use Charcoal\Cache\CacheClient;
@@ -60,10 +60,10 @@ trait OrmModuleTrait
     }
 
     /**
-     * @return SemaphoreProviderEnumInterface
+     * @return SemaphoreScopeEnumInterface
      */
-    public function getSemaphore(): SemaphoreProviderEnumInterface
+    public function getSemaphore(): SemaphoreScopeEnumInterface
     {
-        return SemaphoreProviders::Local;
+        return SemaphoreScopes::Orm;
     }
 }
