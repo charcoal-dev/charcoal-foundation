@@ -18,18 +18,19 @@ use Charcoal\Database\Enums\DbDriver;
  */
 enum DatabaseTables: string implements TableRegistryEnumInterface
 {
-    /** Foundation Modules */
+    /** @for Foundation Modules */
     case ObjectStore = "object_store";
     case DatabaseBackups = "db_backups";
     case BruteForceControl = "bfc_index";
     case Countries = "countries";
     case MailerQueue = "mails_queue";
-    case HttpInterfaceLog = "http_if_log";
-    case HttpCallLog = "http_call_log";
     case HttpProxies = "http_proxies";
-    case EngineExecLog = "engine_exec_log";
-    case EngineExecMetrics = "engine_exec_stats";
-    case EngineQueue = "engine_queue";
+
+    /** @for Telemetry Module */
+    case AppLogs = "app_logs";
+    case AppMetrics = "app_metrics";
+    case HttpIngress = "http_ingress";
+    case HttpEgress = "http_egress";
 
     public function getTableName(): string
     {

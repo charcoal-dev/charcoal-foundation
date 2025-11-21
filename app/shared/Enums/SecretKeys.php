@@ -21,6 +21,7 @@ enum SecretKeys: string implements SecretKeysEnumInterface
 {
     case Primary = "charcoal_app_primary";
     case CoreDataModule = "coreData";
+    case Telemetry = "telemetry";
 
     /**
      * @return int
@@ -52,6 +53,7 @@ enum SecretKeys: string implements SecretKeysEnumInterface
     public function getRemixAttributes(): ?SecretEntropyRemixing
     {
         return match ($this) {
+            self::Telemetry,
             self::CoreDataModule => new SecretEntropyRemixing($this->value,
                 AppConstants::SECRETS_REMIX_ITERATIONS),
             default => null
@@ -66,6 +68,7 @@ enum SecretKeys: string implements SecretKeysEnumInterface
     {
         return match ($this) {
             self::Primary,
+            self::Telemetry,
             self::CoreDataModule => self::Primary->value,
         };
     }
