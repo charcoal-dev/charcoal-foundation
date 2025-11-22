@@ -14,7 +14,6 @@ use App\Shared\CoreData\Countries\CountriesTable;
 use App\Shared\CoreData\ObjectStore\ObjectStoreRepository;
 use App\Shared\CoreData\ObjectStore\ObjectStoreTable;
 use App\Shared\Enums\SecretKeys;
-use App\Shared\Enums\SecretsStores;
 use App\Shared\Traits\OrmModuleTrait;
 use Charcoal\App\Kernel\Domain\ModuleSecurityBindings;
 use Charcoal\App\Kernel\Orm\Db\TableRegistry;

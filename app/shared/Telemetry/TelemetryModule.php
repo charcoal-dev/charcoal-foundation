@@ -12,6 +12,8 @@ use App\Shared\CharcoalApp;
 use App\Shared\Enums\SecretKeys;
 use App\Shared\Telemetry\AppLogs\AppLogsRepository;
 use App\Shared\Telemetry\AppLogs\AppLogsTable;
+use App\Shared\Telemetry\HttpIngress\HttpIngressRepository;
+use App\Shared\Telemetry\HttpIngress\HttpIngressTable;
 use App\Shared\Telemetry\Metrics\MetricsRepository;
 use App\Shared\Telemetry\Metrics\MetricsTable;
 use App\Shared\Traits\OrmModuleTrait;
@@ -31,6 +33,7 @@ final class TelemetryModule extends OrmModuleBase
 
     public readonly AppLogsRepository $appLogs;
     public readonly MetricsRepository $metrics;
+    public readonly HttpIngressRepository $httpIngress;
 
     /**
      * @param CharcoalApp $app
@@ -40,6 +43,7 @@ final class TelemetryModule extends OrmModuleBase
         parent::__construct($app);
         $this->appLogs = new AppLogsRepository();
         $this->metrics = new MetricsRepository();
+        $this->httpIngress = new HttpIngressRepository();
     }
 
     /**
@@ -50,6 +54,7 @@ final class TelemetryModule extends OrmModuleBase
     {
         $tables->register(new AppLogsTable($this));
         $tables->register(new MetricsTable($this));
+        $tables->register(new HttpIngressTable($this));
     }
 
     /**
@@ -60,6 +65,7 @@ final class TelemetryModule extends OrmModuleBase
     {
         $this->appLogs = $data["appLogs"];
         $this->metrics = $data["metrics"];
+        $this->httpIngress = $data["httpIngress"];
         parent::__unserialize($data);
     }
 
