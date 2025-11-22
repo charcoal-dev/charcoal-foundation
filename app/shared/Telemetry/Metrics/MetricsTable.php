@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Telemetry\AppLogs;
+namespace App\Shared\Telemetry\Metrics;
 
 use App\Shared\Enums\DatabaseTables;
 use App\Shared\Enums\Interfaces;
@@ -18,14 +18,14 @@ use Charcoal\Database\Orm\Schema\Builder\ConstraintsBuilder;
 use Charcoal\Database\Orm\Schema\TableMigrations;
 
 /**
- * This class represents the database table structure and migrations for application logs.
- * It extends the OrmTableBase class and defines the schema and constraints for the AppLogs table.
+ * Represents the Metrics table structure and its migration logic.
+ * Extends the base ORM table functionalities for the App Metrics database table.
  */
-final class AppLogsTable extends OrmTableBase
+final class MetricsTable extends OrmTableBase
 {
     public function __construct(TelemetryModule $module)
     {
-        parent::__construct($module, DatabaseTables::AppLogs, AppLogEntity::class);
+        parent::__construct($module, DatabaseTables::AppMetrics, MetricsEntity::class);
     }
 
     /**
@@ -41,14 +41,15 @@ final class AppLogsTable extends OrmTableBase
         $cols->enumObject("interface", Interfaces::class)->options(...Interfaces::getCaseValues());
         $cols->enum("sapi")->options("http", "cli");
         $cols->string("uuid")->length(40)->nullable();
-        $cols->enumObject("level", AppLogLevel::class)->options(...AppLogLevel::getCaseValues());
-        $cols->string("message")->length(255);
-        $cols->json("context")->nullable();
-        $cols->json("exception")->nullable();
         $cols->int("logged_at")->size(4)->unSigned();
+        $cols->int("memory_usage")->size(8)->unSigned();
+        $cols->int("memory_usage_peak")->size(8)->unSigned();
+        $cols->int("cpu_time_user")->size(8)->unSigned();
+        $cols->int("cpu_time_system")->size(8)->unSigned();
+        $cols->int("cpu_time_total")->size(8)->unSigned();
         $cols->setPrimaryKey("id");
 
-        $constraints->addIndexComposite("idx_if_level_ts")->columns("interface", "level", "logged_at");
+        $constraints->addIndexComposite("idx_if_ts")->columns("interface", "logged_at");
         $constraints->addIndex("logged_at");
         $constraints->addIndex("uuid");
     }

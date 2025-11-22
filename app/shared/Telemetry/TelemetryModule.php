@@ -12,6 +12,8 @@ use App\Shared\CharcoalApp;
 use App\Shared\Enums\SecretKeys;
 use App\Shared\Telemetry\AppLogs\AppLogsRepository;
 use App\Shared\Telemetry\AppLogs\AppLogsTable;
+use App\Shared\Telemetry\Metrics\MetricsRepository;
+use App\Shared\Telemetry\Metrics\MetricsTable;
 use App\Shared\Traits\OrmModuleTrait;
 use Charcoal\App\Kernel\Domain\ModuleSecurityBindings;
 use Charcoal\App\Kernel\Orm\Db\TableRegistry;
@@ -23,6 +25,7 @@ final class TelemetryModule extends OrmModuleBase
     use OrmModuleTrait;
 
     public readonly AppLogsRepository $appLogs;
+    public readonly MetricsRepository $metrics;
 
     /**
      * @param CharcoalApp $app
@@ -31,6 +34,7 @@ final class TelemetryModule extends OrmModuleBase
     {
         parent::__construct($app);
         $this->appLogs = new AppLogsRepository();
+        $this->metrics = new MetricsRepository();
     }
 
     /**
@@ -40,6 +44,7 @@ final class TelemetryModule extends OrmModuleBase
     protected function declareDatabaseTables(TableRegistry $tables): void
     {
         $tables->register(new AppLogsTable($this));
+        $tables->register(new MetricsTable($this));
     }
 
     /**
@@ -49,6 +54,7 @@ final class TelemetryModule extends OrmModuleBase
     public function __unserialize(array $data): void
     {
         $this->appLogs = $data["appLogs"];
+        $this->metrics = $data["metrics"];
         parent::__unserialize($data);
     }
 
