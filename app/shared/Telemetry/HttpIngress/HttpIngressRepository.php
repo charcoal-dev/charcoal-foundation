@@ -68,6 +68,11 @@ final class HttpIngressRepository extends OrmRepositoryBase
         $logEntity->responseHeaders = null;
         $logEntity->responseParams = null;
         $logEntity->responseCachedId = null;
+        $logEntity->hasMetrics = false;
+        $logEntity->hasLogs = false;
+        $logEntity->flagSid = null;
+        $logEntity->flagUid = null;
+        $logEntity->flagTid = null;
         $logEntity->loggedAt = Clock::now()->getTimestamp();
         $logEntity->duration = null;
 

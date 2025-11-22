@@ -57,6 +57,9 @@ final class HttpIngressTable extends OrmTableBase
         $cols->string("response_cached_id")->length(64)->nullable();
         $cols->bool("has_metrics")->default(false);
         $cols->bool("has_logs")->default(false);
+        $cols->int("flag_sid")->size(8)->unSigned()->nullable();
+        $cols->int("flag_uid")->size(8)->unSigned()->nullable();
+        $cols->int("flag_tid")->size(8)->unSigned()->nullable();
         $cols->int("logged_at")->size(4)->unSigned();
         $cols->int("duration")->size(8)->unSigned()->nullable();
         $cols->setPrimaryKey("id");

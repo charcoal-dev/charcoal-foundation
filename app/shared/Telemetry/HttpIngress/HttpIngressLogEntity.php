@@ -37,6 +37,9 @@ final class HttpIngressLogEntity extends OrmEntityBase
     public ?string $responseCachedId;
     public bool $hasMetrics = false;
     public bool $hasLogs = false;
+    public ?int $flagSid = null;
+    public ?int $flagUid = null;
+    public ?int $flagTid = null;
     public int $loggedAt;
     public ?int $duration;
 
