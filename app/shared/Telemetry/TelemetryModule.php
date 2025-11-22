@@ -20,6 +20,11 @@ use Charcoal\App\Kernel\Orm\Db\TableRegistry;
 use Charcoal\App\Kernel\Orm\Module\OrmModuleBase;
 use Charcoal\Cipher\Cipher;
 
+/**
+ * Represents a telemetry module that extends the functionality of the application's ORM layer.
+ * Provides repositories and database table registration for telemetry data, such as application logs and metrics.
+ * Implements security bindings for module-specific operations.
+ */
 final class TelemetryModule extends OrmModuleBase
 {
     use OrmModuleTrait;
