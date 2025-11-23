@@ -68,7 +68,7 @@ final class StoredObjectEntity extends OrmEntityBase implements
         self::validateFields($storedObject);
 
         try {
-            $encrypted = $cipher->encrypt($secret, $object, $ref, $version);
+            $encrypted = $cipher->encrypt($secret, $object, null, $ref, $version);
             $storedObject->payload = chr(strlen($encrypted->iv()))
                 . chr(strlen($encrypted->tag()))
                 . $encrypted->iv()
