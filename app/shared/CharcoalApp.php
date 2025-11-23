@@ -63,12 +63,16 @@ readonly class CharcoalApp extends AbstractApp
 
         // Capture log entries (includes Exceptions and Errors) and archive using telemetry module
         if ($this->runtime->logAppLogs) {
-            $charcoal = $this;
+            $logLevel = $this->runtime->appLogLevel->value;
             $this->events->diagnostics(
                 DiagnosticsEvent::LogEntry,
-                function (LogEntry $logEntry) use ($charcoal) {
-                    $charcoal->telemetry->appLogs->store(
-                        $charcoal->sapi->current()->enum,
+                function (LogEntry $logEntry) use ($logLevel) {
+                    if ($logLevel > $logEntry->level) {
+                        return;
+                    }
+
+                    $this->telemetry->appLogs->store(
+                        $this->sapi->current()->enum,
                         null,
                         $logEntry
                     );
