@@ -61,12 +61,7 @@ final class HttpIngressRepository extends OrmRepositoryBase implements
         $requestFacade = $request->requestFacade;
         $logEntity->ipAddress = $requestFacade->clientIp;
         $logEntity->method = $requestFacade->method->value;
-        $urlInfo = $request->request->url;
-        $logEntity->urlScheme = $urlInfo->scheme === "https" ? "https" : "http";
-        $logEntity->urlHost = $urlInfo->host;
-        $logEntity->urlPath = $urlInfo->path;
-        $logEntity->urlPort = is_int($urlInfo->port) && $urlInfo->port > 0 && $urlInfo->port < 65536 ?
-            $urlInfo->port : null;
+        $logEntity->path = $request->request->url->path ?: "/";
         $logEntity->controller = null;
         $logEntity->entrypoint = null;
         $logEntity->requestHeaders = null;

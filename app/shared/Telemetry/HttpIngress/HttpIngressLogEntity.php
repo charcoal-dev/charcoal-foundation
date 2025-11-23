@@ -31,10 +31,7 @@ final class HttpIngressLogEntity extends OrmEntityBase implements
     public string $ipAddress;
     public ?int $responseCode;
     public string $method;
-    public string $urlScheme;
-    public string $urlHost;
-    public ?int $urlPort;
-    public string $urlPath;
+    public string $path;
     public ?string $controller;
     public ?string $entrypoint;
     public ?string $requestHeaders;

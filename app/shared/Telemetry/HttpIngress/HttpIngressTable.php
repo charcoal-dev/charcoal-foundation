@@ -43,10 +43,7 @@ final class HttpIngressTable extends OrmTableBase
         $cols->string("ip_address")->length(45);
         $cols->int("response_code")->size(2)->unSigned()->nullable();
         $cols->string("method")->length(10);
-        $cols->enum("url_scheme")->options("http", "https");
-        $cols->string("url_host")->length(100);
-        $cols->int("url_port")->size(2)->unSigned()->nullable();
-        $cols->string("url_path")->length(255);
+        $cols->string("path")->length(255);
         $cols->string("controller")->length(100)->nullable();
         $cols->string("entrypoint")->length(40)->nullable();
         $cols->json("request_headers")->nullable();
