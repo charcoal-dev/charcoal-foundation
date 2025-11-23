@@ -43,13 +43,21 @@ readonly class CharcoalApp extends AbstractApp
     }
 
     /**
+     * @param bool $restore
+     * @return void
+     */
+    protected function beforeDomainBundlesHook(bool $restore): void
+    {
+        $this->runtime = new RuntimeConfig();
+    }
+
+    /**
      * @return void
      * @internal
      * @noinspection PhpFieldAssignmentTypeMismatchInspection
      */
     protected function onReadyCallback(): void
     {
-        $this->runtime = new RuntimeConfig();
         $this->coreData = $this->domain->get(AppBindings::coreData);
         $this->telemetry = $this->domain->get(AppBindings::telemetry);
 
