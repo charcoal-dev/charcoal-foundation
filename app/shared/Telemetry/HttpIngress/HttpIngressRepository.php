@@ -15,6 +15,10 @@ use Charcoal\App\Kernel\Clock\Clock;
 use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
 use Charcoal\App\Kernel\Orm\Repository\Traits\EntityInsertableTrait;
 use Charcoal\App\Kernel\Orm\Repository\Traits\EntityUpdatableTrait;
+use Charcoal\Base\Support\Runtime;
+use Charcoal\Http\Server\Contracts\Logger\LogStorageProviderInterface;
+use Charcoal\Http\Server\Contracts\Logger\RequestLogEntityInterface;
+use Charcoal\Http\Server\Request\Logger\RequestLogPolicy;
 use Charcoal\Http\Server\Request\RequestGateway;
 use Charcoal\Vectors\Strings\StringVector;
 
@@ -23,7 +27,8 @@ use Charcoal\Vectors\Strings\StringVector;
  * This repository extends the base ORM repository and provides custom operations
  * for managing `HttpIngressLogEntity` entities.
  */
-final class HttpIngressRepository extends OrmRepositoryBase
+final class HttpIngressRepository extends OrmRepositoryBase implements
+    LogStorageProviderInterface
 {
     use EntityInsertableTrait;
     use EntityUpdatableTrait;
@@ -39,16 +44,18 @@ final class HttpIngressRepository extends OrmRepositoryBase
     /**
      * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
      */
-    public function createLogEntity(
-        Interfaces     $interface,
-        string         $uuid,
+    public function initLogEntity(
         RequestGateway $request,
-        ?\Closure      $beforeInsert = null
-    )
+        ?\Closure      $beforeInsert = null,
+        array          $context = [],
+    ): HttpIngressLogEntity
     {
+        $interface = $context[0] ?? null;
+        Runtime::assert($interface instanceof Interfaces, "Enum Interfaces not provided for: initLogEntity");
+
         $logEntity = new HttpIngressLogEntity();
         $logEntity->interface = $interface;
-        $logEntity->uuid = $uuid;
+        $logEntity->uuid = $request->uuid;
         $logEntity->responseCode = null;
 
         $requestFacade = $request->requestFacade;
@@ -67,9 +74,6 @@ final class HttpIngressRepository extends OrmRepositoryBase
         $logEntity->requestParamsBody = null;
         $logEntity->responseHeaders = null;
         $logEntity->responseParams = null;
-        $logEntity->responseCachedId = null;
-        $logEntity->hasMetrics = false;
-        $logEntity->hasLogs = false;
         $logEntity->flagSid = null;
         $logEntity->flagUid = null;
         $logEntity->flagTid = null;
@@ -87,8 +91,11 @@ final class HttpIngressRepository extends OrmRepositoryBase
     /**
      * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
      */
-    public function updateLogEntity(HttpIngressLogEntity $logEntity, StringVector $changeLog): void
+    public function finishLogEntity(RequestLogPolicy $policy, RequestLogEntityInterface $logEntity): void
     {
+        $changeLog = new StringVector();
+        $changeLog->append("controller", "entrypoint", "requestHeaders", "requestParamsQuery", "requestParamsBody",
+            "responseHeaders", "responseParams", "flagSid", "flagUid", "flagTid", "duration", "responseCode");
         $this->dbUpdateEntity($logEntity, $changeLog, $logEntity->id, "id");
     }
 }
