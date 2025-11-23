@@ -67,13 +67,14 @@ readonly class CharcoalApp extends AbstractApp
             $this->events->diagnostics(
                 DiagnosticsEvent::LogEntry,
                 function (LogEntry $logEntry) use ($logLevel) {
-                    if ($logLevel > $logEntry->level) {
+                    if ($logLevel > $logEntry->level->value) {
                         return;
                     }
 
+                    $loadedSapi = $this->sapi->current();
                     $this->telemetry->appLogs->store(
-                        $this->sapi->current()->enum,
-                        null,
+                        $loadedSapi->enum,
+                        $loadedSapi->sapi->getCurrentUuid(),
                         $logEntry
                     );
                 });
