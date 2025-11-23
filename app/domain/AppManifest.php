@@ -20,6 +20,7 @@ use App\Shared\Enums\SecretsStores;
 use App\Shared\Enums\SemaphoreProviders;
 use App\Shared\Enums\SemaphoreScopes;
 use App\Shared\PathRegistry;
+use App\Shared\Telemetry\TelemetryModule;
 use Charcoal\App\Kernel\Domain\AbstractModule;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Enums\EnumContract;
@@ -41,6 +42,8 @@ final class AppManifest extends \Charcoal\App\Kernel\AppManifest
 
         $this->bind(AppBindings::coreData,
             fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::coreData, $app));
+        $this->bind(AppBindings::telemetry,
+            fn(CharcoalApp $app) => $this->createDomainModule(AppBindings::telemetry, $app));
 
         // HTTP Server(s)
         $this->httpServer(new WebRouter(Interfaces::Web));
@@ -73,6 +76,7 @@ final class AppManifest extends \Charcoal\App\Kernel\AppManifest
     {
         return match ($module) {
             AppBindings::coreData => new CoreDataModule($app),
+            AppBindings::telemetry => new TelemetryModule($app),
             default => throw new \DomainException("Cannot build domain module"),
         };
     }

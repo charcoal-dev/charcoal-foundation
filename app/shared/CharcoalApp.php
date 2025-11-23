@@ -11,6 +11,7 @@ namespace App\Shared;
 use App\Domain\AppManifest;
 use App\Shared\Config\Snapshot\AppConfig;
 use App\Shared\CoreData\CoreDataModule;
+use App\Shared\Telemetry\TelemetryModule;
 use Charcoal\App\Kernel\AbstractApp;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\App\Kernel\Internal\PathRegistry as Directories;
@@ -24,6 +25,7 @@ use Charcoal\App\Kernel\Internal\PathRegistry as Directories;
 readonly class CharcoalApp extends AbstractApp
 {
     public CoreDataModule $coreData;
+    public TelemetryModule $telemetry;
 
     /**
      * @return array
@@ -32,6 +34,7 @@ readonly class CharcoalApp extends AbstractApp
     {
         $data = parent::collectSerializableData();
         $data["coreData"] = null;
+        $data["telemetry"] = null;
         return $data;
     }
 
@@ -43,6 +46,7 @@ readonly class CharcoalApp extends AbstractApp
     protected function onReadyCallback(): void
     {
         $this->coreData = $this->domain->get(AppBindings::coreData);
+        // $this->telemetry = $this->domain->get(AppBindings::telemetry);
     }
 
     /**
