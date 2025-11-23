@@ -10,12 +10,14 @@ namespace App\Shared\Telemetry\HttpIngress;
 
 use App\Shared\Enums\Interfaces;
 use Charcoal\App\Kernel\Orm\Entity\OrmEntityBase;
+use Charcoal\App\Kernel\Support\DtoHelper;
 use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Contracts\PayloadInterface;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Server\Contracts\Controllers\Auth\AuthContextInterface;
 use Charcoal\Http\Server\Contracts\Logger\RequestLogEntityInterface;
+use Charcoal\Http\Server\Exceptions\Internal\RequestGatewayException;
 use Charcoal\Http\Server\Request\Bags\QueryParams;
 
 /**
@@ -112,14 +114,20 @@ final class HttpIngressLogEntity extends OrmEntityBase implements
     }
 
     /**
-     * @param PayloadInterface|null $payload
+     * @param PayloadInterface|\Exception|null $payload
      * @param string|null $cachedId
      * @return void
      */
-    public function setResponseData(?PayloadInterface $payload, ?string $cachedId = null): void
+    public function setResponseData(null|PayloadInterface|\Exception $payload, ?string $cachedId = null): void
     {
-        if ($payload && $payload->count() > 0) {
+        if ($payload instanceof PayloadInterface && $payload->count() > 0) {
             $this->responseParams = json_encode($payload->getArray());
+        }
+
+        if ($payload instanceof \Exception) {
+            $payload = $payload instanceof RequestGatewayException && $payload->getPrevious() ?
+                $payload->getPrevious() : $payload;
+            $this->responseParams = json_encode(DtoHelper::getExceptionObject($payload));
         }
     }
 

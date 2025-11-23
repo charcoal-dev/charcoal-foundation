@@ -2,7 +2,7 @@
   "require": {
     "php": "^8.3",
     "charcoal-dev/app-kernel": "^0.1.16",
-    "charcoal-dev/http-server": "^0.2.44",
+    "charcoal-dev/http-server": "^0.2.45",
     "charcoal-dev/http-client": "^0.2.11",
     "charcoal-dev/http-trust-proxy": "^0.1.3",
     "charcoal-dev/charsets-sanitizer": "^0.2.0",
