@@ -13,7 +13,6 @@ namespace App\Shared;
  */
 final class RuntimeConfig
 {
-    public bool $telemetryModule = false;
-    public bool $telemetryAppLogs = false;
-    public bool $telemetryHttpIngress = false;
+    public bool $logAppLogs = false;
+    public bool $logHttpIngress = false;
 }

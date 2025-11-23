@@ -51,12 +51,10 @@ readonly class CharcoalApp extends AbstractApp
     {
         $this->runtime = new RuntimeConfig();
         $this->coreData = $this->domain->get(AppBindings::coreData);
-        if ($this->runtime->telemetryModule) {
-            $this->telemetry = $this->domain->get(AppBindings::telemetry);
-        }
+        $this->telemetry = $this->domain->get(AppBindings::telemetry);
 
         // Capture log entries (includes Exceptions and Errors) and archive using telemetry module
-        if ($this->runtime->telemetryModule && $this->runtime->telemetryAppLogs) {
+        if ($this->runtime->logAppLogs) {
             $charcoal = $this;
             $this->events->diagnostics(
                 DiagnosticsEvent::LogEntry,
