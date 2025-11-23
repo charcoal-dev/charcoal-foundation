@@ -13,7 +13,9 @@ use App\Shared\Config\Snapshot\AppConfig;
 use App\Shared\CoreData\CoreDataModule;
 use App\Shared\Telemetry\TelemetryModule;
 use Charcoal\App\Kernel\AbstractApp;
+use Charcoal\App\Kernel\Diagnostics\LogEntry;
 use Charcoal\App\Kernel\Enums\AppEnv;
+use Charcoal\App\Kernel\Enums\DiagnosticsEvent;
 use Charcoal\App\Kernel\Internal\PathRegistry as Directories;
 
 /**
@@ -24,6 +26,7 @@ use Charcoal\App\Kernel\Internal\PathRegistry as Directories;
  */
 readonly class CharcoalApp extends AbstractApp
 {
+    public RuntimeConfig $runtime;
     public CoreDataModule $coreData;
     public TelemetryModule $telemetry;
 
@@ -33,6 +36,7 @@ readonly class CharcoalApp extends AbstractApp
     public function collectSerializableData(): array
     {
         $data = parent::collectSerializableData();
+        $data["runtime"] = null;
         $data["coreData"] = null;
         $data["telemetry"] = null;
         return $data;
@@ -45,8 +49,25 @@ readonly class CharcoalApp extends AbstractApp
      */
     protected function onReadyCallback(): void
     {
+        $this->runtime = new RuntimeConfig();
         $this->coreData = $this->domain->get(AppBindings::coreData);
-        // $this->telemetry = $this->domain->get(AppBindings::telemetry);
+        if ($this->runtime->telemetryModule) {
+            $this->telemetry = $this->domain->get(AppBindings::telemetry);
+        }
+
+        // Capture log entries (includes Exceptions and Errors) and archive using telemetry module
+        if ($this->runtime->telemetryModule && $this->runtime->telemetryAppLogs) {
+            $charcoal = $this;
+            $this->events->diagnostics(
+                DiagnosticsEvent::LogEntry,
+                function (LogEntry $logEntry) use ($charcoal) {
+                    $charcoal->telemetry->appLogs->store(
+                        $charcoal->sapi->current()->enum,
+                        null,
+                        $logEntry
+                    );
+                });
+        }
     }
 
     /**
