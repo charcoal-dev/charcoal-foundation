@@ -13,9 +13,5 @@ namespace App\Shared\CoreData\Contracts;
  */
 interface StorableObjectInterface
 {
-    public static function getStorageRef(): string;
-
-    public static function getCurrentVersion(): int;
-
     public function overrideCacheTtl(): ?int;
 }
