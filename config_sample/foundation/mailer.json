@@ -1,8 +1,8 @@
 {
   "$schema": "../../dev/schemas/configs/mailer.schema.json",
   "mailer": {
-    "service": "disabled",
-    "mode": "send_only",
+    "transport": "disabled",
+    "policy": "send_only",
     "sender": {
       "name": "Untitled Sender",
       "email": "no-answer@domain.tld"

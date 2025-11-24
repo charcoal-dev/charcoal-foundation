@@ -15,24 +15,24 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "service",
-        "mode",
+        "transport",
+        "policy",
         "sender",
         "queue"
       ],
       "properties": {
-        "service": {
+        "transport": {
           "type": "string",
           "enum": [
             "disabled",
             "smtp"
           ]
         },
-        "mode": {
+        "policy": {
           "type": "string",
           "enum": [
             "queue_only",
-            "send_and_queue",
+            "send_and_log",
             "send_only"
           ]
         },

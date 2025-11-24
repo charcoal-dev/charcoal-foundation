@@ -6,7 +6,7 @@
     "charcoal-dev/http-client": "^0.2.11",
     "charcoal-dev/http-trust-proxy": "^0.1.3",
     "charcoal-dev/charsets-sanitizer": "^0.2.0",
-    "charcoal-dev/mailer": "^0.2.1",
+    "charcoal-dev/mailer": "^0.2.2",
     "ext-pdo": "*",
     "ext-curl": "*",
     "ext-sockets": "*",

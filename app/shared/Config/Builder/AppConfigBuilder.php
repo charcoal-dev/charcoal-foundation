@@ -11,6 +11,7 @@ namespace App\Shared\Config\Builder;
 use App\Shared\Config\Snapshot\AppConfig;
 use App\Shared\Config\Traits\CacheConfigBuilderTrait;
 use App\Shared\Config\Traits\DatabaseConfigBuilderTrait;
+use App\Shared\Config\Traits\MailerConfigBuilderTrait;
 use App\Shared\Config\Traits\SapiConfigBuilderTrait;
 use App\Shared\Config\Traits\SecurityConfigBuilderTrait;
 use App\Shared\Enums\Timezones;
@@ -30,6 +31,9 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
     use DatabaseConfigBuilderTrait;
     use SapiConfigBuilderTrait;
     use SecurityConfigBuilderTrait;
+    use MailerConfigBuilderTrait;
+
+    public readonly MailerConfigBuilder $mailer;
 
     /**
      * @param AppEnv $env
@@ -45,11 +49,13 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
         }
 
         parent::__construct($env, $paths, Timezones::from(strval($configData["charcoal"]["timezone"])));
+        $this->mailer = new MailerConfigBuilder();
 
         $this->cacheStoresFromFileConfig($configData["charcoal"]["cache"] ?? null);
         $this->databasesFromFileConfig($configData["charcoal"]["databases"] ?? null);
         $this->httpInterfacesFromFileConfig($configData["charcoal"]["http"]["sapi"] ?? null);
         $this->securityFromFileConfig($configData["charcoal"]["security"] ?? null);
+        $this->mailFromFileConfig($configData["charcoal"]["mailer"] ?? null);
     }
 
     /**
@@ -64,6 +70,7 @@ final class AppConfigBuilder extends \Charcoal\App\Kernel\Config\Builder\AppConf
             $this->database->build(),
             $this->security->build(),
             $this->sapi->build(),
+            $this->mailer->build(),
             new HttpClientConfig()
         );
     }
