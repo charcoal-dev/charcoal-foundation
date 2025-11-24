@@ -191,7 +191,7 @@ final class StoredObjectEntity extends OrmEntityBase implements
         }
 
         // Plain Object (Unencrypted)
-        $options = null;
+        $options = [];
         if ($unserializeAllowedFqcn) {
             $options = ["allowed_classes" => $unserializeAllowedFqcn];
         }
