@@ -29,7 +29,7 @@ final readonly class AppConfig extends \Charcoal\App\Kernel\Config\Snapshot\AppC
         ?DatabaseManagerConfig  $database,
         SecurityConfig          $security,
         SapiConfigBundle        $sapi,
-        public MailerConfig     $mailer,
+        public ?MailerConfig    $mailer,
         public HttpClientConfig $httpClient,
     )
     {
