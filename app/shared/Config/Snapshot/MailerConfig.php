@@ -33,7 +33,7 @@ final readonly class MailerConfig implements ConfigSnapshotInterface
         public int                $queueRetryTimeout = 300,
         public int                $queueExhaustAfter = 10,
         public int                $queueTickInterval = 1,
-        array                     $providerConfigs,
+        array                     $providerConfigs = [],
     )
     {
         // Cross-check configuration objects
