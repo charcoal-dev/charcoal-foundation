@@ -12,7 +12,6 @@ use App\Shared\Config\Snapshot\MailerConfig;
 use App\Shared\Enums\MailDispatchPolicy;
 use App\Shared\Enums\MailProvider;
 use Charcoal\App\Kernel\Internal\Config\ConfigBuilderInterface;
-use Charcoal\App\Kernel\Internal\Config\ConfigSnapshotInterface;
 use Charcoal\Mailer\Contracts\MailProviderConfigInterface;
 
 /**
