@@ -11,7 +11,6 @@ namespace App\Shared\CoreData\ObjectStore;
 use App\Shared\AppConstants;
 use App\Shared\CoreData\Contracts\StorableObjectInterface;
 use App\Shared\CoreData\CoreDataModule;
-use App\Shared\CoreData\Internal\CoreDataConstants;
 use App\Shared\CoreData\Support\StoredObjectPointer;
 use App\Shared\Enums\DatabaseTables;
 use Charcoal\App\Kernel\Contracts\Orm\Entity\CacheableEntityInterface;
@@ -185,5 +184,13 @@ final class ObjectStoreRepository extends OrmRepositoryBase
         }
 
         return $this->invokeStorageHooks($storedObject, FetchOrigin::Database, $storedInCache ?? false);
+    }
+
+    /**
+     * @throws \Charcoal\Cache\Exceptions\CacheStoreOpException
+     */
+    public function purgeFromCache(StoredObjectPointer $objectPointer): void
+    {
+        $this->module->deleteFromCache($objectPointer->storageId);
     }
 }
