@@ -12,6 +12,7 @@ use App\Shared\AppConstants;
 use App\Shared\CoreData\Contracts\StorableObjectInterface;
 use App\Shared\CoreData\CoreDataModule;
 use App\Shared\CoreData\Internal\CoreDataConstants;
+use App\Shared\CoreData\Support\StoredObjectPointer;
 use App\Shared\Enums\DatabaseTables;
 use Charcoal\App\Kernel\Contracts\Orm\Entity\CacheableEntityInterface;
 use Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException;
@@ -52,10 +53,9 @@ final class ObjectStoreRepository extends OrmRepositoryBase
      * @throws EntityRepositoryException
      * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException
      */
-    public function getStoredEntity(string $ref, int $version, bool $useCache): StoredObjectEntity
+    public function getStoredEntity(StoredObjectPointer $objectPointer, bool $useCache): StoredObjectEntity
     {
-        $cacheId = $this->validateFetchArguments($ref, $version);
-        $cacheEntityId = $cacheId . "_entity";
+        $cacheEntityId = $objectPointer->storageId . "_entity";
 
         // From Runtime Memory
         $storedEntity = $this->module->runtimeMemory->get($cacheEntityId);
@@ -77,7 +77,9 @@ final class ObjectStoreRepository extends OrmRepositoryBase
         }
 
         // From Database
-        $storedEntity = $this->getFromDb("ref=? AND version=?", [$ref, $version], invokeStorageHooks: false);
+        $storedEntity = $this->getFromDb("ref=? AND version=?",
+            [$objectPointer->ref, $objectPointer->version],
+            invokeStorageHooks: false);
         if (!$storedEntity instanceof StoredObjectEntity) {
             throw new \UnexpectedValueException("Expected instance of " . StoredObjectEntity::class . "from DB, "
                 . "got \"" . get_debug_type($storedEntity) . "\"");
@@ -109,15 +111,12 @@ final class ObjectStoreRepository extends OrmRepositoryBase
      * @throws WrappedException
      */
     public function getObjectRuntime(
-        string $ref,
-        int    $version,
-        bool   $useCache
+        StoredObjectPointer $objectPointer,
+        bool                $useCache
     ): ?StorableObjectInterface
     {
-        $cacheId = $this->validateFetchArguments($ref, $version);
-
         // From Runtime Memory
-        $storedObject = $this->module->runtimeMemory->get($cacheId);
+        $storedObject = $this->module->runtimeMemory->get($objectPointer->storageId);
         if ($storedObject instanceof StorableObjectInterface) {
             return $storedObject;
         }
@@ -125,9 +124,9 @@ final class ObjectStoreRepository extends OrmRepositoryBase
         // From Caching Engine
         if ($useCache) {
             try {
-                $storedObject = $this->module->getFromCache($cacheId);
+                $storedObject = $this->module->getFromCache($objectPointer->storageId);
                 if ($storedObject instanceof StorableObjectInterface) {
-                    $this->module->runtimeMemory->store($cacheId, $storedObject);
+                    $this->module->runtimeMemory->store($objectPointer->storageId, $storedObject);
                     return $this->invokeStorageHooks($storedObject, FetchOrigin::Cache);
                 }
             } catch (CacheException $e) {
@@ -145,25 +144,23 @@ final class ObjectStoreRepository extends OrmRepositoryBase
      * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException
      */
     public function getObject(
-        string              $ref,
-        int                 $version,
+        StoredObjectPointer $objectPointer,
         bool                $useCache,
         ?array              $unserializeAllowedFqcn = null,
         ?SecretKeyInterface $secret = null,
         Cipher              $cipher = Cipher::AES_256_GCM
     ): StorableObjectInterface
     {
-        $storedObject = $this->getObjectRuntime($ref, $version, $useCache);
+        $storedObject = $this->getObjectRuntime($objectPointer, $useCache);
         if ($storedObject) {
             return $storedObject;
         }
 
-        $cacheId = $this->generateCacheId($ref, $version);
-        $storedEntity = $this->getStoredEntity($ref, $version, $useCache);
+        $storedEntity = $this->getStoredEntity($objectPointer, $useCache);
         $storedObject = $storedEntity->getObject($unserializeAllowedFqcn, $secret, $cipher);
 
         // Store in Runtime Memory
-        $this->module->runtimeMemory->store($cacheId, $storedObject);
+        $this->module->runtimeMemory->store($objectPointer->storageId, $storedObject);
 
         // Store in Cache?
         if ($useCache) {
@@ -179,7 +176,7 @@ final class ObjectStoreRepository extends OrmRepositoryBase
             }
 
             try {
-                $this->module->storeInCache($cacheId, $storedObject,
+                $this->module->storeInCache($objectPointer->storageId, $storedObject,
                     max($this->entityCacheTtl, $storedObject->overrideCacheTtl()));
                 $storedInCache = true;
             } catch (CacheException $e) {
@@ -188,30 +185,5 @@ final class ObjectStoreRepository extends OrmRepositoryBase
         }
 
         return $this->invokeStorageHooks($storedObject, FetchOrigin::Database, $storedInCache ?? false);
-    }
-
-    /**
-     * Validated the argument reference key and version before fetch/lookup.
-     */
-    private function validateFetchArguments(string $ref, int $version): string
-    {
-        // Bare validations
-        if (!$ref || !preg_match(CoreDataConstants::STORED_OBJECT_REF_REGEXP, $ref)) {
-            throw new \InvalidArgumentException("Invalid stored object reference: " . $ref);
-        }
-
-        if (!$version || $version < 1 || $version > 65535) {
-            throw new \OutOfRangeException("Invalid stored object version: " . $version);
-        }
-
-        return $this->generateCacheId($ref, $version);
-    }
-
-    /**
-     * No validations; Expects arguments to be valid.
-     */
-    private function generateCacheId(string $ref, int $version): string
-    {
-        return "objectStore:" . StoredObjectEntity::uniqueRefId($ref, $version);
     }
 }
