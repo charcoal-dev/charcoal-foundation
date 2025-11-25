@@ -13,21 +13,37 @@ use Charcoal\Contracts\Sapi\Exceptions\TranslatedExceptionInterface;
 use Charcoal\Contracts\Sapi\SapiRequestContextInterface;
 
 /**
- * Class AppTranslatedException
- * @package App\Shared\Exceptions
+ * Represents an exception with support for translation and additional context.
+ * Extends the base AppException and implements the TranslatedExceptionInterface.
+ * This exception enables translation of messages and codes while providing enhanced
+ * contextual information to the exception subsystem.
  */
 final class AppTranslatedException extends AppException implements TranslatedExceptionInterface
 {
+    public readonly array $context;
+
     public function __construct(
-        DomainMessageEnumInterface   $msg,
-        public readonly array        $context = [],
-        ?SapiRequestContextInterface $requestContext = null,
-        ?\Throwable                  $previous = null,
+        DomainMessageEnumInterface|string $msg,
+        array                             $context = [],
+        ?array                            $words = null,
+        ?SapiRequestContextInterface      $requestContext = null,
+        ?\Throwable                       $previous = null,
+        ?int                              $code = null,
+        ?string                           $param = null
     )
     {
-        $code = $msg->getCode($requestContext, $context);
+        if ($param) {
+            $context["param"] = $param;
+        }
+
+        $this->context = $context;
+        if (!$code && $msg instanceof DomainMessageEnumInterface) {
+            $code = $msg->getCode($requestContext, $context);
+        }
+
         parent::__construct(
-            $msg->getTranslated($requestContext, $context),
+            $msg instanceof DomainMessageEnumInterface ?
+                $msg->getTranslated($requestContext, $words ?? []) : $msg,
             is_int($code) ? $code : 0,
             $previous,
         );
