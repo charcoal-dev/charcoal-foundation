@@ -10,7 +10,9 @@ namespace App\Shared\CoreData\Countries;
 
 use App\Shared\AppConstants;
 use App\Shared\Enums\DatabaseTables;
+use Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException;
 use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
+use Charcoal\Contracts\Dataset\Sort;
 
 /**
  * Class CountriesRepository
@@ -24,5 +26,36 @@ final class CountriesRepository extends OrmRepositoryBase
             DatabaseTables::Countries,
             AppConstants::ORM_CACHE_ERROR_HANDLING
         );
+    }
+
+    /**
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityNotFoundException
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
+     */
+    public function getSingle(string $code): ?CountryEntity
+    {
+        /** @var CountryEntity */
+        return $this->getEntity($code, false, sprintf("code%d=?", strlen($code)), [$code], false);
+    }
+
+    /**
+     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
+     */
+    public function getList(
+        ?bool  $status = null,
+        Sort   $sort = Sort::ASC,
+        string $order = "name"
+    ): array
+    {
+        try {
+            return $this->getMultipleFromDb(
+                is_bool($status) ? "status=?" : "1",
+                is_bool($status) ? [$status] : [],
+                $sort,
+                $order
+            );
+        } catch (EntityNotFoundException) {
+            return [];
+        }
     }
 }
