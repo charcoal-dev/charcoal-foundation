@@ -19,6 +19,7 @@ use Charcoal\Filesystem\Path\DirectoryPath;
 use Charcoal\Http\Commons\Enums\CacheControl;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Headers\Headers;
+use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Server\Contracts\Cache\CacheProviderInterface;
 use Charcoal\Http\Server\Request\Cache\CachedResponsePointer;
@@ -119,6 +120,7 @@ final readonly class CachedResponseProvider implements CacheProviderInterface
                 "allowed_classes" => [
                     CachedResult::class,
                     Headers::class,
+                    HeadersImmutable::class,
                     Charset::class,
                     KeyValue::class,
                     \DateTimeImmutable::class,
