@@ -148,6 +148,11 @@ final readonly class CachedResponseProvider implements CacheProviderInterface
         }
     }
 
+    /**
+     * @param CachedResponsePointer $pointer
+     * @param CachedResult $result
+     * @return void
+     */
     public function store(CachedResponsePointer $pointer, CachedResult $result): void
     {
         $cacheResultKey = $this->normalizeStorageKey($pointer);
