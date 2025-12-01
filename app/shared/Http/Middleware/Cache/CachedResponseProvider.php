@@ -99,6 +99,8 @@ final readonly class CachedResponseProvider implements CacheProviderInterface
                 if (is_string($cacheResultBuffer) && $cacheResultBuffer) {
                     return $this->handleCacheResultBuffer($cacheResultBuffer, $cacheResultKey);
                 }
+
+                return null;
             }
         } catch (\Exception $e) {
             Diagnostics::app()->warning("Failed to load cached response: " . $e::class,
@@ -167,10 +169,13 @@ final readonly class CachedResponseProvider implements CacheProviderInterface
                         throw $exception;
                     }
                 }
+
+                return;
             }
 
             if ($this->storage instanceof CacheClient) {
                 $this->storage->set($cacheResultKey, $cacheBuffer, $pointer->validity);
+                return;
             }
         } catch (\Exception $e) {
             Diagnostics::app()->warning("Failed to store cached response: " . $e::class,
@@ -211,6 +216,7 @@ final readonly class CachedResponseProvider implements CacheProviderInterface
             // Cache
             if ($this->storage instanceof CacheClient) {
                 $this->storage->delete($cacheResultKey);
+                return;
             }
         } catch (\Exception $e) {
             Diagnostics::app()->warning("Failed to delete cached response: " . $e::class,
