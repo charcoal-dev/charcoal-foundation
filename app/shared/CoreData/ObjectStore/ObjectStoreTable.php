@@ -36,7 +36,7 @@ final class ObjectStoreTable extends OrmTableBase
     {
         $cols->setDefaultCharset(Charset::ASCII);
 
-        $cols->string("ref")->length(40);
+        $cols->string("ref")->length(64);
         $cols->int("version")->unSigned()->size(2);
         $cols->binary("payload")->length(10240);
         $cols->string("kid")->length(80)->nullable();
