@@ -205,10 +205,12 @@ final readonly class CachedResponseProvider implements CacheProviderInterface
             if ($this->storage instanceof DirectoryPath) {
                 $filePath = $this->storage->join($cacheResultKey)->path;
                 error_clear_last();
-                if (!@unlink($filePath)) {
-                    $exception = ErrorHelper::lastErrorToRuntimeException();
-                    if ($exception) {
-                        throw $exception;
+                if(@file_exists($filePath)) {
+                    if (!@unlink($filePath)) {
+                        $exception = ErrorHelper::lastErrorToRuntimeException();
+                        if ($exception) {
+                            throw $exception;
+                        }
                     }
                 }
 
