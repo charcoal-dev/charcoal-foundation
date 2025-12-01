@@ -105,6 +105,7 @@ final readonly class CachedResponseProvider implements CacheProviderInterface
         } catch (\Exception $e) {
             Diagnostics::app()->warning("Failed to load cached response: " . $e::class,
                 exception: $e);
+            return null;
         }
 
         throw new \RuntimeException("Unsupported HTTP cache storage type");
@@ -180,6 +181,7 @@ final readonly class CachedResponseProvider implements CacheProviderInterface
         } catch (\Exception $e) {
             Diagnostics::app()->warning("Failed to store cached response: " . $e::class,
                 exception: $e);
+            return;
         }
     }
 
@@ -221,6 +223,7 @@ final readonly class CachedResponseProvider implements CacheProviderInterface
         } catch (\Exception $e) {
             Diagnostics::app()->warning("Failed to delete cached response: " . $e::class,
                 exception: $e);
+            return;
         }
 
         throw new \RuntimeException("Unsupported HTTP cache storage type");
