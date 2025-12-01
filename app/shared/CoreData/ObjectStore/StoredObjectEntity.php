@@ -235,4 +235,18 @@ final class StoredObjectEntity extends OrmEntityBase implements
         return sprintf('Stored object "%s" (v: %d) stored in CACHE',
             $this->ref, $this->version);
     }
+
+    /**
+     * @return array
+     */
+    protected function collectSerializableData(): array
+    {
+        $data = parent::collectSerializableData();
+        $data["ref"] = $this->ref;
+        $data["version"] = $this->version;
+        $data["payload"] = $this->payload;
+        $data["kid"] = $this->kid;
+        $data["updatedOn"] = $this->updatedOn;
+        return $data;
+    }
 }
