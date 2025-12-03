@@ -53,11 +53,10 @@ final readonly class BruteForceControl implements SecurityModuleInterface
      */
     public function logEntry(
         BruteForcePolicy    $policy,
-        BruteForceActor     $actor,
         ?\DateTimeImmutable $timestamp = null
     ): void
     {
-        $this->bfcIndex->logEntry($actor, $policy->action, $timestamp);
+        $this->bfcIndex->logEntry($policy->actor, $policy->action, $timestamp);
     }
 
     /**
@@ -66,10 +65,9 @@ final readonly class BruteForceControl implements SecurityModuleInterface
      */
     public function getCount(
         ?BruteForcePolicy   $policy,
-        ?BruteForceActor    $actor = null,
         ?\DateTimeImmutable $timestamp = null
     ): int
     {
-        return $this->bfcIndex->getCount($actor, $policy->action, $policy->duration, $timestamp);
+        return $this->bfcIndex->getCount($policy->actor, $policy->action, $policy->duration, $timestamp);
     }
 }

@@ -13,10 +13,17 @@ namespace App\Shared\Security\BruteForceControl;
  */
 final readonly class BruteForcePolicy
 {
+    public BruteForceAction $action;
+
     public function __construct(
-        public BruteForceAction $action,
+        public BruteForceActor  $actor,
+        BruteForceAction|string $action,
         public int              $duration = 3600,
     )
     {
+        $this->action = is_string($action) ? new BruteForceAction($action) : $action;
+        if ($this->duration < 1) {
+            throw new \InvalidArgumentException("BFC duration must be greater than 0");
+        }
     }
 }
