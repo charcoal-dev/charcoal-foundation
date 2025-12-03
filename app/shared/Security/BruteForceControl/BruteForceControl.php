@@ -52,12 +52,12 @@ final readonly class BruteForceControl implements SecurityModuleInterface
      * @throws \Charcoal\Database\Exceptions\QueryExecuteException
      */
     public function logEntry(
+        BruteForcePolicy    $policy,
         BruteForceActor     $actor,
-        BruteForceAction    $action,
         ?\DateTimeImmutable $timestamp = null
     ): void
     {
-        $this->bfcIndex->logEntry($actor, $action, $timestamp);
+        $this->bfcIndex->logEntry($actor, $policy->action, $timestamp);
     }
 
     /**
@@ -65,12 +65,11 @@ final readonly class BruteForceControl implements SecurityModuleInterface
      * @throws \Charcoal\Database\Exceptions\QueryFetchException
      */
     public function getCount(
+        ?BruteForcePolicy   $policy,
         ?BruteForceActor    $actor = null,
-        ?BruteForceAction   $action = null,
-        int                 $duration = 3600,
         ?\DateTimeImmutable $timestamp = null
     ): int
     {
-        return $this->bfcIndex->getCount($actor, $action, $duration, $timestamp);
+        return $this->bfcIndex->getCount($actor, $policy->action, $policy->duration, $timestamp);
     }
 }
