@@ -12,6 +12,7 @@ use App\Shared\CoreData\Bfc\BfcRepository;
 use App\Shared\Security\SecurityService;
 use Charcoal\App\Kernel\Contracts\Security\SecurityModuleInterface;
 use Charcoal\App\Kernel\Security\SecurityService as SecurityServiceKernel;
+use Charcoal\Base\Exceptions\WrappedException;
 use Charcoal\Base\Objects\Traits\ControlledSerializableTrait;
 
 /**
@@ -49,25 +50,32 @@ final readonly class BruteForceControl implements SecurityModuleInterface
     }
 
     /**
-     * @throws \Charcoal\Database\Exceptions\QueryExecuteException
+     * @throws WrappedException
      */
     public function logEntry(
         BruteForcePolicy    $policy,
         ?\DateTimeImmutable $timestamp = null
     ): void
     {
-        $this->bfcIndex->logEntry($policy->actor, $policy->action, $timestamp);
+        try {
+            $this->bfcIndex->logEntry($policy->actor, $policy->action, $timestamp);
+        } catch (\Exception $e) {
+            throw new WrappedException($e, "Failed to log BFC entry");
+        }
     }
 
     /**
-     * @throws \Charcoal\Database\Exceptions\QueryExecuteException
-     * @throws \Charcoal\Database\Exceptions\QueryFetchException
+     * @throws WrappedException
      */
     public function getCount(
         ?BruteForcePolicy   $policy,
         ?\DateTimeImmutable $timestamp = null
     ): int
     {
-        return $this->bfcIndex->getCount($policy->actor, $policy->action, $policy->duration, $timestamp);
+        try {
+            return $this->bfcIndex->getCount($policy->actor, $policy->action, $policy->duration, $timestamp);
+        } catch (\Exception $e) {
+            throw new WrappedException($e, "Failed to get BFC count");
+        }
     }
 }
