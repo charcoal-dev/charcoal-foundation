@@ -57,6 +57,10 @@ final readonly class BruteForceControl implements SecurityModuleInterface
         ?\DateTimeImmutable $timestamp = null
     ): void
     {
+        if (!$policy->status) {
+            return;
+        }
+
         try {
             $this->bfcIndex->logEntry($policy->actor, $policy->action, $timestamp);
         } catch (\Exception $e) {
