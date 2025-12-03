@@ -11,6 +11,7 @@ namespace App\Shared;
 use App\Domain\AppManifest;
 use App\Shared\Config\Snapshot\AppConfig;
 use App\Shared\CoreData\CoreDataModule;
+use App\Shared\Security\SecurityService;
 use App\Shared\Telemetry\TelemetryModule;
 use Charcoal\App\Kernel\AbstractApp;
 use Charcoal\App\Kernel\Diagnostics\LogEntry;
@@ -23,6 +24,7 @@ use Charcoal\App\Kernel\Internal\PathRegistry as Directories;
  * @package App\Shared
  * @property PathRegistry $paths
  * @property AppConfig $config
+ * @property SecurityService $security
  */
 readonly class CharcoalApp extends AbstractApp
 {
