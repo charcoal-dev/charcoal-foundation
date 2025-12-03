@@ -67,7 +67,7 @@ final readonly class BruteForceControl implements SecurityModuleInterface
     /**
      * @throws WrappedException
      */
-    public function getCount(
+    public function getAttemptsCount(
         ?BruteForcePolicy   $policy,
         ?\DateTimeImmutable $timestamp = null
     ): int
@@ -77,5 +77,16 @@ final readonly class BruteForceControl implements SecurityModuleInterface
         } catch (\Exception $e) {
             throw new WrappedException($e, "Failed to get BFC count");
         }
+    }
+
+    /**
+     * @throws WrappedException
+     */
+    public function isBlocked(
+        ?BruteForcePolicy   $policy,
+        ?\DateTimeImmutable $timestamp = null
+    ): bool
+    {
+        return $this->getAttemptsCount($policy, $timestamp) >= $policy->maxAttempts;
     }
 }

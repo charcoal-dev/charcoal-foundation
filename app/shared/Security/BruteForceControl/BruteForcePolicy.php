@@ -18,10 +18,16 @@ final readonly class BruteForcePolicy
     public function __construct(
         public BruteForceActor  $actor,
         BruteForceAction|string $action,
+        public int              $maxAttempts,
         public int              $duration = 3600,
+        public bool             $status = true
     )
     {
         $this->action = is_string($action) ? new BruteForceAction($action) : $action;
+        if ($this->maxAttempts < 1) {
+            throw new \InvalidArgumentException("BFC max attempts must be greater than 0");
+        }
+
         if ($this->duration < 1) {
             throw new \InvalidArgumentException("BFC duration must be greater than 0");
         }
