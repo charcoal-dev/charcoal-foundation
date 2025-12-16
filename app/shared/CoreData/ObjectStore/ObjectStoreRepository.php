@@ -192,5 +192,6 @@ final class ObjectStoreRepository extends OrmRepositoryBase
     public function purgeFromCache(StoredObjectPointer $objectPointer): void
     {
         $this->module->deleteFromCache($objectPointer->storageId);
+        $this->module->deleteFromCache($objectPointer->storageId . "_entity");
     }
 }
