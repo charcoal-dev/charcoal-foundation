@@ -12,7 +12,6 @@ use App\Shared\Config\Snapshot\MailerConfig;
 use App\Shared\Enums\MailDispatchPolicy;
 use App\Shared\Enums\MailProvider;
 use Charcoal\App\Kernel\Internal\Config\ConfigBuilderInterface;
-use Charcoal\Mailer\Contracts\MailProviderConfigInterface;
 
 /**
  * A builder class responsible for constructing a configuration for the mailer system.
@@ -28,16 +27,6 @@ final class MailerConfigBuilder implements ConfigBuilderInterface
     public int $queueRetryTimeout = 300;
     public int $queueExhaustAfter = 10;
     public int $queueTickInterval = 1;
-    private array $transportConfigs = [];
-
-    /**
-     * @api
-     */
-    public function setTransportConfig(MailProvider $provider, MailProviderConfigInterface $config): self
-    {
-        $this->transportConfigs[$provider->value] = $config;
-        return $this;
-    }
 
     /**
      * @return MailerConfig
@@ -53,7 +42,6 @@ final class MailerConfigBuilder implements ConfigBuilderInterface
             $this->queueRetryTimeout,
             $this->queueExhaustAfter,
             $this->queueTickInterval,
-            $this->transportConfigs
         );
     }
 }

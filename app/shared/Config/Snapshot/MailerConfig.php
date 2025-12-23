@@ -12,7 +12,6 @@ use App\Shared\Enums\MailDispatchPolicy;
 use App\Shared\Enums\MailProvider;
 use Charcoal\App\Kernel\Internal\Config\ConfigSnapshotInterface;
 use Charcoal\App\Kernel\Support\ContactHelper;
-use Charcoal\Mailer\Contracts\MailProviderConfigInterface;
 
 /**
  * This class defines properties required for configuring a mail dispatch system.
@@ -21,9 +20,6 @@ use Charcoal\Mailer\Contracts\MailProviderConfigInterface;
  */
 final readonly class MailerConfig implements ConfigSnapshotInterface
 {
-    /** @var array<string, MailProviderConfigInterface> */
-    private array $transportConfigs;
-
     public function __construct(
         public MailProvider       $agent,
         public MailDispatchPolicy $policy,
@@ -33,7 +29,6 @@ final readonly class MailerConfig implements ConfigSnapshotInterface
         public int                $queueRetryTimeout = 300,
         public int                $queueExhaustAfter = 10,
         public int                $queueTickInterval = 1,
-        array                     $providerConfigs = [],
     )
     {
         // Cross-check configuration objects
@@ -62,36 +57,5 @@ final readonly class MailerConfig implements ConfigSnapshotInterface
         if ($this->queueTickInterval < 1 || $this->queueTickInterval > 300) {
             throw new \OutOfRangeException("Invalid queue tick interval value: " . $this->queueTickInterval);
         }
-
-        // Provider Configurations
-        $finalConfigs = [];
-        if ($providerConfigs) {
-            foreach ($providerConfigs as $providerId => $providerConfig) {
-                if (!$providerConfig instanceof MailProviderConfigInterface) {
-                    throw new \InvalidArgumentException("Invalid mail provider configuration object: " .
-                        get_debug_type($providerConfig));
-                }
-
-                $providerEnum = MailProvider::tryFrom(strval($providerId));
-                if (!$providerEnum) {
-                    throw new \InvalidArgumentException("Invalid MailProvider enum: " . $providerId);
-                } elseif ($providerEnum === MailProvider::Disabled) {
-                    throw new \InvalidArgumentException("Configuration cannot be stored for Disabled enum case");
-                }
-
-                $finalConfigs[$providerEnum->value] = $providerConfig;
-            }
-        }
-
-        $this->transportConfigs = $finalConfigs;
-    }
-
-    /**
-     * @param MailProvider $provider
-     * @return MailProviderConfigInterface|null
-     */
-    public function getTransportConfig(MailProvider $provider): ?MailProviderConfigInterface
-    {
-        return $this->transportConfigs[$provider->value] ?? null;
     }
 }
