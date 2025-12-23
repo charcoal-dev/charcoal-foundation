@@ -43,6 +43,7 @@ readonly class CharcoalApp extends AbstractApp
         $data["runtime"] = null;
         $data["coreData"] = null;
         $data["telemetry"] = null;
+        $data["mailer"] = null;
         return $data;
     }
 
@@ -64,8 +65,9 @@ readonly class CharcoalApp extends AbstractApp
     {
         $this->coreData = $this->domain->get(AppBindings::coreData);
         $this->telemetry = $this->domain->get(AppBindings::telemetry);
+        $this->mailer = $this->domain->get(AppBindings::mailer);
 
-        // Capture log entries (includes Exceptions and Errors) and archive using telemetry module
+        // Capture log entries (includes Exceptions and Errors) and archive using the telemetry module
         if ($this->runtime->logAppLogs) {
             $logLevel = $this->runtime->appLogLevel->value;
             $this->events->diagnostics(

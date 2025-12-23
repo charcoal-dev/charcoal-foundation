@@ -17,6 +17,7 @@ enum AppBindings
     /** @for Foundation App */
     case coreData;
     case telemetry;
+    case mailer;
 
     /** @for Placeholder */
     case ethereal;
