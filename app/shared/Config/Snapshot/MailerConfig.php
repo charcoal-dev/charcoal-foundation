@@ -31,11 +31,6 @@ final readonly class MailerConfig implements ConfigSnapshotInterface
         public int                $queueTickInterval = 1,
     )
     {
-        // Cross-check configuration objects
-        if ($this->agent !== MailProvider::Disabled) {
-            throw new \OutOfBoundsException($this->agent->name . " configuration object required");
-        }
-
         // Validate Sender Name & Email
         if (!preg_match('/\A[A-Za-z0-9\-.!$%&+#@]+(\s[A-Za-z0-9\-.!$%&+#@]+)*\z/', $this->senderName)) {
             throw new \InvalidArgumentException("Invalid sender name");
