@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace App\Shared\Config\Builder;
 
 use App\Shared\Config\Snapshot\MailerConfig;
-use App\Shared\Enums\MailDispatchPolicy;
 use App\Shared\Enums\MailProvider;
+use App\Shared\Mailer\Enums\MailDispatchPolicy;
 use Charcoal\App\Kernel\Internal\Config\ConfigBuilderInterface;
 
 /**

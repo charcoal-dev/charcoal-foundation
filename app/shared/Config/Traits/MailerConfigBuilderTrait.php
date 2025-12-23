@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Config\Traits;
 
-use App\Shared\Enums\MailDispatchPolicy;
 use App\Shared\Enums\MailProvider;
+use App\Shared\Mailer\Enums\MailDispatchPolicy;
 
 /**
  * Provides functionality for configuring a mailer service using an array-based configuration file.

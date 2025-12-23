@@ -14,13 +14,14 @@ use Charcoal\App\Kernel\Security\Secrets\SecretEntropyRemixing;
 use Charcoal\Security\Secrets\Support\SecretKeyRef;
 
 /**
- * Class SecretKeys
- * @package App\Shared\Enums
+ * Enum representing different secret keys used within the application.
+ * Each secret key is associated with a specific functionality or module.
  */
 enum SecretKeys: string implements SecretKeysEnumInterface
 {
     case Primary = "charcoal_app_primary";
     case CoreDataModule = "coreData";
+    case Mailer = "mailer";
     case Telemetry = "telemetry";
 
     /**
@@ -54,6 +55,7 @@ enum SecretKeys: string implements SecretKeysEnumInterface
     {
         return match ($this) {
             self::Telemetry,
+            self::Mailer,
             self::CoreDataModule => new SecretEntropyRemixing($this->value,
                 AppConstants::SECRETS_REMIX_ITERATIONS),
             default => null
@@ -69,6 +71,7 @@ enum SecretKeys: string implements SecretKeysEnumInterface
         return match ($this) {
             self::Primary,
             self::Telemetry,
+            self::Mailer,
             self::CoreDataModule => self::Primary->value,
         };
     }

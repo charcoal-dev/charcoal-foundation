@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Enums;
+namespace App\Shared\Mailer\Enums;
 
 /**
  * Represents the policies available for handling mail dispatch within the system.

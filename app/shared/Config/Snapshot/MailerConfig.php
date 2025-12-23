@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Config\Snapshot;
 
-use App\Shared\Enums\MailDispatchPolicy;
 use App\Shared\Enums\MailProvider;
+use App\Shared\Mailer\Enums\MailDispatchPolicy;
 use Charcoal\App\Kernel\Internal\Config\ConfigSnapshotInterface;
 use Charcoal\App\Kernel\Support\ContactHelper;
 

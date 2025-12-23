@@ -11,6 +11,7 @@ namespace App\Shared;
 use App\Domain\AppManifest;
 use App\Shared\Config\Snapshot\AppConfig;
 use App\Shared\CoreData\CoreDataModule;
+use App\Shared\Mailer\MailerModule;
 use App\Shared\Security\SecurityService;
 use App\Shared\Telemetry\TelemetryModule;
 use Charcoal\App\Kernel\AbstractApp;
@@ -31,6 +32,7 @@ readonly class CharcoalApp extends AbstractApp
     public RuntimeConfig $runtime;
     public CoreDataModule $coreData;
     public TelemetryModule $telemetry;
+    public MailerModule $mailer;
 
     /**
      * @return array

@@ -27,4 +27,9 @@ interface AppConstants
     public const string SECRETS_LOCAL_NAMESPACE = "charcoal";
     /** @var int Number of iterations to perform when remixing secret keys (from app's Primary key)') */
     public const int SECRETS_REMIX_ITERATIONS = 1;
+
+    /** @for=Mailer */
+    /** @var string Mailer signatures used in MIME formated messages */
+    public const string MAILER_SIGNATURE = "Charcoal Foundation v0.2.x";
+    public const string MAILER_BOUNDARY_PREFIX = "--Charcoal_B";
 }

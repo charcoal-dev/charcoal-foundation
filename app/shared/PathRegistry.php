@@ -25,7 +25,7 @@ final readonly class PathRegistry extends \Charcoal\App\Kernel\Internal\PathRegi
     public DirectoryPath $emails;
 
     /**
-     * Declaring paths right in application constructor (no lazy loading)
+     * Declaring paths right in the application constructor (no lazy loading)
      */
     public function declarePaths(): void
     {
@@ -34,5 +34,6 @@ final readonly class PathRegistry extends \Charcoal\App\Kernel\Internal\PathRegi
         $this->tmp = $this->getValidatedPathSnapshot("/var/tmp", true, true, true, true);
         $this->shared = $this->getValidatedPathSnapshot("/var/shared", true, true, true, true);
         $this->storage = $this->getValidatedPathSnapshot("/var/storage", true, true, false, true);
+        $this->emails = $this->getValidatedPathSnapshot("/var/storage/emails", true, true, false, true);
     }
 }
