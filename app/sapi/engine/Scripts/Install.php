@@ -9,6 +9,9 @@ declare(strict_types=1);
 namespace App\Sapi\Engine\Scripts;
 
 use App\Shared\Cli\DomainScriptBase;
+use App\Shared\Contracts\PersistedConfigInterface;
+use App\Shared\CoreData\ObjectStore\StoredObjectEntity;
+use App\Shared\CoreData\Support\StoredObjectPointer;
 use App\Shared\Enums\Databases;
 use App\Shared\Enums\SecretKeys;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
@@ -18,8 +21,9 @@ use Charcoal\Base\Objects\ObjectHelper;
 use Charcoal\Database\Orm\Migrations;
 
 /**
- * Class Install
- * @package App\Sapi\Engine\Scripts
+ * The Installation class is responsible for the execution of a domain-related installation script.
+ * It performs tasks such as checking secret keys, creating required database tables,
+ * and ensuring the existence of required stored objects.
  */
 class Install extends DomainScriptBase
 {
@@ -99,30 +103,38 @@ class Install extends DomainScriptBase
      * @api
      */
     protected function handleRequiredStoredObject(
-        string   $objectClassname,
-        \Closure $newInstance
+        StoredObjectPointer $objectPointer,
+        \Closure            $newInstance
     ): void
     {
-        $objectStore = $this->getAppBuild()->coreData->objectStore;
-        if (!class_exists($objectClassname)) {
+        if (!class_exists($objectPointer->fqcn)) {
             throw new \LogicException("Bad stored object classname");
         }
 
-        $this->inline("\t{grey}Checking {yellow}" . ObjectHelper::baseClassName($objectClassname) . "{/}{grey} ... ");
+        $this->inline("\t{grey}Checking {yellow}"
+            . ObjectHelper::baseClassName($objectPointer->fqcn) . "{/}{grey} ... ");
+
+        $objectStore = $this->getAppBuild()->coreData->objectStore;
 
         try {
-            $objectStore->getObject($objectClassname, 1, useCache: false);
+            $objectStore->getObject($objectPointer, useCache: false);
             $this->print("{green}Exists");
             return;
         } catch (EntityNotFoundException) {
         }
 
         $newInstance = $newInstance();
-        if (!$newInstance instanceof $objectClassname) {
-            throw new \LogicException("Expected " . $objectClassname . " instance");
+        /** @var PersistedConfigInterface $newInstance */
+        if (!$newInstance instanceof $objectPointer->fqcn) {
+            throw new \LogicException("Expected " . $objectPointer->fqcn . " instance");
         }
 
-        $objectStore->store($newInstance);
+        $objectStore->store(StoredObjectEntity::plainEnvelope(
+            $objectPointer->ref,
+            $newInstance,
+            $objectPointer->version
+        ));
+
         $this->print("{green}Created");
     }
 
