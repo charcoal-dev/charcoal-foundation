@@ -10,12 +10,11 @@ namespace App\Shared\Cli;
 
 use App\Shared\CharcoalApp;
 use App\Shared\Enums\SemaphoreScopes;
-use Charcoal\App\Kernel\Enums\SemaphoreType;
 use Charcoal\App\Kernel\ServerApi\Cli\AppCliHandler;
 use Charcoal\App\Kernel\ServerApi\Cli\AppCliScript;
 use Charcoal\App\Kernel\Support\TypeCaster;
 use Charcoal\Cli\Enums\ExecutionState;
-use Charcoal\Filesystem\Semaphore\FileLock;
+use Charcoal\Semaphore\Contracts\SemaphoreLockInterface;
 use Charcoal\Semaphore\Exceptions\SemaphoreLockException;
 
 /**
@@ -31,9 +30,6 @@ abstract class DomainScriptBase extends AppCliScript
      * @param AppCliHandler $cli
      * @param ExecutionState $initialState
      * @param string|null $semaphoreLockId
-     * @throws SemaphoreLockException
-     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
-     * @throws \Charcoal\Semaphore\Exceptions\SemaphoreUnlockException
      */
     public function __construct(
         AppCliHandler              $cli,
@@ -206,21 +202,19 @@ abstract class DomainScriptBase extends AppCliScript
 
 
     /**
-     * @param string $resourceId
-     * @param bool $setAutoRelease
-     * @return FileLock
      * @throws SemaphoreLockException
-     * @throws \Charcoal\Semaphore\Exceptions\SemaphoreUnlockException
+     * @api Get a semaphore lock.
      */
-    protected function obtainSemaphoreLock(string $resourceId, bool $setAutoRelease): FileLock
+    protected function obtainSemaphoreLock(
+        string          $resourceId,
+        bool            $setAutoRelease,
+        SemaphoreScopes $scope = SemaphoreScopes::Cli
+    ): SemaphoreLockInterface
     {
         $this->inline(sprintf("Obtaining semaphore lock for {yellow}{invert} %s {/} ... ", $resourceId));
 
         try {
-            $lock = $this->getAppBuild()->security
-                ->semaphore(SemaphoreType::Filesystem_Private)
-                ->lock(SemaphoreScopes::Cli, $resourceId);
-
+            $lock = $this->getAppBuild()->security->semaphore->lock($scope, $resourceId);
             $this->inline("{green}Success{/} {grey}[AutoRelease={/}");
             if ($setAutoRelease) {
                 $lock->setAutoRelease();
