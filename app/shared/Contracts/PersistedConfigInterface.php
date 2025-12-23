@@ -9,10 +9,14 @@ declare(strict_types=1);
 namespace App\Shared\Contracts;
 
 use App\Shared\CoreData\Contracts\StorableObjectInterface;
+use App\Shared\CoreData\Support\StoredObjectPointer;
 
 /**
  * Marker interface for configuration objects stored in core data module
  */
-interface PersistedConfigObjectInterface extends StorableObjectInterface
+interface PersistedConfigInterface extends StorableObjectInterface
 {
+    public static function getConfigKey(): string;
+
+    public static function getCurrentPointer(): StoredObjectPointer;
 }

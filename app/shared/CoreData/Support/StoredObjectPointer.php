@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace App\Shared\CoreData\Support;
 
-use App\Shared\Contracts\PersistedConfigObjectInterface;
+use App\Shared\Contracts\PersistedConfigInterface;
 use App\Shared\CoreData\Internal\CoreDataConstants;
 use App\Shared\CoreData\ObjectStore\StoredObjectEntity;
 
@@ -22,7 +22,7 @@ final readonly class StoredObjectPointer
     public string $storageId;
 
     /**
-     * @param class-string<PersistedConfigObjectInterface> $fqcn
+     * @param class-string<PersistedConfigInterface> $fqcn
      * @param string $ref
      * @param int $version
      * @param bool $validate
