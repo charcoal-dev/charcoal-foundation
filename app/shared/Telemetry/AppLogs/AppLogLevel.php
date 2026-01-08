@@ -31,7 +31,7 @@ enum AppLogLevel: string
     /**
      * Converts a LogLevel instance to the corresponding diagnostic log level enumeration.
      */
-    public static function fromDiagnostics(LogLevel $level)
+    public static function fromDiagnostics(LogLevel $level): self
     {
         return self::tryFrom(strtolower($level->name)) ?? self::Unknown;
     }
