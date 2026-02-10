@@ -43,8 +43,8 @@ RUN set -eux; \
       echo ">>> Building PHP extension: curl"; \
       docker-php-ext-install -j"$(nproc)" curl; \
     fi; \
-    echo ">>> Adding phpredis 6.1.0"; \
-    curl -fsSL -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/refs/tags/6.1.0.tar.gz; \
+    echo ">>> Adding phpredis 6.3.0"; \
+    curl -fsSL -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/refs/tags/6.3.0.tar.gz; \
     mkdir -p /usr/src/php/ext/redis; \
     tar -xzf /tmp/phpredis.tar.gz -C /usr/src/php/ext/redis --strip-components=1; \
     test -f /usr/src/php/ext/redis/config.m4; \
