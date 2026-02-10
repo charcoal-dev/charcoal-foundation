@@ -10,7 +10,7 @@ At its core, it offers two primary entry points:
  - A CLI engine for command-line operations
 
 Unlike higher-level frameworks that introduce extensive wrappers and abstractions, 
-Charcoal Monolith Foundation remains lightweight and unopinionated, ensuring raw performance and direct integration with **PHP 8.3**.
+Charcoal Monolith Foundation remains lightweight and unopinionated, ensuring raw performance and direct integration with **PHP 8.5**.
 
 When deployed via Docker, it can be seamlessly configured alongside MySQL 8.1 and Redis 7.2, allowing for a robust, production-ready environment while maintaining the low-level simplicity that defines a true Level 0 framework.
 

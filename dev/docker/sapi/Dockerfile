@@ -1,4 +1,4 @@
-FROM php:8.3-__SAPI_BASE__-bookworm AS base
+FROM php:8.5-__SAPI_BASE__-bookworm AS base
 ARG CHARCOAL_UID=1000
 ARG CHARCOAL_GID=1000
 ARG SAPI_BASE=__SAPI_BASE__
@@ -61,7 +61,7 @@ RUN set -e; \
     [ -f "$d/entrypoint.sh" ]    && cp -f "$d/entrypoint.sh" /entrypoint.sh && chmod +x /entrypoint.sh; \
     [ -f "$d/supervisord.ini" ] && cp -f "$d/supervisord.ini" /etc/supervisord.conf; \
     [ -f "$d/nginx.conf" ]       && mkdir -p /etc/nginx && cp -f "$d/nginx.conf" /etc/nginx/nginx.template.conf; \
-    [ -f "$d/php8.3-fpm.ini" ]  && mkdir -p /usr/local/etc/php-fpm.d && cp -f "$d/php8.3-fpm.ini" /usr/local/etc/php-fpm.d/zz-charcoal.conf; \
+    [ -f "$d/php8.5-fpm.ini" ]  && mkdir -p /usr/local/etc/php-fpm.d && cp -f "$d/php8.5-fpm.ini" /usr/local/etc/php-fpm.d/zz-charcoal.conf; \
   done; \
   rm -rf /opt/sapi
 

@@ -36,7 +36,7 @@ This guide outlines the fastest way to deploy **Charcoal Monolith Foundation** u
 
     - **This will automatically**:
         - Build Docker containers for the framework
-        - Set up **PHP 8.3**, **MySQL 8.1**, and **Redis 7.2**
+        - Set up **PHP 8.5**, **MySQL 8.1**, and **Redis 7.2**
         - Start all necessary services
 
 5. **Verify deployment**

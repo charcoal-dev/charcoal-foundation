@@ -31,7 +31,7 @@ class ConstructTest extends TestCase
         fwrite(STDERR, "\033[35mInitializing...\n");
         fwrite(STDERR, "\033[40m\033[33mCharcoal App\033[0m\n");
 
-        $rootDirectory = (new DirectoryPath(realpath(__DIR__ . "/../")))->node();
+        $rootDirectory = new DirectoryPath(realpath(__DIR__ . "/../"))->node();
         try {
             $timestamp = MonotonicTimestamp::now();
             $charcoal = new CharcoalApp(
