@@ -105,9 +105,20 @@ trait SapiConfigBuilderTrait
                 }
             }
 
+            $corsAllowHeaders = $server["cors"]["allow"] ?? null;
+            if (!is_array($corsAllowHeaders) && !is_null($corsAllowHeaders)) {
+                throw new \InvalidArgumentException("CORS allow headers should be an array of strings");
+            }
+
             $httpSapi->corsPolicy($corsEnabled, $corsMaxAge);
             foreach ($corsOrigins as $corsOrigin) {
                 $httpSapi->corsAllowOrigin($corsOrigin);
+            }
+
+            if($corsAllowHeaders) {
+                foreach ($corsAllowHeaders as $corsAllowHeader) {
+                    $httpSapi->corsAllowHeaders($corsAllowHeader);
+                }
             }
 
             // Trust Proxy
