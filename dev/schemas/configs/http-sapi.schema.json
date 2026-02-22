@@ -57,6 +57,12 @@
                 "type": "string",
                 "format": "uri"
               }
+            },
+            "allow": {
+              "type": ["array", "null"],
+              "items": {
+                "type": "string"
+              }
             }
           },
           "required": ["enforced"]
