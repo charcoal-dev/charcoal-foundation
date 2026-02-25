@@ -18,7 +18,6 @@ use App\Shared\Enums\Databases;
 use App\Shared\Enums\Interfaces;
 use App\Shared\Enums\SecretsStores;
 use App\Shared\Enums\SemaphoreProviders;
-use App\Shared\Enums\SemaphoreScopes;
 use App\Shared\Mailer\MailerModule;
 use App\Shared\PathRegistry;
 use App\Shared\Telemetry\TelemetryModule;
@@ -55,8 +54,7 @@ final class AppManifest extends \Charcoal\App\Kernel\AppManifest
         $this->enums->declare(EnumContract::CacheStoreEnum, CacheStores::class)
             ->declare(EnumContract::DbEnum, Databases::class)
             ->declare(EnumContract::SecretsStoreEnum, SecretsStores::class)
-            ->declare(EnumContract::SemaphoreProviderEnum, SemaphoreProviders::class)
-            ->declare(EnumContract::SemaphoreScopeEnum, SemaphoreScopes::class);
+            ->declare(EnumContract::SemaphoreProviderEnum, SemaphoreProviders::class);
     }
 
     /**

@@ -9,8 +9,6 @@ declare(strict_types=1);
 namespace App\Shared\Traits;
 
 use App\Shared\Enums\CacheStores;
-use App\Shared\Enums\SemaphoreScopes;
-use Charcoal\App\Kernel\Contracts\Enums\SemaphoreScopeEnumInterface;
 use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
 use Charcoal\App\Kernel\Orm\Repository\RepositoryCipherRef;
 use Charcoal\Cache\CacheClient;
@@ -57,13 +55,5 @@ trait OrmModuleTrait
     public function getCacheStore(): CacheClient
     {
         return $this->app->cache->getStore(CacheStores::Primary);
-    }
-
-    /**
-     * @return SemaphoreScopeEnumInterface
-     */
-    public function getSemaphore(): SemaphoreScopeEnumInterface
-    {
-        return SemaphoreScopes::Orm;
     }
 }

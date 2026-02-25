@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace App\Shared\Cli;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Enums\SemaphoreScopes;
+use App\Shared\Enums\SemaphoreProviders;
 use Charcoal\App\Kernel\ServerApi\Cli\AppCliHandler;
 use Charcoal\App\Kernel\ServerApi\Cli\AppCliScript;
 use Charcoal\App\Kernel\Support\TypeCaster;
@@ -87,8 +87,6 @@ abstract class DomainScriptBase extends AppCliScript
 
     /**
      * @return void
-     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
-     * @throws \Throwable
      */
     final public function exec(): void
     {
@@ -208,13 +206,13 @@ abstract class DomainScriptBase extends AppCliScript
     protected function obtainSemaphoreLock(
         string          $resourceId,
         bool            $setAutoRelease,
-        SemaphoreScopes $scope = SemaphoreScopes::Cli
+        SemaphoreProviders $scope
     ): SemaphoreLockInterface
     {
         $this->inline(sprintf("Obtaining semaphore lock for {yellow}{invert} %s {/} ... ", $resourceId));
 
         try {
-            $lock = $this->getAppBuild()->security->semaphore->lock($scope, $resourceId);
+            $lock = $this->getAppBuild()->security->semaphore->acquireLock($scope, $resourceId);
             $this->inline("{green}Success{/} {grey}[AutoRelease={/}");
             if ($setAutoRelease) {
                 $lock->setAutoRelease();
