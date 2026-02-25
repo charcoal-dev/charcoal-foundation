@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace App\Shared\Security;
 
 use App\Shared\CharcoalApp;
+use App\Shared\Enums\SemaphoreProviders;
 use App\Shared\Security\BruteForceControl\BruteForceControl;
 use Charcoal\App\Kernel\AbstractApp;
 
@@ -20,9 +21,9 @@ final readonly class SecurityService extends \Charcoal\App\Kernel\Security\Secur
 {
     public BruteForceControl $bruteForceControl;
 
-    public function __construct()
+    public function __construct(?SemaphoreProviders $concurrencyProvider)
     {
-        parent::__construct();
+        parent::__construct($concurrencyProvider);
         $this->bruteForceControl = new BruteForceControl();
     }
 
