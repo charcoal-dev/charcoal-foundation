@@ -97,6 +97,6 @@ final class AppManifest extends \Charcoal\App\Kernel\AppManifest
      */
     final protected function createSecurityService(): SecurityService
     {
-        return new \App\Shared\Security\SecurityService(SemaphoreProviders::Cache);
+        return new \App\Shared\Security\SecurityService();
     }
 }

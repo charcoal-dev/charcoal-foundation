@@ -165,7 +165,7 @@ final class MailsQueueRepository extends OrmRepositoryBase implements
      * @return Bytes20
      * @throws ChecksumComputeException
      */
-    public function calculateChecksum(MailQueueEntity $entity = null): Bytes20
+    public function calculateChecksum(?MailQueueEntity $entity = null): Bytes20
     {
         return $this->entityChecksumCalculate($entity);
     }
@@ -175,7 +175,7 @@ final class MailsQueueRepository extends OrmRepositoryBase implements
      * @return bool
      * @throws ChecksumComputeException
      */
-    public function verifyChecksum(MailQueueEntity $entity = null): bool
+    public function verifyChecksum(?MailQueueEntity $entity = null): bool
     {
         return $this->entityChecksumVerify($entity);
     }
@@ -186,7 +186,7 @@ final class MailsQueueRepository extends OrmRepositoryBase implements
      * @throws ChecksumComputeException
      * @throws ChecksumMismatchException
      */
-    public function validateChecksum(MailQueueEntity $entity = null): void
+    public function validateChecksum(?MailQueueEntity $entity = null): void
     {
         $this->entityChecksumValidate($entity);
     }

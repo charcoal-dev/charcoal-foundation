@@ -21,9 +21,9 @@ final readonly class SecurityService extends \Charcoal\App\Kernel\Security\Secur
 {
     public BruteForceControl $bruteForceControl;
 
-    public function __construct(?SemaphoreProviders $concurrencyProvider)
+    public function __construct()
     {
-        parent::__construct($concurrencyProvider);
+        parent::__construct();
         $this->bruteForceControl = new BruteForceControl();
     }
 
