@@ -19,7 +19,7 @@ require_once "bootstrap.php";
 charcoal_autoloader();
 
 $appFqcn = CharcoalApp::getAppFqcn();
-$rootDirectory = (new DirectoryPath(charcoal_from_root()))->node();
+$rootDirectory = new DirectoryPath(charcoal_from_root())->node();
 ErrorBoundary::configStreams(true, false, strlen(charcoal_from_root()));
 $timestamp = MonotonicTimestamp::now();
 
