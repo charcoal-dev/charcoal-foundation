@@ -25,20 +25,13 @@ use Charcoal\Database\Orm\Migrations;
  * It performs tasks such as checking secret keys, creating required database tables,
  * and ensuring the existence of required stored objects.
  */
-class Install extends DomainScriptBase
+final class Install extends DomainScriptBase
 {
-    /**
-     * @return void
-     */
-    protected function onConstructHook(): void
-    {
-    }
-
     /**
      * @return void
      * @throws \Throwable
      */
-    protected function execScript(): void
+    protected function exec(): void
     {
         $this->checkSecretKeys();
         $this->createDbTables();

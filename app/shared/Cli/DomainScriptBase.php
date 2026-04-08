@@ -9,113 +9,29 @@ declare(strict_types=1);
 namespace App\Shared\Cli;
 
 use App\Shared\CharcoalApp;
-use App\Shared\Enums\SemaphoreProviders;
 use Charcoal\App\Kernel\ServerApi\Cli\AppCliHandler;
 use Charcoal\App\Kernel\ServerApi\Cli\AppCliScript;
 use Charcoal\App\Kernel\Support\TypeCaster;
-use Charcoal\Cli\Enums\ExecutionState;
-use Charcoal\Semaphore\Contracts\SemaphoreLockInterface;
-use Charcoal\Semaphore\Exceptions\SemaphoreLockException;
 
 /**
- * Class DomainScriptBase
- * @package App\Shared\Core\Cli
+ * Base class for domain-specific scripts, extending the functionality
+ * of the AppCliScript class by enforcing time limits and providing utility
+ * methods for interacting with the application and error reporting.
  */
 abstract class DomainScriptBase extends AppCliScript
 {
-    public readonly int $startedOn;
-//    protected readonly ?FileLock $semaphoreLock;
-
     /**
      * @param AppCliHandler $cli
-     * @param ExecutionState $initialState
-     * @param string|null $semaphoreLockId
      */
-    public function __construct(
-        AppCliHandler              $cli,
-        ExecutionState             $initialState = ExecutionState::STARTED,
-        protected readonly ?string $semaphoreLockId = null
-    )
+    public function __construct(AppCliHandler $cli)
     {
         parent::__construct($cli);
-        $this->startedOn = time();
-        $this->state = $initialState;
 
-        $this->onConstructHook();
-
-//        $this->semaphoreLock = $this->semaphoreLockId ?
-//            $this->obtainSemaphoreLock($this->semaphoreLockId, true) : null;
-
-        // Log Binding & ScriptExecutionLogger
-        //$this->logBinding = $this->declareExecutionLogging();
-//        if (!$this->logBinding->loggable) {
-//            $this->logger = null;
-//        } else {
-//            $this->logger = new ScriptLogger(
-//                $this,
-//                $this->state,
-//                true,
-//                $this->logBinding->label,
-//                getmypid(),
-//            );
-//
-//            $this->print("{green}Started process tracking # {b}" . $this->logger->logId);
-//
-//            $this->cli->events->subscribe()->listen(ExceptionCaught::class, function () {
-//                if ($this->logger) {
-//                    $this->closeScriptLogger($this->logger, ExecutionState::ERROR);
-//                }
-//            });
-//
-//            $this->cli->events->subscribe()->listen(PcntlSignalClose::class, function () {
-//                if ($this->logger) {
-//                    $this->closeScriptLogger($this->logger, ExecutionState::ERROR);
-//                }
-//            });
-//        }
-    }
-
-    /**
-     * @return void
-     */
-    abstract protected function onConstructHook(): void;
-
-    /**
-     * @return void
-     */
-    abstract protected function execScript(): void;
-
-    /**
-     * @return void
-     */
-    final public function exec(): void
-    {
-        if ($this->timeLimit <= 0 && TypeCaster::toBool($this->cli->args->get("tty")) === false) {
+        // Time-limit Enforcement
+        if ($this->timeLimit <= 0
+            && TypeCaster::toBool($this->cli->args->get("tty")) === false) {
             extension_loaded("pcntl") ? pcntl_alarm(30) :
                 throw new \RuntimeException('Cannot execute script with no time limit outside an interactive terminal');
-        }
-
-        try {
-            $this->execScript();
-//            if (isset($this->logger)) {
-//                $this->closeScriptLogger($this->logger, ExecutionState::FINISHED);
-//            }
-        } catch (\Throwable $t) {
-//            if (isset($this->logBinding, $this->logger)) {
-//                $this->logger->context->logException($t);
-//                $this->closeScriptLogger($this->logger, ExecutionState::ERROR);
-//            }
-
-//            if ($t instanceof CliScriptException) {
-//                $this->eol()->print("{red}" . $t->getMessage());
-//                if ($t->getPrevious()) {
-//                    throw $t->getPrevious();
-//                }
-//
-//                return;
-//            }
-
-            throw $t;
         }
     }
 
@@ -124,67 +40,8 @@ abstract class DomainScriptBase extends AppCliScript
      */
     public function getAppBuild(): CharcoalApp
     {
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        /** @var CharcoalApp */
         return $this->cli->app;
-    }
-
-    /**
-     * @return ExecutionState
-     * @api
-     */
-    public function getState(): ExecutionState
-    {
-        return $this->state;
-    }
-
-    /**
-     * @param ExecutionState $newState
-     * @return void
-     * @api
-     */
-    public function changeState(ExecutionState $newState): void
-    {
-        $this->state = $newState;
-//        $this->logger?->changeState($newState);
-    }
-
-    /**
-     * @param string $label
-     * @param callable $childFn
-     * @param array $childArgs
-     * @param bool $scriptAwareContext
-     * @return void
-     * @throws \Charcoal\App\Kernel\Orm\Exceptions\EntityRepositoryException
-     * @api
-     */
-    protected function childExecutionLog(
-        string   $label,
-        callable $childFn,
-        array    $childArgs = [],
-        bool     $scriptAwareContext = false
-    ): void
-    {
-//        $execLogger = new ScriptLogger(
-//            $this,
-//            ExecutionState::STARTED,
-//            $scriptAwareContext,
-//            $label,
-//            getmypid()
-//        );
-//
-//        $this->print("{cyan}Started Child Execution Logger # {yellow}" . $execLogger->logId);
-//        $this->print("{green}" . $label);
-//
-//        try {
-//            call_user_func_array($childFn, [$execLogger, ...$childArgs]);
-//            $this->closeScriptLogger($execLogger, ExecutionState::FINISHED);
-//        } catch (\Throwable $t) {
-//            $execLogger->context->logException($t);
-//            $this->closeScriptLogger($execLogger, ExecutionState::ERROR);
-//            throw $t;
-//        } finally {
-//            unset($execLogger);
-//        }
     }
 
     /**
@@ -196,35 +53,5 @@ abstract class DomainScriptBase extends AppCliScript
     protected function printErrorsIfAny(int $tabs = 0, bool $compact = true): void
     {
         $this->cli->printErrors($tabs, $compact);
-    }
-
-
-    /**
-     * @throws SemaphoreLockException
-     * @api Get a semaphore lock.
-     */
-    protected function obtainSemaphoreLock(
-        string          $resourceId,
-        bool            $setAutoRelease,
-        SemaphoreProviders $scope
-    ): SemaphoreLockInterface
-    {
-        $this->inline(sprintf("Obtaining semaphore lock for {yellow}{invert} %s {/} ... ", $resourceId));
-
-        try {
-            $lock = $this->getAppBuild()->security->semaphore->acquireLock($scope, $resourceId);
-            $this->inline("{green}Success{/} {grey}[AutoRelease={/}");
-            if ($setAutoRelease) {
-                $lock->setAutoRelease();
-                $this->print("{green}1{grey}]{/}");
-            } else {
-                $this->print("{red}0{grey}]{/}");
-            }
-
-            return $lock;
-        } catch (SemaphoreLockException $e) {
-            $this->print("{red}{invert} " . $e->error->name . " {/}");
-            throw $e;
-        }
     }
 }

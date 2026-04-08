@@ -10,21 +10,19 @@ namespace App\Sapi\Engine\Scripts\Config;
 
 use App\Shared\Cli\DomainScriptBase;
 use App\Shared\Exceptions\CliScriptException;
+use Charcoal\App\Kernel\ServerApi\Cli\AppCliHandler;
 use Charcoal\Base\Objects\ObjectHelper;
 use Charcoal\Database\Exceptions\QueryExecuteException;
 use Charcoal\Filesystem\Exceptions\FilesystemException;
 
 /**
- * Class ImportCountries
- * @package App\Sapi\Engine\Scripts\Config
+ * A script to import country data from a CSV file into a database.
  */
 class ImportCountries extends DomainScriptBase
 {
-    /**
-     * @return void
-     */
-    protected function onConstructHook(): void
+    public function __construct(AppCliHandler $cli)
     {
+        parent::__construct($cli);
         $this->config->displayAppClassBanner = false;
         $this->config->displayScriptName = false;
     }
@@ -33,7 +31,7 @@ class ImportCountries extends DomainScriptBase
      * @return void
      * @throws CliScriptException
      */
-    protected function execScript(): void
+    protected function exec(): void
     {
         // Read Data File
         $this->print('Looking for {yellow}{b}countries.csv{/} file...');

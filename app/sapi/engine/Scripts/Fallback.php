@@ -11,41 +11,33 @@ namespace App\Sapi\Engine\Scripts;
 use App\Shared\Cli\DomainScriptBase;
 
 /**
- * Class Fallback
- * @package App\Sapi\Engine\Scripts
+ * Fallback/Default script for CLI console
  */
-class Fallback extends DomainScriptBase
+final class Fallback extends DomainScriptBase
 {
-    private array $scripts = [];
+    /** @var array<array{0: string, 1: string, 2?: string}> */
+    private array $scripts = [
+        ["install", "Install the application", "yellow"]
+    ];
 
     /**
      * @return void
      */
-    protected function onConstructHook(): void
-    {
-        $this->scripts[] = ["install", "Install the application", "yellow"];
-    }
-
-    /**
-     * @return void
-     */
-    protected function execScript(): void
+    protected function exec(): void
     {
         $this->print("Use the following scripts to perform specific tasks:");
         $this->print("");
 
-
-        for ($i = 0; $i < count($this->scripts); $i++) {
+        foreach ($this->scripts as $index => $script) {
             $this->print(sprintf("{green}%d.{/} {%s}{invert} %s {/}{grey} - %s",
-                $i + 1,
-                $this->scripts[$i][2] ?? "yellow",
-                $this->scripts[$i][0],
-                $this->scripts[$i][1]
+                $index + 1,
+                $script[2] ?? "yellow",
+                $script[0],
+                $script[1]
             ));
         }
 
         $this->print("");
         $this->print("To run a script, use: {b}{cyan}./charcoal.sh [script-name]{/}");
-
     }
 }
