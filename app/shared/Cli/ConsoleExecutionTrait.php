@@ -104,7 +104,7 @@ trait ConsoleExecutionTrait
                     $this->logPolicy->captureStateChanges
                 ));
             } catch (\Exception $e) {
-                $this->getAppBuild()->diagnostics->warning("Failed to create EngineLog", exception: $e);
+                $this->getAppBuild()->diagnostics->error("Failed to create EngineLog", exception: $e);
                 return;
             }
         }
@@ -121,7 +121,7 @@ trait ConsoleExecutionTrait
                 $this->getAppBuild()->telemetry->engineLogs->updateLog($this->engineLog->logEntity,
                     $this->state, Clock::now());
             } catch (\Exception $e) {
-                $this->getAppBuild()->diagnostics->warning("Failed to finalise EngineLog", exception: $e);
+                $this->getAppBuild()->diagnostics->error("Failed to finalise EngineLog", exception: $e);
                 return;
             }
         }

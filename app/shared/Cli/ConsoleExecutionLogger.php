@@ -50,7 +50,7 @@ final class ConsoleExecutionLogger
                     try {
                         $this->captureState(Clock::now());
                     } catch (\Exception $e) {
-                        $this->app->diagnostics->warning("Failed to capture EngineMetrics", exception: $e);
+                        $this->app->diagnostics->error("Failed to capture EngineMetrics", exception: $e);
                     }
                 });
         }
