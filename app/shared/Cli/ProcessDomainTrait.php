@@ -22,10 +22,12 @@ trait ProcessDomainTrait
     private function initializeDomainLogic(): void
     {
         // Time-limit Enforcement
-        if ($this->timeLimit <= 0
-            && TypeCaster::toBool($this->cli->args->get("tty")) === false) {
-            extension_loaded("pcntl") ? pcntl_alarm(30) :
-                throw new \RuntimeException("Cannot execute script with no time limit outside an interactive terminal");
+        if ($this instanceof DomainScriptBase) {
+            if ($this->timeLimit <= 0
+                && TypeCaster::toBool($this->cli->args->get("tty")) === false) {
+                extension_loaded("pcntl") ? pcntl_alarm(30) :
+                    throw new \RuntimeException("Cannot execute script with no time limit outside an interactive terminal");
+            }
         }
     }
 
