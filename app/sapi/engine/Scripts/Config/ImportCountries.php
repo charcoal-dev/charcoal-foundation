@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace App\Sapi\Engine\Scripts\Config;
 
 use App\Shared\Cli\DomainScriptBase;
+use App\Shared\Cli\LogPolicy;
 use App\Shared\Exceptions\CliScriptException;
 use Charcoal\App\Kernel\ServerApi\Cli\AppCliHandler;
 use Charcoal\Base\Objects\ObjectHelper;
@@ -25,6 +26,15 @@ class ImportCountries extends DomainScriptBase
         parent::__construct($cli);
         $this->config->displayAppClassBanner = false;
         $this->config->displayScriptName = false;
+        $this->whoAmI = "import_countries";
+    }
+
+    /**
+     * @return LogPolicy
+     */
+    protected function declareLogPolicy(): LogPolicy
+    {
+        return new LogPolicy(true, "Import Countries from CSV", true);
     }
 
     /**

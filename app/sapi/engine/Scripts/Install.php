@@ -38,6 +38,11 @@ final class Install extends DomainScriptBase
         $this->createRequiredStoredObjects();
     }
 
+    protected function declareLogPolicy(): null
+    {
+        return null;
+    }
+
     /**
      * @return void
      * @throws \Exception

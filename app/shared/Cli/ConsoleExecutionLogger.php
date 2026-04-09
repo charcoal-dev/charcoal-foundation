@@ -28,7 +28,7 @@ final class ConsoleExecutionLogger
     use NoDumpTrait;
 
     private readonly CharcoalApp $app;
-    private readonly EngineLogEntity $logEntity;
+    public readonly EngineLogEntity $logEntity;
     private readonly ?Subscription $subscription;
 
     /**
