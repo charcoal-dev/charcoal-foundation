@@ -44,8 +44,8 @@ final class EngineLogTable extends OrmTableBase
         $cols->enumObject("last_state", ExecutionState::class)->options(...ExecutionState::getCaseValues());
         $cols->json("flags")->nullable();
         $cols->json("arguments")->nullable();
-        $cols->float("started_on")->precision(14, 6)->unSigned();
-        $cols->float("updated_on")->precision(14, 6)->unSigned()->nullable();
+        $cols->float("started_on")->precision(16, 6)->unSigned();
+        $cols->float("updated_on")->precision(16, 6)->unSigned()->nullable();
         $cols->setPrimaryKey("id");
 
         $constraints->addIndexComposite("idx_type_start")->columns("type", "started_on");
