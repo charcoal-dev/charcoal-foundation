@@ -19,7 +19,7 @@ use Charcoal\Cli\Events\State\RuntimeStatusChange;
  */
 trait ConsoleExecutionTrait
 {
-    protected readonly ?LogPolicy $logPolicy;
+    private(set) ?LogPolicy $logPolicy = null;
     private(set) ?ConsoleExecutionLogger $engineLog = null;
 
     /**
@@ -51,7 +51,9 @@ trait ConsoleExecutionTrait
             });
 
         // Log Policy Declaration
-        $this->logPolicy = $this->declareLogPolicy();
+        if (!isset($this->logPolicy)) {
+            $this->logPolicy = $this->declareLogPolicy();
+        }
     }
 
     /**
@@ -89,6 +91,11 @@ trait ConsoleExecutionTrait
      */
     protected function hookBeforeExecutionStart(): void
     {
+        // Late log policy declaration
+        if (($this->logPolicy ?? null) === null) {
+            $this->logPolicy = $this->declareLogPolicy();
+        }
+
         if ($this->logPolicy?->status) {
             try {
                 $this->setExecutionLogger($this->createEngineLog(
