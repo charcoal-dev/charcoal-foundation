@@ -8,18 +8,21 @@ declare(strict_types=1);
 
 namespace App\Shared\Cli;
 
+use Charcoal\Charsets\Support\AsciiHelper;
+
 /**
- * Class ScriptExecutionLogBinding
- * @package App\Shared\Foundation\Engine\ExecutionLog
- * @deprecated
+ * Represents a policy for logging behavior, encapsulating whether logging
+ * is enabled and an optional label for classification or identification.
  */
-readonly class LogPolicy
+final readonly class LogPolicy
 {
     public function __construct(
-        public bool    $loggable = true,
-        public ?string $label = null,
-        public bool    $outputBuffering = false,
+        public bool    $loggable,
+        public ?string $label,
     )
     {
+        if (strlen($this->label) > 80 || !AsciiHelper::isPrintableOnly($this->label)) {
+            throw new \InvalidArgumentException("Invalid label: " . var_export($this->label, true));
+        }
     }
 }

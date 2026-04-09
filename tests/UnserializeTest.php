@@ -13,8 +13,8 @@ use App\Shared\CoreData\Bfc\BfcRepository;
 use App\Shared\CoreData\Countries\CountriesRepository;
 use App\Shared\CoreData\ObjectStore\ObjectStoreRepository;
 use App\Shared\Telemetry\AppLogs\AppLogsRepository;
+use App\Shared\Telemetry\EngineLog\EngineLogRepository;
 use App\Shared\Telemetry\HttpIngress\HttpIngressRepository;
-use App\Shared\Telemetry\Metrics\MetricsRepository;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Enums\AppEnv;
 use Charcoal\Filesystem\Path\DirectoryPath;
@@ -31,7 +31,7 @@ class UnserializeTest extends \PHPUnit\Framework\TestCase
      */
     public function testUnserializeApp()
     {
-        $rootDirectory = (new DirectoryPath(realpath(__DIR__ . "/../")))->node();
+        $rootDirectory = new DirectoryPath(realpath(__DIR__ . "/../"))->node();
 
         fwrite(STDERR, "\033[35mInitializing...\n");
 
@@ -62,8 +62,8 @@ class UnserializeTest extends \PHPUnit\Framework\TestCase
 
         $this->assertInstanceOf(AppLogsRepository::class,
             $charcoal->telemetry->appLogs, "TelemetryModule has AppLogsRepository");
-        $this->assertInstanceOf(MetricsRepository::class,
-            $charcoal->telemetry->metrics, "TelemetryModule has Interface MetricsRepository");
+        $this->assertInstanceOf(EngineLogRepository::class,
+            $charcoal->telemetry->engineLogs, "TelemetryModule has Interface EngineLogRepository");
         $this->assertInstanceOf(HttpIngressRepository::class,
             $charcoal->telemetry->httpIngress, "TelemetryModule has HttpIngressRepository");
 

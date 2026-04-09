@@ -14,7 +14,7 @@ use Charcoal\Database\Enums\DbDriver;
 
 /**
  * Each constant defines a specific database table name as a string value. The constants
- * are categorized by their respective modules such as CoreData, Mailer, HTTP, and Engine.
+ * are categorized by their respective modules, such as CoreData, Mailer, HTTP, and Engine.
  */
 enum DatabaseTables: string implements TableRegistryEnumInterface
 {
@@ -28,9 +28,10 @@ enum DatabaseTables: string implements TableRegistryEnumInterface
 
     /** @for Telemetry Module */
     case AppLogs = "app_logs";
-    case AppMetrics = "app_metrics";
     case HttpIngress = "http_ingress";
     case HttpEgress = "http_egress";
+    case EngineLogs = "engine_logs";
+    case EngineMetrics = "engine_metrics";
 
     public function getTableName(): string
     {

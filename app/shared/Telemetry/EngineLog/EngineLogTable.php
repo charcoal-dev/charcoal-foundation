@@ -6,26 +6,25 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Telemetry\Metrics;
+namespace App\Shared\Telemetry\EngineLog;
 
 use App\Shared\Enums\DatabaseTables;
 use App\Shared\Telemetry\TelemetryModule;
-use App\Shared\Telemetry\TelemetryType;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
+use Charcoal\Cli\Enums\ExecutionState;
 use Charcoal\Contracts\Charsets\Charset;
 use Charcoal\Database\Orm\Schema\Builder\ColumnsBuilder;
 use Charcoal\Database\Orm\Schema\Builder\ConstraintsBuilder;
 use Charcoal\Database\Orm\Schema\TableMigrations;
 
 /**
- * Represents the Metrics table structure and its migration logic.
- * Extends the base ORM table functionalities for the App Metrics database table.
+ * @property TelemetryModule $module
  */
-final class MetricsTable extends OrmTableBase
+final class EngineLogTable extends OrmTableBase
 {
     public function __construct(TelemetryModule $module)
     {
-        parent::__construct($module, DatabaseTables::AppMetrics, MetricsEntity::class);
+        parent::__construct($module, DatabaseTables::EngineLogs, EngineLogEntity::class);
     }
 
     /**
@@ -38,18 +37,20 @@ final class MetricsTable extends OrmTableBase
         $cols->setDefaultCharset(Charset::ASCII);
 
         $cols->int("id")->size(8)->unSigned()->autoIncrement();
-        $cols->enumObject("type", TelemetryType::class)->options(...TelemetryType::getCaseValues());
-        $cols->int("log_id")->size(8)->unSigned()->nullable();
-        $cols->int("logged_at")->size(4)->unSigned();
-        $cols->int("memory_usage")->size(8)->unSigned();
-        $cols->int("memory_usage_peak")->size(8)->unSigned();
-        $cols->int("cpu_time_user")->size(8)->unSigned();
-        $cols->int("cpu_time_system")->size(8)->unSigned();
-        $cols->int("cpu_time_total")->size(8)->unSigned();
+        $cols->enum("type")->options("script", "process");
+        $cols->string("command")->length(40);
+        $cols->string("label")->length(80)->nullable();
+        $cols->int("pid")->size(4)->unSigned();
+        $cols->enumObject("last_state", ExecutionState::class)->options(...ExecutionState::getCaseValues());
+        $cols->json("flags")->nullable();
+        $cols->json("arguments")->nullable();
+        $cols->float("started_on")->precision(14, 6)->unSigned();
+        $cols->float("updated_on")->precision(14, 6)->unSigned()->nullable();
         $cols->setPrimaryKey("id");
 
-        $constraints->addIndexComposite("idx_type_log_time")->columns("type", "log_id", "logged_at");
-        $constraints->addIndex("logged_at");
+        $constraints->addIndexComposite("idx_type_start")->columns("type", "started_on");
+        $constraints->addIndexComposite("idx_type_cmd_start")->columns("type", "command", "started_on");
+        $constraints->addIndex("started_on");
     }
 
     /**

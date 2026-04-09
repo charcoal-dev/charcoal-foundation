@@ -12,10 +12,12 @@ use App\Shared\CharcoalApp;
 use App\Shared\Enums\SecretKeys;
 use App\Shared\Telemetry\AppLogs\AppLogsRepository;
 use App\Shared\Telemetry\AppLogs\AppLogsTable;
+use App\Shared\Telemetry\EngineLog\EngineLogRepository;
+use App\Shared\Telemetry\EngineLog\EngineLogTable;
+use App\Shared\Telemetry\EngineLog\EngineMetricsRepository;
+use App\Shared\Telemetry\EngineLog\EngineMetricsTable;
 use App\Shared\Telemetry\HttpIngress\HttpIngressRepository;
 use App\Shared\Telemetry\HttpIngress\HttpIngressTable;
-use App\Shared\Telemetry\Metrics\MetricsRepository;
-use App\Shared\Telemetry\Metrics\MetricsTable;
 use App\Shared\Traits\OrmModuleTrait;
 use Charcoal\App\Kernel\Domain\ModuleSecurityBindings;
 use Charcoal\App\Kernel\Orm\Db\TableRegistry;
@@ -32,7 +34,8 @@ final class TelemetryModule extends OrmModuleBase
     use OrmModuleTrait;
 
     public readonly AppLogsRepository $appLogs;
-    public readonly MetricsRepository $metrics;
+    public readonly EngineLogRepository $engineLogs;
+    public readonly EngineMetricsRepository $engineMetrics;
     public readonly HttpIngressRepository $httpIngress;
 
     /**
@@ -42,7 +45,8 @@ final class TelemetryModule extends OrmModuleBase
     {
         parent::__construct($app);
         $this->appLogs = new AppLogsRepository();
-        $this->metrics = new MetricsRepository();
+        $this->engineLogs = new EngineLogRepository();
+        $this->engineMetrics = new EngineMetricsRepository();
         $this->httpIngress = new HttpIngressRepository();
     }
 
@@ -53,7 +57,8 @@ final class TelemetryModule extends OrmModuleBase
     protected function declareDatabaseTables(TableRegistry $tables): void
     {
         $tables->register(new AppLogsTable($this));
-        $tables->register(new MetricsTable($this));
+        $tables->register(new EngineLogTable($this));
+        $tables->register(new EngineMetricsTable($this));
         $tables->register(new HttpIngressTable($this));
     }
 
@@ -64,7 +69,8 @@ final class TelemetryModule extends OrmModuleBase
     public function __unserialize(array $data): void
     {
         $this->appLogs = $data["appLogs"];
-        $this->metrics = $data["metrics"];
+        $this->engineLogs = $data["engineLogs"];
+        $this->engineMetrics = $data["engineMetrics"];
         $this->httpIngress = $data["httpIngress"];
         parent::__unserialize($data);
     }
