@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace App\Shared\Cli;
 
 use App\Shared\CharcoalApp;
+use App\Shared\Telemetry\EngineLog\EngineLogEntity;
 use Charcoal\App\Kernel\Support\TypeCaster;
 
 /**
@@ -29,6 +30,11 @@ trait ConsoleExecutionTrait
                     throw new \RuntimeException("Cannot execute script with no time limit outside an interactive terminal");
             }
         }
+    }
+
+    public function createEngineLog(): EngineLogEntity
+    {
+
     }
 
     /**

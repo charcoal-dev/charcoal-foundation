@@ -11,6 +11,7 @@ namespace App\Shared\Telemetry\EngineLog;
 use App\Shared\Enums\DatabaseTables;
 use App\Shared\Telemetry\TelemetryModule;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
+use Charcoal\Cli\Enums\ExecutionState;
 use Charcoal\Contracts\Charsets\Charset;
 use Charcoal\Database\Orm\Schema\Builder\ColumnsBuilder;
 use Charcoal\Database\Orm\Schema\Builder\ConstraintsBuilder;
@@ -37,6 +38,7 @@ final class EngineMetricsTable extends OrmTableBase
 
         $cols->int("id")->size(8)->unSigned()->autoIncrement();
         $cols->int("log_id")->size(8)->unSigned()->nullable();
+        $cols->enumObject("state", ExecutionState::class)->options(...ExecutionState::getCaseValues());
         $cols->float("logged_at")->precision(14, 6)->unSigned();
         $cols->int("memory_usage")->size(8)->unSigned();
         $cols->int("memory_usage_peak")->size(8)->unSigned();

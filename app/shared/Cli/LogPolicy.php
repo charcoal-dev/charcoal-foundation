@@ -8,8 +8,6 @@ declare(strict_types=1);
 
 namespace App\Shared\Cli;
 
-use Charcoal\Charsets\Support\AsciiHelper;
-
 /**
  * Represents a policy for logging behavior, encapsulating whether logging
  * is enabled and an optional label for classification or identification.
@@ -17,12 +15,10 @@ use Charcoal\Charsets\Support\AsciiHelper;
 final readonly class LogPolicy
 {
     public function __construct(
-        public bool    $loggable,
+        public bool    $status,
         public ?string $label,
+        public bool    $captureStateChanges = false
     )
     {
-        if (strlen($this->label) > 80 || !AsciiHelper::isPrintableOnly($this->label)) {
-            throw new \InvalidArgumentException("Invalid label: " . var_export($this->label, true));
-        }
     }
 }

@@ -13,6 +13,7 @@ use App\Shared\Enums\DatabaseTables;
 use Charcoal\App\Kernel\Diagnostics\ExecutionMetrics;
 use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
 use Charcoal\Base\Exceptions\WrappedException;
+use Charcoal\Cli\Enums\ExecutionState;
 
 /**
  * Repository class responsible for managing engine metrics within the underlying ORM system.
@@ -32,6 +33,7 @@ final class EngineMetricsRepository extends OrmRepositoryBase
     public function capture(
         \DateTimeImmutable $timestamp,
         EngineLogEntity    $logEntity,
+        ExecutionState     $state,
         ExecutionMetrics   $metrics
     ): void
     {
@@ -39,6 +41,7 @@ final class EngineMetricsRepository extends OrmRepositoryBase
             $this->table->queryInsert([
                 "id" => 0,
                 "logId" => $logEntity->id,
+                "state" => $state->value,
                 "loggedAt" => (float)sprintf("%.6f", (float)$timestamp->format("U.u")),
                 "memoryUsage" => $metrics->memoryUsage,
                 "memoryUsagePeak" => $metrics->peakMemoryUsage,
