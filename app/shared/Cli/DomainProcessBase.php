@@ -18,6 +18,10 @@ abstract class DomainProcessBase extends AppCliProcess
 {
     use ProcessDomainTrait;
 
+    /**
+     * @param AppCliHandler $cli
+     * @throws \Charcoal\App\Kernel\Concurrency\ConcurrencyLockException
+     */
     public function __construct(AppCliHandler $cli)
     {
         parent::__construct($cli);
