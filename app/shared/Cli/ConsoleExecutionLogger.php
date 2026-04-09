@@ -48,7 +48,7 @@ final class ConsoleExecutionLogger
             $this->subscription->listen(RuntimeStatusChange::class,
                 function () {
                     try {
-                        $this->captureState(Clock::now());
+                        $this->captureState(Clock::nowHighRes());
                     } catch (\Exception $e) {
                         $this->app->diagnostics->error("Failed to capture EngineMetrics", exception: $e);
                     }

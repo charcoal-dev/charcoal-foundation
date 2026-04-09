@@ -99,7 +99,7 @@ trait ConsoleExecutionTrait
         if ($this->logPolicy?->status) {
             try {
                 $this->setExecutionLogger($this->createEngineLog(
-                    Clock::now(),
+                    Clock::nowHighRes(),
                     $this->logPolicy->label,
                     $this->logPolicy->captureStateChanges
                 ));
@@ -119,7 +119,7 @@ trait ConsoleExecutionTrait
         if ($this->engineLog) {
             try {
                 $this->getAppBuild()->telemetry->engineLogs->updateLog($this->engineLog->logEntity,
-                    $this->state, Clock::now());
+                    $this->state, Clock::nowHighRes());
             } catch (\Exception $e) {
                 $this->getAppBuild()->diagnostics->error("Failed to finalise EngineLog", exception: $e);
                 return;
