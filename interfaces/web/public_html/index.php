@@ -40,7 +40,7 @@ ErrorBoundary::configStreams(true, false, strlen(charcoal_from_root()))
     });
 
 $appFqcn = CharcoalApp::getAppFqcn();
-$rootDirectory = (new DirectoryPath(charcoal_from_root()))->node();
+$rootDirectory = new DirectoryPath(charcoal_from_root())->node();
 $timestamp = MonotonicTimestamp::now();
 
 /** @var CharcoalApp $charcoal */

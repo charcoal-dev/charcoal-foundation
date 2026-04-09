@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use App\Shared\CharcoalApp;
+use App\Shared\Enums\Interfaces;
 use App\Shared\ErrorBoundary;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Enums\AppEnv;
@@ -25,7 +26,7 @@ $timestamp = MonotonicTimestamp::now();
 
 /** @var CharcoalApp $charcoal */
 $charcoal = $appFqcn::Load(AppEnv::tryFrom(getenv("APP_ENV") ?: "dev"), $rootDirectory, ["var", "shared"]);
-$charcoal->bootstrap($timestamp);
+$charcoal->bootstrap($timestamp, Interfaces::Engine);
 $startupTime = $charcoal->diagnostics->startupTime / 1e6;
 $charcoal->errors->debugBacktraceOffset(0);
 
