@@ -40,14 +40,14 @@ final class EngineMetricsRepository extends OrmRepositoryBase
         try {
             $this->table->queryInsert([
                 "id" => 0,
-                "logId" => $logEntity->id,
+                "log_id" => $logEntity->id,
                 "state" => $state->value,
-                "loggedAt" => (float)sprintf("%.6f", (float)$timestamp->format("U.u")),
-                "memoryUsage" => $metrics->memoryUsage,
-                "memoryUsagePeak" => $metrics->peakMemoryUsage,
-                "cpuTimeUser" => (int)($metrics->cpuTimeUser * 1e6),
-                "cpuTimeSystem" => (int)($metrics->cpuTimeSystem * 1e6),
-                "cpuTimeTotal" => (int)($metrics->cpuTimeTotal * 1e6),
+                "logged_at" => (float)sprintf("%.6f", (float)$timestamp->format("U.u")),
+                "memory_usage" => $metrics->memoryUsage,
+                "memory_usage_peak" => $metrics->peakMemoryUsage,
+                "cpu_time_user" => (int)($metrics->cpuTimeUser * 1e6),
+                "cpu_time_system" => (int)($metrics->cpuTimeSystem * 1e6),
+                "cpu_time_total" => (int)($metrics->cpuTimeTotal * 1e6),
             ]);
         } catch (\Exception $e) {
             throw new WrappedException($e, "Failed to capture engine metrics");
