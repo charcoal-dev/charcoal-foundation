@@ -10,7 +10,7 @@ namespace App\Shared\Telemetry\Metrics;
 
 use App\Shared\AppConstants;
 use App\Shared\Enums\DatabaseTables;
-use App\Shared\Enums\Interfaces;
+use App\Shared\Telemetry\TelemetryType;
 use Charcoal\App\Kernel\Diagnostics\ExecutionMetrics;
 use Charcoal\App\Kernel\Orm\Repository\OrmRepositoryBase;
 
@@ -31,12 +31,12 @@ final class MetricsRepository extends OrmRepositoryBase
     /**
      * @throws \Charcoal\Database\Orm\Exceptions\OrmQueryException
      */
-    public function insert(Interfaces $interface, ?string $uuid, ExecutionMetrics $metrics): void
+    public function insert(TelemetryType $type, int $logId, ExecutionMetrics $metrics): void
     {
         $this->table->queryInsert([
             "id" => 0,
-            "interface" => $interface->value,
-            "uuid" => $uuid,
+            "type" => $type->value,
+            "logId" => $logId,
             "loggedAt" => (int)$metrics->timestamp,
             "memoryUsage" => $metrics->memoryUsage,
             "memoryUsagePeak" => $metrics->peakMemoryUsage,

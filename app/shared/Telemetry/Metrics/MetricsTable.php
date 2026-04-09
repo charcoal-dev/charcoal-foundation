@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace App\Shared\Telemetry\Metrics;
 
 use App\Shared\Enums\DatabaseTables;
-use App\Shared\Enums\Interfaces;
 use App\Shared\Telemetry\TelemetryModule;
+use App\Shared\Telemetry\TelemetryType;
 use Charcoal\App\Kernel\Orm\Db\OrmTableBase;
 use Charcoal\Contracts\Charsets\Charset;
 use Charcoal\Database\Orm\Schema\Builder\ColumnsBuilder;
@@ -38,9 +38,8 @@ final class MetricsTable extends OrmTableBase
         $cols->setDefaultCharset(Charset::ASCII);
 
         $cols->int("id")->size(8)->unSigned()->autoIncrement();
-        $cols->enumObject("interface", Interfaces::class)->options(...Interfaces::getCaseValues());
-        $cols->enum("sapi")->options("http", "cli");
-        $cols->string("uuid")->length(40)->nullable();
+        $cols->enumObject("type", TelemetryType::class)->options(...TelemetryType::getCaseValues());
+        $cols->int("log_id")->size(8)->unSigned()->nullable();
         $cols->int("logged_at")->size(4)->unSigned();
         $cols->int("memory_usage")->size(8)->unSigned();
         $cols->int("memory_usage_peak")->size(8)->unSigned();
@@ -49,9 +48,8 @@ final class MetricsTable extends OrmTableBase
         $cols->int("cpu_time_total")->size(8)->unSigned();
         $cols->setPrimaryKey("id");
 
-        $constraints->addIndexComposite("idx_if_ts")->columns("interface", "logged_at");
+        $constraints->addIndexComposite("idx_type_log_time")->columns("type", "log_id", "logged_at");
         $constraints->addIndex("logged_at");
-        $constraints->addIndex("uuid");
     }
 
     /**

@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Telemetry\Metrics;
 
-use App\Shared\Enums\Interfaces;
+use App\Shared\Telemetry\TelemetryType;
 use Charcoal\App\Kernel\Orm\Entity\OrmEntityBase;
 
 /**
@@ -18,9 +18,8 @@ use Charcoal\App\Kernel\Orm\Entity\OrmEntityBase;
 final class MetricsEntity extends OrmEntityBase
 {
     public int $id;
-    public Interfaces $interface;
-    public string $sapi;
-    public ?string $uuid;
+    public TelemetryType $type;
+    public int $logId;
     public int $loggedAt;
     public int $memoryUsage;
     public int $memoryUsagePeak;
