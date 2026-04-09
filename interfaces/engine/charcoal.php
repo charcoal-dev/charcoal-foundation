@@ -1,7 +1,7 @@
 <?php
 /**
  * Part of the "charcoal-dev/charcoal-foundation" package.
- * @link https://github.com/charcoal-dev/charcoal-foundation
+ * @link         https://github.com/charcoal-dev/charcoal-foundation
  * @noinspection PhpUnhandledExceptionInspection
  */
 
@@ -26,23 +26,11 @@ $timestamp = MonotonicTimestamp::now();
 
 /** @var CharcoalApp $charcoal */
 $charcoal = $appFqcn::Load(AppEnv::tryFrom(getenv("APP_ENV") ?: "dev"), $rootDirectory, ["var", "shared"]);
-$charcoal->bootstrap($timestamp, Interfaces::Engine);
+$console = $charcoal->bootstrap($timestamp, Interfaces::Engine);
+/** @var AppCliHandler $console */
+
 $startupTime = $charcoal->diagnostics->startupTime / 1e6;
 $charcoal->errors->debugBacktraceOffset(0);
-
-if ($charcoal->context->env !== AppEnv::Prod) {
-    $scriptInject = getenv("SAPI_ENGINE_SCRIPT_INJECT");
-    if ($scriptInject) {
-        $argv = explode("|", $scriptInject);
-    }
-}
-
-$console = new AppCliHandler($charcoal,
-    "App\\Sapi\\Engine\\Scripts",
-    explode(";", substr($argv[1] ?? "", 1, -1)),
-    "fallback"
-);
-
 $console->stdout->useAnsiCodes(true);
 
 $console->print(sprintf("{grey}%s app bootstrapped in {green}%sms{/}",
