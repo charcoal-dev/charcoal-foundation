@@ -14,7 +14,7 @@ use Charcoal\App\Kernel\Support\TypeCaster;
 /**
  * Provides domain-specific processing logic for handling application behavior.
  */
-trait ProcessDomainTrait
+trait ConsoleExecutionTrait
 {
     /**
      * @return void

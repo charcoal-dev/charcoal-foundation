@@ -16,7 +16,7 @@ use Charcoal\App\Kernel\ServerApi\Cli\AppCliProcess;
  */
 abstract class DomainProcessBase extends AppCliProcess
 {
-    use ProcessDomainTrait;
+    use ConsoleExecutionTrait;
 
     /**
      * @param AppCliHandler $cli

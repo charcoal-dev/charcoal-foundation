@@ -18,7 +18,7 @@ use Charcoal\App\Kernel\ServerApi\Cli\AppCliScript;
  */
 abstract class DomainScriptBase extends AppCliScript
 {
-    use ProcessDomainTrait;
+    use ConsoleExecutionTrait;
 
     /**
      * @param AppCliHandler $cli
