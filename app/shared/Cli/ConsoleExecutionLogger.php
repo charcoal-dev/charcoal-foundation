@@ -47,7 +47,11 @@ final class ConsoleExecutionLogger
             $this->subscription = $this->script->cli->events->subscribe();
             $this->subscription->listen(RuntimeStatusChange::class,
                 function () {
-                    $this->captureState(Clock::now());
+                    try {
+                        $this->captureState(Clock::now());
+                    } catch (\Exception $e) {
+                        $this->app->diagnostics->warning("Failed to capture EngineMetrics", exception: $e);
+                    }
                 });
         }
     }
