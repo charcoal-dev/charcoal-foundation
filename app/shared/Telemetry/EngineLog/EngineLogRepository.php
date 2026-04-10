@@ -115,6 +115,10 @@ final class EngineLogRepository extends OrmRepositoryBase
     private function encodeArguments(Arguments $args): ?string
     {
         $args = $args->getAll();
+        if ($args) {
+            unset($args["tty"], $args["ansi"]);
+        }
+
         if (!$args) {
             return null;
         }
