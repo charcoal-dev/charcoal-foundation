@@ -54,6 +54,15 @@ trait ConsoleExecutionTrait
         if (!isset($this->logPolicy)) {
             $this->logPolicy = $this->declareLogPolicy();
         }
+
+        $this->onConstructHook();
+    }
+
+    /**
+     * @return void
+     */
+    protected function onConstructHook(): void
+    {
     }
 
     /**
