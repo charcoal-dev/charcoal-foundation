@@ -42,7 +42,7 @@ final class EngineMetricsRepository extends OrmRepositoryBase
                 "id" => 0,
                 "log_id" => $logEntity->id,
                 "state" => $state->value,
-                "logged_at" => (float)sprintf("%.6f", (float)$timestamp->format("U.u")),
+                "logged_at" => number_format((float)$timestamp->format("U.u"), 6, ".", ""),
                 "memory_usage" => $metrics->memoryUsage,
                 "memory_usage_peak" => $metrics->peakMemoryUsage,
                 "cpu_time_user" => (int)($metrics->cpuTimeUser * 1e6),

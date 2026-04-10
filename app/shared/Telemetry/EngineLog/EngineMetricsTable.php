@@ -39,7 +39,7 @@ final class EngineMetricsTable extends OrmTableBase
         $cols->int("id")->size(8)->unSigned()->autoIncrement();
         $cols->int("log_id")->size(8)->unSigned()->nullable();
         $cols->enumObject("state", ExecutionState::class)->options(...ExecutionState::getCaseValues());
-        $cols->float("logged_at")->precision(16, 6)->unSigned();
+        $cols->decimal("logged_at")->precision(16, 6)->unSigned();
         $cols->int("memory_usage")->size(8)->unSigned();
         $cols->int("memory_usage_peak")->size(8)->unSigned();
         $cols->int("cpu_time_user")->size(8)->unSigned();

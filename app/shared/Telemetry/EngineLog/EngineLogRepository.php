@@ -57,7 +57,7 @@ final class EngineLogRepository extends OrmRepositoryBase
         $engineLog->lastState = $execScript->state;
         $engineLog->flags = $this->encodeFlags($execScript->cli->flags);
         $engineLog->arguments = $this->encodeArguments($execScript->cli->args);
-        $engineLog->startedOn = (float)sprintf("%.6f", (float)$timestamp->format("U.u"));
+        $engineLog->startedOn = number_format((float)$timestamp->format("U.u"), 6, ".", "");
         $engineLog->updatedOn = null;
 
         try {
@@ -78,7 +78,7 @@ final class EngineLogRepository extends OrmRepositoryBase
     ): void
     {
         $logEntity->lastState = $newState;
-        $logEntity->updatedOn = (float)sprintf("%.6f", (float)$timestamp->format("U.u"));
+        $logEntity->updatedOn = number_format((float)$timestamp->format("U.u"), 6, ".", "");
 
         try {
             $this->dbUpdateEntity($logEntity, new StringVector("lastState", "updatedOn"), $logEntity->id, "id");

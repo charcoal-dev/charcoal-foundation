@@ -25,8 +25,8 @@ final class EngineLogEntity extends OrmEntityBase
     public ExecutionState $lastState;
     public ?string $flags;
     public ?string $arguments;
-    public float $startedOn;
-    public ?float $updatedOn;
+    public string $startedOn;
+    public ?string $updatedOn;
 
     private ?array $_flags = null;
     private ?array $_arguments = null;
