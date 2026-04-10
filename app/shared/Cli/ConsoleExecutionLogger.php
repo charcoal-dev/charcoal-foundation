@@ -43,7 +43,9 @@ final class ConsoleExecutionLogger
     {
         $this->app = $script->getAppBuild();
         $this->logEntity = $this->app->telemetry->engineLogs->createLog($this->script, $this->label, $timestamp);
-        if ($this->captureStateChanges) {
+        if (!$this->captureStateChanges) {
+            $this->subscription = null;
+        } else {
             $this->subscription = $this->script->cli->events->subscribe();
             $this->subscription->listen(RuntimeStatusChange::class,
                 function () {
