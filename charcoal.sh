@@ -44,6 +44,14 @@ else
   svc(){ echo "$1"; }
 fi
 
+# Maintenance helper
+MAINTENANCE_FILE_SH="$ROOT/dev/bin/maintenance.sh"
+if [ -r "$MAINTENANCE_FILE_SH" ]; then
+  . "$MAINTENANCE_FILE_SH"
+else
+  svc(){ echo "$1"; }
+fi
+
 # Load App Manifest
 load_manifest
 
@@ -134,6 +142,7 @@ ensure_runtime_dirs() {
     install -d -m 0750 "$ROOT/var/log/$id" "$ROOT/var/tmp/$id"
   done
   install -d -m 0750 "$ROOT/var/shared" "$ROOT/var/storage"
+  [[ -f "$ROOT/var/shared/maintenance" ]] || touch "$ROOT/var/shared/maintenance"
   install -d -m 0750 "$SEMAPHORE_DIR" "$LOGS_SEMA_DIR"
 }
 
@@ -475,6 +484,8 @@ usage() {
   {yellow}./charcoal.sh{/} {cyan}engine{/} exec {magenta}<script>{/} {grey}[args...]{/}
   {yellow}./charcoal.sh{/} {cyan}ssh{/} {magenta}<sapi>{/} {grey}[shell]{/}
   {yellow}./charcoal.sh{/} {cyan}docker{/} {grey}<args...>{/}
+  {yellow}./charcoal.sh{/} {cyan}suspend{/} {grey}enter maintenance mode{/}
+  {yellow}./charcoal.sh{/} {cyan}resume{/} {grey}leave maintenance mode{/}
 "
 }
 
@@ -492,6 +503,8 @@ main() {
       ;;
 
     update|pull)   cmd_update "$@";;
+    suspend)       cmd_suspend "$@";;
+    resume)        cmd_resume "$@";;
     engine)   cmd_engine "$@";;
     docker)   cmd_docker "$@";;
     ssh)      cmd_ssh "$@";;
