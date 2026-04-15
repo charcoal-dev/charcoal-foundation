@@ -10,12 +10,12 @@ MAINTENANCE_FILE="$ROOT/var/shared/maintenance"
 
 cmd_suspend() {
   local ts; ts=$(date +%s)
-  echo "off;$ts" > "$MAINTENANCE_FILE"
+  echo "on;$ts" > "$MAINTENANCE_FILE"
   ok "Maintenance mode enabled (on;$ts)."
 }
 
 cmd_resume() {
   local ts; ts=$(date +%s)
-  echo "on;$ts" > "$MAINTENANCE_FILE"
+  echo "off;$ts" > "$MAINTENANCE_FILE"
   ok "Maintenance mode disabled (off;$ts)."
 }

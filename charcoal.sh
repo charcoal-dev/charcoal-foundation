@@ -276,6 +276,11 @@ gen_sapi_df() {
 cmd_build_docker() {
   require_env
 
+  # 0) Suspend and wait
+  cmd_suspend
+  info "Waiting 10 seconds for maintenance to settle..."
+  sleep 10
+
   # 1) Generate per-SAPI Dockerfiles from your templates
   gen_sapi_df engine cli "curl mariadb-client"
   gen_sapi_df web    fpm "curl nginx gettext-base"
