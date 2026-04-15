@@ -69,7 +69,7 @@ trait ConsoleExecutionTrait
      * @return void
      * @throws \Throwable
      */
-    protected function onEveryLoop(): void
+    public function onEveryLoop(): void
     {
         /** @noinspection PhpMultipleClassDeclarationsInspection */
         parent::onEveryLoop();
