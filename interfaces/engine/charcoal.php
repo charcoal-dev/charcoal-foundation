@@ -7,12 +7,15 @@
 
 declare(strict_types=1);
 
+use App\Shared\AppConstants;
 use App\Shared\CharcoalApp;
 use App\Shared\Enums\Interfaces;
 use App\Shared\ErrorBoundary;
 use Charcoal\App\Kernel\Clock\MonotonicTimestamp;
 use Charcoal\App\Kernel\Enums\AppEnv;
+use Charcoal\App\Kernel\Internal\Exceptions\AppCrashException;
 use Charcoal\App\Kernel\ServerApi\Cli\AppCliHandler;
+use Charcoal\App\Kernel\ServerApi\Cli\ConsoleErrorWriter;
 use Charcoal\Base\Objects\ObjectHelper;
 use Charcoal\Filesystem\Path\DirectoryPath;
 
@@ -21,7 +24,14 @@ charcoal_autoloader();
 
 $appFqcn = CharcoalApp::getAppFqcn();
 $rootDirectory = new DirectoryPath(charcoal_from_root())->node();
-ErrorBoundary::configStreams(true, false, strlen(charcoal_from_root()));
+ErrorBoundary::configStreams(true, false, strlen(charcoal_from_root()))::handle(function (\Throwable $e) {
+    new ConsoleErrorWriter(AppConstants::CONSOLE_ANSI, PHP_EOL)->handleException(
+        $e instanceof AppCrashException ? $e->getPrevious() : $e,
+    );
+
+    exit(1);
+});
+
 $timestamp = MonotonicTimestamp::now();
 
 /** @var CharcoalApp $charcoal */
