@@ -76,3 +76,34 @@ if (!function_exists("charcoal_autoloader")) {
         require_once $autoload;
     }
 }
+
+// Maintenance Mode Handler
+if (!function_exists("charcoal_is_maintenance")) {
+    function charcoal_is_maintenance(): bool
+    {
+        $maintenance = @file_get_contents(charcoal_from_root("var/shared/maintenance"), false, null, 0, 16);
+        if (!is_string($maintenance) || !$maintenance) {
+            return true;
+        }
+
+        return explode(";", $maintenance)[0] !== "off";
+    }
+}
+
+if (!function_exists("charcoal_enforce_maintenance")) {
+    /**
+     * @throws \App\Shared\Exceptions\MaintenanceException
+     */
+    function charcoal_enforce_maintenance(): void
+    {
+        if (!charcoal_is_maintenance()) {
+            return;
+        }
+
+        throw new \App\Shared\Exceptions\MaintenanceException(
+            defined("CHARCOAL_MAINTENANCE_MESSAGE")
+                ? (string)CHARCOAL_MAINTENANCE_MESSAGE
+                : "Maintenance mode is enabled"
+        );
+    }
+}

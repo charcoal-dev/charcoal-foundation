@@ -32,6 +32,8 @@ ErrorBoundary::configStreams(true, false, strlen(charcoal_from_root()))::handle(
     exit(1);
 });
 
+charcoal_enforce_maintenance();
+
 $timestamp = MonotonicTimestamp::now();
 
 /** @var CharcoalApp $charcoal */

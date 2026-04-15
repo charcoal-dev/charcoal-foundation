@@ -43,6 +43,8 @@ $appFqcn = CharcoalApp::getAppFqcn();
 $rootDirectory = new DirectoryPath(charcoal_from_root())->node();
 $timestamp = MonotonicTimestamp::now();
 
+charcoal_enforce_maintenance();
+
 /** @var CharcoalApp $charcoal */
 //$charcoal = new $appFqcn(AppEnv::tryFrom(getenv("APP_ENV") ?: "dev"), $rootDirectory, null);
 $charcoal = $appFqcn::Load(
