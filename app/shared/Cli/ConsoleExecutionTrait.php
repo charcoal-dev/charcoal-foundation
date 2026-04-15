@@ -66,6 +66,19 @@ trait ConsoleExecutionTrait
     }
 
     /**
+     * @return void
+     * @throws \Throwable
+     */
+    protected function onEveryLoop(): void
+    {
+        /** @noinspection PhpMultipleClassDeclarationsInspection */
+        parent::onEveryLoop();
+        if (charcoal_is_maintenance()) {
+            $this->cli->processControlSignalClose(15);
+        }
+    }
+
+    /**
      * @return string|null
      */
     public function getCurrentUuid(): ?string
